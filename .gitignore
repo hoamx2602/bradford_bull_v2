@@ -1,5 +1,37 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+env/
+*.egg-info/
+.pytest_cache/
+
+# Outputs / cache (heavy)
 videos/
+output/
+cache/
 selected_frames/
 metadata/
 best_crops/
 auto_annotated_crops/
+*.pt
+*.onnx
+yolo*.pt
+
+# Notebooks
+.ipynb_checkpoints/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# Settings (claude-code)
+.claude/scheduled_tasks.lock
+frame_extraction
+create_notebook.py
