@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "frame_selector"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = [
+    "ultralytics==8.3.40",
+    "imagehash==4.3.1",
+    "tqdm",
+    "pandas",
+    "opencv-python-headless",
+    "numpy",
+    "Pillow",
+    "matplotlib",
+]
+
+[project.optional-dependencies]
+dev = ["pytest", "pytest-cov"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
