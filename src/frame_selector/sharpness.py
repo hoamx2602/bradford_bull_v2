@@ -60,3 +60,24 @@ def score_torso_sharpness(
         gray = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY)
         scores.append(fn(gray))
     return float(np.mean(scores)) if scores else 0.0
+
+
+def max_torso_sharpness(
+    frame_bgr: np.ndarray,
+    target_bboxes: list,
+    method: str = 'tenengrad',
+) -> float:
+    """Max sharpness across all target-player torso ROIs.
+
+    Used for filtering: the frame is useful if at least ONE player is sharp,
+    even if others are blurry (e.g. player in background is blurry but foreground player is sharp).
+    """
+    fn = SCORERS[method]
+    scores = []
+    for bbox in target_bboxes:
+        roi = _crop_torso(frame_bgr, bbox)
+        if roi.size == 0:
+            continue
+        gray = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY)
+        scores.append(fn(gray))
+    return float(max(scores)) if scores else 0.0
