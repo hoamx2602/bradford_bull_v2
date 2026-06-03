@@ -35,3 +35,5 @@ yolo*.pt
 .claude/scheduled_tasks.lock
 frame_extraction
 create_notebook.py
+/videos
+/short-clips
