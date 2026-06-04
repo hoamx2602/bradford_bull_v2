@@ -47,8 +47,9 @@ except ImportError:
     print("ERROR: umap-learn not installed.  Run:  pip install umap-learn")
     sys.exit(1)
 
-from src.embedder    import load_siglip, encode_crops
-from src.shirt_color import get_shirt_crop_bgr, lab_to_rgb, SHIRT_TOP, SHIRT_BOTTOM, get_shirt_color
+from src.embedder    import load_siglip, encode_crops, encode_crops_masked
+from src.jersey      import get_jersey_region, jersey_quality
+from src.classifier  import color_feature, learn_weights
 
 # ── Colours matching visualizer.py ───────────────────────────────────────────
 TEAM_HEX = {'Team A': '#5050FF', 'Team B': '#FF5050', 'Other': '#00BBBB'}
@@ -87,7 +88,7 @@ def _letterbox(img_bgr, size=THUMB_PX, bg=35):
 
 # ── Crop extraction ───────────────────────────────────────────────────────────
 
-def extract_crops(video, n_frames, conf, min_height, max_iou):
+def extract_crops(video, n_frames, conf, min_height, max_iou, min_quality):
     cap     = cv2.VideoCapture(video)
     total   = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     fps     = cap.get(cv2.CAP_PROP_FPS) or 30.0
@@ -101,7 +102,8 @@ def extract_crops(video, n_frames, conf, min_height, max_iou):
     print(f"Sampling : {len(indices)} frames  (min player height: {min_h_px}px)")
 
     model = YOLO('yolo26n.pt')
-    crops = []   # list of {'thumb_rgb', 'crop_bgr'}
+    crops = []   # list of {'thumb_rgb', 'crop_bgr', 'pixel_mask'}
+    skipped = 0
 
     cap = cv2.VideoCapture(video)
     for fidx in tqdm(indices, desc='Extracting crops'):
@@ -109,7 +111,6 @@ def extract_crops(video, n_frames, conf, min_height, max_iou):
         ok, frame = cap.read()
         if not ok:
             continue
-        frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         result    = model(frame, verbose=False, conf=conf, classes=[0])[0]
         if len(result.boxes) == 0:
             continue
@@ -121,13 +122,20 @@ def extract_crops(video, n_frames, conf, min_height, max_iou):
 
         for li in _isolated(boxes, max_iou):
             x1, y1, x2, y2 = boxes[li]
-            crop_bgr = get_shirt_crop_bgr(frame, (x1, y1, x2, y2))
+            # Same jersey-extraction path as inference (src/jersey.py).
+            crop_bgr, pixel_mask = get_jersey_region(frame, (x1, y1, x2, y2))
             if crop_bgr is None:
                 continue
+            if jersey_quality(crop_bgr, pixel_mask) < min_quality:
+                skipped += 1
+                continue
             thumb = cv2.cvtColor(_letterbox(crop_bgr), cv2.COLOR_BGR2RGB)
-            crops.append({'thumb_rgb': thumb, 'crop_bgr': crop_bgr})
+            crops.append({'thumb_rgb': thumb, 'crop_bgr': crop_bgr,
+                          'pixel_mask': pixel_mask})
 
     cap.release()
+    if skipped:
+        print(f"Filtered : {skipped} low-quality crops (blurry / mostly grass)")
     return crops
 
 
@@ -135,12 +143,14 @@ def extract_crops(video, n_frames, conf, min_height, max_iou):
 
 def auto_cluster(crops, n_clusters, siglip_proc, siglip_model):
     """
-    Encode crops → UMAP(3-D) → K-Means.
-    Returns (embeddings_full, labels) where labels ∈ [0, n_clusters).
+    Encode crops (background masked) → UMAP(3-D) → K-Means.
+    Returns (embeddings, color_feats, assignments).
     """
-    print(f"\nEncoding {len(crops)} crops with SigLIP...")
-    crops_bgr  = [c['crop_bgr'] for c in crops]
-    embeddings = encode_crops(crops_bgr, siglip_proc, siglip_model)  # (N, D)
+    print(f"\nEncoding {len(crops)} crops with SigLIP (background masked)...")
+    crops_bgr  = [c['crop_bgr']   for c in crops]
+    masks      = [c['pixel_mask'] for c in crops]
+    embeddings = encode_crops_masked(crops_bgr, masks, siglip_proc, siglip_model)
+    color_feats = [color_feature(c['crop_bgr'], c['pixel_mask']) for c in crops]
 
     print(f"Fitting UMAP (n_components=3) on {len(embeddings)} embeddings...")
     reducer  = umap_lib.UMAP(n_components=3, n_neighbors=min(15, len(embeddings)-1),
@@ -159,7 +169,7 @@ def auto_cluster(crops, n_clusters, siglip_proc, siglip_model):
     clust_to_team = {c: team_names[min(i, 2)] for i, c in enumerate(sorted_clust)}
 
     assignments = [clust_to_team[lb] for lb in labels]
-    return embeddings, assignments
+    return embeddings, color_feats, assignments
 
 
 # ── Interactive selector ──────────────────────────────────────────────────────
@@ -344,17 +354,37 @@ class RefSelector:
 
     # ── Build refs ────────────────────────────────────────────────────────────
 
-    def get_refs(self, embeddings):
-        refs = {}
+    def get_refs(self, embeddings, color_feats):
+        teams = [t for t in ['Team A', 'Team B', 'Other']
+                 if any(v == t for v in self.assignments)]
+
+        # Learn colour/SigLIP weight + team means from the labelled crops.
+        w_color, w_siglip, centroids, colors = learn_weights(
+            teams, self.assignments, embeddings, color_feats)
+
+        teams_data = {}
         selections = {}
-        for team in ['Team A', 'Team B', 'Other']:
+        for team in teams:
             idxs = [i for i, v in enumerate(self.assignments) if v == team]
-            if not idxs: continue
-            embs = embeddings[idxs]   # (k, D)
-            mean_emb = embs.mean(axis=0)
-            mean_emb = mean_emb / (np.linalg.norm(mean_emb) + 1e-8)   # re-normalise
-            refs[team]       = {'embedding': mean_emb, 'label': self.labels[team]}
+            teams_data[team] = {
+                'label':     self.labels[team],
+                'embedding': centroids[team],   # SigLIP centroid (masked)
+                'color':     colors[team],      # mean colour histogram
+            }
             selections[team] = idxs
+
+        refs = {
+            '__schema__': 2,
+            'teams': teams_data,
+            'meta': {
+                'w_color':    w_color,
+                'w_siglip':   w_siglip,
+                'temp_c':     8.0,
+                'temp_s':     15.0,
+                'min_margin': 0.05,
+            },
+        }
+        print(f"\nLearned fusion weights → colour {w_color:.2f} | SigLIP {w_siglip:.2f}")
         return refs, selections
 
 
@@ -369,7 +399,7 @@ def save_refs(refs, selections, crops, output_dir):
         pickle.dump(refs, f)
 
     print(f"\nSaved → {refs_path}")
-    for team, data in refs.items():
+    for team, data in refs['teams'].items():
         print(f"  {data['label']:14s}: {len(selections[team])} crops used")
 
     _save_confirmation(refs, selections, crops, out)
@@ -378,7 +408,7 @@ def save_refs(refs, selections, crops, output_dir):
 
 
 def _save_confirmation(refs, selections, crops, out_dir, n_samples=6):
-    teams  = list(refs.keys())
+    teams  = list(refs['teams'].keys())
     n_cols = n_samples + 1
     COLORS = ['#3355FF', '#FF4444', '#00CCCC', '#FFAA00']
 
@@ -387,7 +417,7 @@ def _save_confirmation(refs, selections, crops, out_dir, n_samples=6):
     if len(teams) == 1: axes = [axes]
 
     for ti, team in enumerate(teams):
-        label = refs[team]['label']
+        label = refs['teams'][team]['label']
         col   = COLORS[ti % len(COLORS)]
         axes[ti][0].set_facecolor('#333333')
         axes[ti][0].set_title(f'{label}\n{len(selections[team])} crops',
@@ -413,14 +443,16 @@ def _save_confirmation(refs, selections, crops, out_dir, n_samples=6):
 def main(args):
     # 1. Extract crops
     crops = extract_crops(
-        args.video, args.n_frames, args.conf, args.min_height, args.max_iou)
+        args.video, args.n_frames, args.conf, args.min_height,
+        args.max_iou, args.min_quality)
     if not crops:
         print("ERROR: No valid crops found. Try --conf 0.35 or --min_height 0.05")
         return
 
     # 2. SigLIP encode + UMAP + K-Means
     proc, model = load_siglip(args.siglip_model)
-    embeddings, initial_assignments = auto_cluster(crops, args.n_clusters, proc, model)
+    embeddings, color_feats, initial_assignments = auto_cluster(
+        crops, args.n_clusters, proc, model)
 
     counts = Counter(initial_assignments)
     print(f"\nAuto-cluster result:")
@@ -440,8 +472,8 @@ def main(args):
         print("Quit without saving.")
         return
 
-    refs, selections = selector.get_refs(embeddings)
-    if len(refs) < 2:
+    refs, selections = selector.get_refs(embeddings, color_feats)
+    if len(refs['teams']) < 2:
         print("ERROR: Need at least Team A and Team B selected (≥1 crop each).")
         return
 
@@ -458,6 +490,8 @@ if __name__ == '__main__':
     p.add_argument('--conf',           type=float, default=0.50)
     p.add_argument('--min_height',     type=float, default=0.07)
     p.add_argument('--max_iou',        type=float, default=0.25)
+    p.add_argument('--min_quality',    type=float, default=0.35,
+                   help='Drop blurry / mostly-grass crops below this quality (0-1)')
     p.add_argument('--siglip_model',   default='google/siglip-base-patch16-224')
     p.add_argument('--team_a_label',   default='Bradford')
     p.add_argument('--team_b_label',   default='Opponent')

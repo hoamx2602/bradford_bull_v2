@@ -55,3 +55,26 @@ def encode_crops(crops_bgr: list, processor, model, batch_size: int = 32) -> np.
         all_emb.append(feats.cpu().float().numpy())
 
     return np.concatenate(all_emb, axis=0)
+
+
+def _mask_background(crop_bgr: np.ndarray, pixel_mask: np.ndarray) -> np.ndarray:
+    """Black-out everything outside the shirt mask so SigLIP ignores grass."""
+    if pixel_mask is None or pixel_mask.shape != crop_bgr.shape[:2]:
+        return crop_bgr
+    out = crop_bgr.copy()
+    out[~pixel_mask.astype(bool)] = 0
+    return out
+
+
+def encode_crops_masked(crops_bgr: list, pixel_masks: list,
+                        processor, model, batch_size: int = 32) -> np.ndarray:
+    """
+    Like `encode_crops`, but blacks out the background (everything outside the
+    shirt mask) before encoding.  Keeps the embedding focused on the jersey
+    instead of the surrounding grass.  `pixel_masks[i]` may be None.
+    """
+    masked = [
+        _mask_background(c, m) if m is not None else c
+        for c, m in zip(crops_bgr, pixel_masks)
+    ]
+    return encode_crops(masked, processor, model, batch_size)
