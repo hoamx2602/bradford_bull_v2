@@ -39,6 +39,18 @@ def get_shirt_color(frame_rgb: np.ndarray, box: tuple) -> np.ndarray | None:
     return np.median(px, axis=0)   # [L, a, b]
 
 
+def get_shirt_crop_bgr(frame_bgr: np.ndarray, box: tuple) -> np.ndarray | None:
+    """Return the shirt/chest region as a BGR crop (same window as get_shirt_color)."""
+    x1, y1, x2, y2 = [int(v) for v in box]
+    h   = y2 - y1
+    sy1 = y1 + int(SHIRT_TOP    * h)
+    sy2 = y1 + int(SHIRT_BOTTOM * h)
+    if sy2 <= sy1 + 4:
+        return None
+    crop = frame_bgr[sy1:sy2, x1:x2]
+    return crop.copy() if crop.size > 0 else None
+
+
 def lab_to_rgb(lab_vec: np.ndarray) -> tuple:
     """Convert a Lab triplet (OpenCV scale 0-255) to an RGB tuple for display."""
     arr = np.array([[[int(lab_vec[0]), int(lab_vec[1]), int(lab_vec[2])]]], dtype=np.uint8)

@@ -1,24 +1,20 @@
 #!/bin/bash
-# Batch process multiple videos using ONE K-means model from warmup.
+# Batch process multiple videos using ONE reference model from ref_build.sh.
 #
-# Edit VIDEO_LIST and cluster assignments below, then:
+# Edit VIDEO_LIST and configuration below, then:
 #   conda activate <your_env>
 #   bash batch_run.sh
 #
-# NOTE: All videos in the list use the SAME cluster assignments.
-#       If a video has very different lighting, re-run warmup.sh separately.
+# NOTE: All videos use the SAME refs file.
+#       If a video has very different lighting, re-run ref_build.sh separately.
 
 set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
 # ── CONFIGURATION ─────────────────────────────────────────────────────────────
-KMEANS_MODEL="output/kmeans_model.pkl"
+REFS_PATH="output/refs/team_refs.pkl"
 OUTPUT_BASE="output"
-
-TEAM_A_CLUSTER=0
-TEAM_B_CLUSTER=1
-OTHER_CLUSTER=2
 
 TEAM_A_LABEL="Bradford"
 TEAM_B_LABEL="Opponent"
@@ -36,7 +32,7 @@ VIDEO_LIST=(
 )
 # ── END CONFIGURATION ─────────────────────────────────────────────────────────
 
-echo "Batch processing ${#VIDEO_LIST[@]} video(s)..."
+echo "Batch processing ${#VIDEO_LIST[@]} video(s) using refs: $REFS_PATH"
 echo ""
 
 for VIDEO in "${VIDEO_LIST[@]}"; do
@@ -51,10 +47,7 @@ for VIDEO in "${VIDEO_LIST[@]}"; do
 
     python process_video.py \
         --video        "$VIDEO" \
-        --kmeans_model "$KMEANS_MODEL" \
-        --team_a       "$TEAM_A_CLUSTER" \
-        --team_b       "$TEAM_B_CLUSTER" \
-        --other        "$OTHER_CLUSTER" \
+        --refs         "$REFS_PATH" \
         --team_a_label "$TEAM_A_LABEL" \
         --team_b_label "$TEAM_B_LABEL" \
         --other_label  "$OTHER_LABEL" \

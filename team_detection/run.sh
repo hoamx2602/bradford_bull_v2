@@ -1,22 +1,23 @@
 #!/bin/bash
-# Process a video with team detection and generate output video + timeline.
+# Process a video with reference-based team detection.
 #
-# Usage (after running warmup.sh and noting cluster numbers):
+# Usage:
 #   conda activate <your_env>
-#   bash run.sh --video /path/to/video.mp4 --team_a 0 --team_b 1
-#   bash run.sh --video /path/to/video.mp4 --team_a 1 --team_b 0 --other 2 \
+#   bash run.sh --video /path/to/video.mp4 --refs output/refs/team_refs.pkl
+#   bash run.sh --video /path/to/video.mp4 --refs output/refs/team_refs.pkl \
 #               --team_a_label Bradford --team_b_label HFC \
 #               --output_dir output/M02
 #
+# Build the refs file first:
+#   bash ref_build.sh extract --video /path/to/clip.mp4
+#   bash ref_build.sh assign  --team_a 3,7,12 --team_b 0,5,9
+#
 # Options:
 #   --video           Path to input video  (required)
-#   --team_a          Cluster number for Team A  (required)
-#   --team_b          Cluster number for Team B  (required)
-#   --other           Cluster number for Other  (optional)
-#   --team_a_label    Display label for Team A  (default: Bradford)
-#   --team_b_label    Display label for Team B  (default: Opponent)
-#   --other_label     Display label for Other  (default: Other)
-#   --kmeans_model    Path to saved K-means model  (default: output/kmeans_model.pkl)
+#   --refs            Path to team_refs.pkl from ref_build.sh  (required)
+#   --team_a_label    Override display label for Team A  (optional)
+#   --team_b_label    Override display label for Team B  (optional)
+#   --other_label     Override display label for Other  (optional)
 #   --output_dir      Output directory  (default: output)
 #   --conf            YOLO confidence threshold  (default: 0.50)
 #   --min_height      Min player height / frame height  (default: 0.07)
