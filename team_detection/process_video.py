@@ -5,7 +5,7 @@ Step 2 — Process video: detect + classify teams → output video + timeline ch
 Usage:
     conda activate <your_env>
     python process_video.py --video /path/to/video.mp4 --team_a 0 --team_b 1
-    python process_video.py --video /path/to/video.mp4 --team_a 1 --team_b 0 --referee 2 \
+    python process_video.py --video /path/to/video.mp4 --team_a 1 --team_b 0 --other 2 \
         --team_a_label Bradford --team_b_label HFC --output_dir output/M02
 
 Run warmup.py first to generate the K-means model.
@@ -75,7 +75,7 @@ def process_video(args, centroids, label_map, output_dir):
 
         output    = frame.copy()
         frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        counts    = {t: 0 for t in ['Team A', 'Team B', 'Referee']}
+        counts    = {t: 0 for t in ['Team A', 'Team B', 'Other']}
 
         results = model.track(
             frame, persist=True, verbose=False,
@@ -108,11 +108,11 @@ def process_video(args, centroids, label_map, output_dir):
 
         writer.write(output)
         timeline.append({
-            'frame':   fidx,
-            'sec':     round(fidx / src_fps, 2),
-            'Team A':  counts['Team A'],
-            'Team B':  counts['Team B'],
-            'Referee': counts['Referee'],
+            'frame':  fidx,
+            'sec':    round(fidx / src_fps, 2),
+            'Team A': counts['Team A'],
+            'Team B': counts['Team B'],
+            'Other':  counts['Other'],
         })
 
     cap.release()
@@ -134,18 +134,18 @@ def process_video(args, centroids, label_map, output_dir):
 
 def save_timeline(df, src_fps, stem, label_map, output_dir):
     w = max(1, int(src_fps))
-    for col in ['Team A', 'Team B', 'Referee']:
+    for col in ['Team A', 'Team B', 'Other']:
         df[f'{col}_s'] = df[col].rolling(w, min_periods=1).mean()
 
-    a_lbl = label_map.get('Team A',  'Team A')
-    b_lbl = label_map.get('Team B',  'Team B')
-    r_lbl = label_map.get('Referee', 'Referee')
+    a_lbl = label_map.get('Team A', 'Team A')
+    b_lbl = label_map.get('Team B', 'Team B')
+    r_lbl = label_map.get('Other',  'Other')
 
     fig, axes = plt.subplots(2, 1, figsize=(14, 7), sharex=True)
 
-    axes[0].plot(df['sec'], df['Team A_s'],  color='#5050FF', label=a_lbl,  lw=1.5)
-    axes[0].plot(df['sec'], df['Team B_s'],  color='#FF5050', label=b_lbl,  lw=1.5)
-    axes[0].plot(df['sec'], df['Referee_s'], color='#00CCCC', label=r_lbl,  lw=1.0, ls='--')
+    axes[0].plot(df['sec'], df['Team A_s'], color='#5050FF', label=a_lbl, lw=1.5)
+    axes[0].plot(df['sec'], df['Team B_s'], color='#FF5050', label=b_lbl, lw=1.5)
+    axes[0].plot(df['sec'], df['Other_s'],  color='#00CCCC', label=r_lbl, lw=1.0, ls='--')
     axes[0].set_ylabel('Players / frame'); axes[0].legend(); axes[0].grid(alpha=0.3)
     axes[0].spines[['top', 'right']].set_visible(False)
 
@@ -171,7 +171,7 @@ def save_timeline(df, src_fps, stem, label_map, output_dir):
     print(f"Chart saved  → {chart}")
 
     csv = output_dir / f'{stem}_team_timeline.csv'
-    df[['frame', 'sec', 'Team A', 'Team B', 'Referee']].to_csv(csv, index=False)
+    df[['frame', 'sec', 'Team A', 'Team B', 'Other']].to_csv(csv, index=False)
     print(f"CSV saved    → {csv}")
 
     print("\n── Summary ──────────────────────────────────")
@@ -187,13 +187,13 @@ def main(args):
     kmeans = load_kmeans(args.kmeans_model)
 
     cluster_map = {args.team_a: 'Team A', args.team_b: 'Team B'}
-    if args.referee is not None:
-        cluster_map[args.referee] = 'Referee'
+    if args.other is not None:
+        cluster_map[args.other] = 'Other'
 
     label_map = {
-        'Team A':  args.team_a_label,
-        'Team B':  args.team_b_label,
-        'Referee': args.ref_label,
+        'Team A': args.team_a_label,
+        'Team B': args.team_b_label,
+        'Other':  args.other_label,
     }
     centroids = build_centroids(kmeans, cluster_map)
 
@@ -211,10 +211,10 @@ if __name__ == '__main__':
     p.add_argument('--video',          required=True,              help='Input video path')
     p.add_argument('--team_a',         type=int, required=True,    help='Cluster number for Team A')
     p.add_argument('--team_b',         type=int, required=True,    help='Cluster number for Team B')
-    p.add_argument('--referee',        type=int, default=None,     help='Cluster number for Referee (optional)')
+    p.add_argument('--other',          type=int, default=None,     help='Cluster number for Other (optional)')
     p.add_argument('--team_a_label',   default='Bradford',         help='Label for Team A (default: Bradford)')
     p.add_argument('--team_b_label',   default='Opponent',         help='Label for Team B (default: Opponent)')
-    p.add_argument('--ref_label',      default='Referee',          help='Label for Referee (default: Referee)')
+    p.add_argument('--other_label',    default='Other',            help='Label for Other (default: Other)')
     p.add_argument('--kmeans_model',   default='output/kmeans_model.pkl', help='Path to K-means model')
     p.add_argument('--output_dir',     default='output',           help='Output directory')
     p.add_argument('--conf',           type=float, default=0.50,   help='YOLO confidence threshold')

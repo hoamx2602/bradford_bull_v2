@@ -3,7 +3,7 @@ import cv2
 BOX_COLORS_BGR = {
     'Team A':  (255, 80,  80 ),   # blue
     'Team B':  (80,  80,  255),   # red
-    'Referee': (0,   220, 220),   # yellow
+    'Other':   (0,   220, 220),   # cyan
     'Unknown': (180, 180, 180),   # grey
 }
 

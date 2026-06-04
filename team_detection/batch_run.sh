@@ -18,11 +18,11 @@ OUTPUT_BASE="output"
 
 TEAM_A_CLUSTER=0
 TEAM_B_CLUSTER=1
-REFEREE_CLUSTER=2
+OTHER_CLUSTER=2
 
 TEAM_A_LABEL="Bradford"
 TEAM_B_LABEL="Opponent"
-REF_LABEL="Referee"
+OTHER_LABEL="Other"
 
 CONF=0.50
 MIN_HEIGHT=0.07
@@ -54,10 +54,10 @@ for VIDEO in "${VIDEO_LIST[@]}"; do
         --kmeans_model "$KMEANS_MODEL" \
         --team_a       "$TEAM_A_CLUSTER" \
         --team_b       "$TEAM_B_CLUSTER" \
-        --referee      "$REFEREE_CLUSTER" \
+        --other        "$OTHER_CLUSTER" \
         --team_a_label "$TEAM_A_LABEL" \
         --team_b_label "$TEAM_B_LABEL" \
-        --ref_label    "$REF_LABEL" \
+        --other_label  "$OTHER_LABEL" \
         --output_dir   "$OUT_DIR" \
         --conf         "$CONF" \
         --min_height   "$MIN_HEIGHT" \
