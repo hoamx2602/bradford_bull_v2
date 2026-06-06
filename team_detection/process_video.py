@@ -82,6 +82,44 @@ class VoteTracker:
         return self.shown[tid]
 
 
+class DrawHolder:
+    """
+    Display-level track coasting: keep drawing a track's last box + label for a
+    few frames when the detector momentarily drops it.  Removes the visible
+    "nháy" (box/label blinking) caused by single-frame detection gaps — without
+    touching the player counts, which stay based on real detections.
+    """
+
+    def __init__(self, hold: int = 8):
+        self.hold = hold
+        self.last = {}   # tid -> [xyxy(4,), team_idx, label, last_frame_idx]
+
+    def merge(self, index, xyxy, tids, team_indices, labels):
+        present = set()
+        for b, t, ti, l in zip(xyxy, tids, team_indices, labels):
+            self.last[int(t)] = [np.asarray(b, dtype=float), int(ti), l, index]
+            present.add(int(t))
+
+        held_b, held_ti, held_l = [], [], []
+        for tid, (b, ti, l, f) in list(self.last.items()):
+            if tid in present:
+                continue
+            if 0 < index - f <= self.hold:
+                held_b.append(b); held_ti.append(ti); held_l.append(l)
+            elif index - f > self.hold:
+                del self.last[tid]
+
+        xs  = [xyxy] if len(xyxy) else []
+        tis = [np.asarray(team_indices)] if len(team_indices) else []
+        lbl = list(labels)
+        if held_b:
+            xs.append(np.array(held_b)); tis.append(np.array(held_ti)); lbl += held_l
+
+        m_xyxy = np.vstack(xs).astype(np.float32) if xs else np.zeros((0, 4), np.float32)
+        m_ti   = np.concatenate(tis).astype(int)  if tis else np.zeros((0,), int)
+        return m_xyxy, m_ti, lbl
+
+
 def classify_and_vote(frame, detections, masks, classifier, voter,
                       siglip_proc, siglip_model, index, siglip_every, emb_cache):
     """
@@ -279,13 +317,14 @@ def run_bytetrack(args, classifier, label_map, teams,
     yolo       = YOLO('yolo26n.pt')
 
     voter      = VoteTracker(teams, hysteresis=args.vote_hysteresis)
+    holder     = DrawHolder(hold=args.label_hold)
     emb_cache  = {}
     timeline   = []
 
     def callback(frame: np.ndarray, index: int) -> np.ndarray:
         results    = yolo.track(frame, persist=True, verbose=False,
                                 conf=args.conf, classes=[0],
-                                tracker='bytetrack.yaml')
+                                tracker=args.tracker_cfg)
         detections = sv.Detections.from_ultralytics(results[0])
 
         if len(detections) == 0 or detections.tracker_id is None:
@@ -311,17 +350,23 @@ def run_bytetrack(args, classifier, label_map, teams,
         team_indices = np.array([team_to_idx.get(s, len(teams)) for s in shown])
         labels       = [label_map.get(s, s) for s in shown]
 
+        # Counts come from REAL detections only (held boxes don't inflate them).
         counts = {t: 0 for t in teams}
         for s in shown:
             if s in counts:
                 counts[s] += 1
 
-        annotated    = frame.copy()
-        annotated    = box_ann.annotate(
-            annotated, detections, custom_color_lookup=team_indices)
-        annotated    = lbl_ann.annotate(
-            annotated, detections, labels=labels,
-            custom_color_lookup=team_indices)
+        # Coast briefly-dropped tracks so labels don't blink.
+        m_xyxy, m_ti, m_labels = holder.merge(
+            index, detections.xyxy, detections.tracker_id, team_indices, labels)
+
+        annotated = frame.copy()
+        if len(m_xyxy) > 0:
+            draw_det  = sv.Detections(xyxy=m_xyxy)
+            annotated = box_ann.annotate(
+                annotated, draw_det, custom_color_lookup=m_ti)
+            annotated = lbl_ann.annotate(
+                annotated, draw_det, labels=m_labels, custom_color_lookup=m_ti)
 
         row = {'frame': index, 'sec': round(index / src_fps, 2)}
         row.update(counts)
@@ -440,6 +485,9 @@ if __name__ == '__main__':
     p.add_argument('--video',          required=True)
     p.add_argument('--refs',           required=True)
     p.add_argument('--tracker',        default='sam2', choices=['sam2','byte'])
+    p.add_argument('--tracker_cfg',    default='bytetrack.yaml',
+                   help='YOLO tracker config. Default bytetrack.yaml; use '
+                        'botsort_gmc.yaml for clips with heavy camera panning')
     p.add_argument('--swap_teams',     action='store_true',
                    help='Swap Team A and Team B if initial assignment is reversed')
     p.add_argument('--sam2_size',      default='large',
@@ -456,4 +504,6 @@ if __name__ == '__main__':
                    help='Rival must lead the shown label by this factor to flip it')
     p.add_argument('--siglip_every',   type=int,   default=5,
                    help='Refresh SigLIP embedding every N frames (colour runs every frame)')
+    p.add_argument('--label_hold',     type=int,   default=8,
+                   help='Keep drawing a dropped track for N frames (stops label blinking)')
     main(p.parse_args())
