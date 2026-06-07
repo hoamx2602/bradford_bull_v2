@@ -235,15 +235,30 @@ export function buildTimeSeries(result: AnalysisResult): TimeSeriesPoint[] {
   return points
 }
 
-// ── Body zone exposure data ─────────────────────────────────────────
+// ── Body zone exposure data (23 zones) ─────────────────────────────
 
 export const BODY_ZONES: BodyZone[] = [
-  { id: 'chest-front', name: 'Chest (Front)',  percentage: 32.5, color: '#FF3B30' },
-  { id: 'back',        name: 'Back',           percentage: 8.2,  color: '#34C759' },
-  { id: 'sleeve-l',    name: 'Left Sleeve',    percentage: 18.7, color: '#FF9500' },
-  { id: 'sleeve-r',    name: 'Right Sleeve',   percentage: 17.3, color: '#FFCC00' },
-  { id: 'shorts',      name: 'Shorts',         percentage: 12.8, color: '#5AC8FA' },
-  { id: 'socks',       name: 'Socks',          percentage: 4.1,  color: '#AF52DE' },
-  { id: 'head',        name: 'Head / Cap',     percentage: 3.9,  color: '#FF2D55' },
-  { id: 'collar',      name: 'Collar Area',    percentage: 2.5,  color: '#64D2FF' },
+  { id: 'head',         name: 'Head',          percentage:  4.1, color: '' },
+  { id: 'neck',         name: 'Neck',          percentage:  2.3, color: '' },
+  { id: 'shoulder-l',   name: 'Shoulder L',    percentage:  8.2, color: '' },
+  { id: 'shoulder-r',   name: 'Shoulder R',    percentage:  7.6, color: '' },
+  { id: 'chest-l',      name: 'Chest Left',    percentage: 15.8, color: '' },
+  { id: 'chest-r',      name: 'Chest Right',   percentage: 14.2, color: '' },
+  { id: 'upper-arm-l',  name: 'Upper Arm L',   percentage: 10.4, color: '' },
+  { id: 'upper-arm-r',  name: 'Upper Arm R',   percentage:  9.1, color: '' },
+  { id: 'forearm-l',    name: 'Forearm L',     percentage:  5.3, color: '' },
+  { id: 'forearm-r',    name: 'Forearm R',     percentage:  4.8, color: '' },
+  { id: 'hand-l',       name: 'Hand L',        percentage:  2.1, color: '' },
+  { id: 'hand-r',       name: 'Hand R',        percentage:  1.9, color: '' },
+  { id: 'spine',        name: 'Spine',         percentage:  2.0, color: '' },
+  { id: 'back-l',       name: 'Back L',        percentage:  5.4, color: '' },
+  { id: 'back-r',       name: 'Back R',        percentage:  4.8, color: '' },
+  { id: 'hip-l',        name: 'Hip L',         percentage:  6.2, color: '' },
+  { id: 'hip-r',        name: 'Hip R',         percentage:  5.7, color: '' },
+  { id: 'upper-leg-l',  name: 'Upper Leg L',   percentage:  3.9, color: '' },
+  { id: 'upper-leg-r',  name: 'Upper Leg R',   percentage:  3.6, color: '' },
+  { id: 'lower-leg-l',  name: 'Lower Leg L',   percentage:  2.4, color: '' },
+  { id: 'lower-leg-r',  name: 'Lower Leg R',   percentage:  2.1, color: '' },
+  { id: 'foot-l',       name: 'Foot L',        percentage:  0.6, color: '' },
+  { id: 'foot-r',       name: 'Foot R',        percentage:  0.5, color: '' },
 ]

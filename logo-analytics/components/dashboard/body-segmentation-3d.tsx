@@ -10,27 +10,66 @@ interface Props {
   zones?: BodyZone[]
 }
 
-// Color interpolation: percentage → hsl
-function percentToColor(pct: number): string {
-  // 0% → cool blue (200, 70, 50), 35%+ → hot red/yellow
-  const maxPct = 35
-  const t = Math.min(pct / maxPct, 1)
-  const hue = 200 - t * 200 // from 200 (blue) → 0 (red)
-  const sat = 70 + t * 20
-  const lig = 45 + t * 15
-  return `hsl(${Math.round(hue)}, ${Math.round(sat)}%, ${Math.round(lig)}%)`
+// 23-zone body config — one distinct hue per region, flat vivid colour on 3D body.
+// Convention: -l = viewer's LEFT (neg X in 3D), -r = viewer's RIGHT (pos X).
+// Anchor (x,y,z) = world-space label point after model is scaled to TARGET_HEIGHT=3.6.
+const ZONE_CONFIG: Record<string, { label: string; hue: number; x: number; y: number; z: number; front: boolean }> = {
+  'head':          { label: 'Head',          hue: 270, x:  0.00, y: 3.30, z:  0.15, front: true  },
+  'neck':          { label: 'Neck',          hue:  35, x:  0.00, y: 3.04, z:  0.14, front: true  },
+  'shoulder-l':    { label: 'Shoulder L',    hue: 200, x: -0.32, y: 2.82, z:  0.05, front: true  },
+  'shoulder-r':    { label: 'Shoulder R',    hue: 140, x:  0.32, y: 2.82, z:  0.05, front: true  },
+  'chest-l':       { label: 'Chest L',       hue: 220, x: -0.12, y: 2.50, z:  0.22, front: true  },
+  'chest-r':       { label: 'Chest R',       hue:   8, x:  0.12, y: 2.50, z:  0.22, front: true  },
+  'upper-arm-l':   { label: 'Upper Arm L',   hue:  35, x: -0.50, y: 2.65, z:  0.00, front: true  },
+  'upper-arm-r':   { label: 'Upper Arm R',   hue: 300, x:  0.50, y: 2.65, z:  0.00, front: true  },
+  'forearm-l':     { label: 'Forearm L',     hue: 170, x: -0.65, y: 2.46, z:  0.00, front: true  },
+  'forearm-r':     { label: 'Forearm R',     hue:  95, x:  0.65, y: 2.46, z:  0.00, front: true  },
+  'hand-l':        { label: 'Hand L',        hue: 330, x: -0.78, y: 2.28, z:  0.00, front: true  },
+  'hand-r':        { label: 'Hand R',        hue: 250, x:  0.78, y: 2.28, z:  0.00, front: true  },
+  'spine':         { label: 'Spine',         hue:  50, x:  0.00, y: 2.42, z: -0.22, front: false },
+  'back-l':        { label: 'Back L',        hue: 185, x: -0.16, y: 2.42, z: -0.22, front: false },
+  'back-r':        { label: 'Back R',        hue: 285, x:  0.16, y: 2.42, z: -0.22, front: false },
+  'hip-l':         { label: 'Hip L',         hue: 110, x: -0.14, y: 1.76, z:  0.18, front: true  },
+  'hip-r':         { label: 'Hip R',         hue:  20, x:  0.14, y: 1.76, z:  0.18, front: true  },
+  'upper-leg-l':   { label: 'Upper Leg L',   hue: 280, x: -0.12, y: 1.28, z:  0.14, front: true  },
+  'upper-leg-r':   { label: 'Upper Leg R',   hue: 160, x:  0.12, y: 1.28, z:  0.14, front: true  },
+  'lower-leg-l':   { label: 'Lower Leg L',   hue:  45, x: -0.10, y: 0.68, z:  0.12, front: true  },
+  'lower-leg-r':   { label: 'Lower Leg R',   hue: 240, x:  0.10, y: 0.68, z:  0.12, front: true  },
+  'foot-l':        { label: 'Foot L',        hue: 150, x: -0.10, y: 0.04, z:  0.10, front: true  },
+  'foot-r':        { label: 'Foot R',        hue: 320, x:  0.10, y: 0.04, z:  0.10, front: true  },
 }
 
-function percentToHex(pct: number): number {
-  const maxPct = 35
-  const t = Math.min(pct / maxPct, 1)
-  const hue = 200 - t * 200
-  const sat = (70 + t * 20) / 100
-  const lig = (45 + t * 15) / 100
+// Colour for UI elements (CSS string) — hue from zone config, brightness from %
+function zoneColorStr(pct: number, hue: number): string {
+  const t   = Math.min(pct / 35, 1)
+  const sat = Math.round(72 + t * 18)   // 72 → 90 %
+  const lig = Math.round(42 + t * 20)   // 42 → 62 % (min raised so dark zones still pop)
+  return `hsl(${hue}, ${sat}%, ${lig}%)`
+}
 
-  // HSL → RGB
-  const a = sat * Math.min(lig, 1 - lig)
-  const f = (n: number) => {
+// Colour for Three.js vertex (hex int) — same logic, different output format
+function zoneColorHex(pct: number, hue: number): number {
+  const t   = Math.min(pct / 35, 1)
+  const sat = (72 + t * 18) / 100
+  const lig = (42 + t * 20) / 100
+  const a   = sat * Math.min(lig, 1 - lig)
+  const f   = (n: number) => {
+    const k = (n + hue / 30) % 12
+    return lig - a * Math.max(-1, Math.min(k - 3, 9 - k, 1))
+  }
+  const r = Math.round(f(0) * 255)
+  const g = Math.round(f(8) * 255)
+  const b = Math.round(f(4) * 255)
+  return (r << 16) | (g << 8) | b
+}
+
+// Flat vivid body colour — fixed brightness so each zone reads as a solid block
+// (percentage is shown in labels/sidebar only, not baked into the body mesh)
+function zoneBodyHex(hue: number): number {
+  const sat = 0.82
+  const lig = 0.54
+  const a   = sat * Math.min(lig, 1 - lig)
+  const f   = (n: number) => {
     const k = (n + hue / 30) % 12
     return lig - a * Math.max(-1, Math.min(k - 3, 9 - k, 1))
   }
@@ -45,11 +84,34 @@ function percentToHex(pct: number): number {
 const TARGET_HEIGHT = 3.6  // world-unit height the model is scaled to
 const LOOK_AT_Y     = TARGET_HEIGHT * 0.52  // camera focal point (slightly above mid)
 
-function buildBodyModel(scene: any, zones: BodyZone[], onLoaded: () => void, onError: (err: any) => void) {
-  if (!THREE || typeof window === 'undefined') return
+// Iterable array derived from ZONE_CONFIG — used by the label overlay loop
+const ZONE_ANCHORS = Object.entries(ZONE_CONFIG).map(([id, cfg]) => ({ id, ...cfg }))
 
-  const zoneMap: Record<string, number> = {}
-  zones.forEach(z => { zoneMap[z.id] = z.percentage })
+// Map a normalized body coordinate to one of the 23 zone ids.
+//   normY: 0 (feet) → 1 (head top);  normX: -0.5 (left) → +0.5 (right);  normZ: world z relative to centre (>0 front)
+function assignZoneId(normX: number, normY: number, normZ: number): string {
+  const absX = Math.abs(normX)
+  if (normY > 0.88) return 'head'
+  if (normY > 0.82) return 'neck'
+  if (normY > 0.50 && absX > 0.22) {
+    const side = normX < 0 ? 'l' : 'r'
+    if (absX < 0.36) return `shoulder-${side}`
+    if (absX < 0.54) return `upper-arm-${side}`
+    if (absX < 0.70) return `forearm-${side}`
+    return `hand-${side}`
+  }
+  if (normY > 0.50) {
+    if (normZ >= 0) return normX < 0 ? 'chest-l' : 'chest-r'
+    return absX < 0.10 ? 'spine' : (normX < 0 ? 'back-l' : 'back-r')
+  }
+  if (normY > 0.38) return normX < 0 ? 'hip-l' : 'hip-r'
+  if (normY > 0.22) return normX < 0 ? 'upper-leg-l' : 'upper-leg-r'
+  if (normY > 0.07) return normX < 0 ? 'lower-leg-l' : 'lower-leg-r'
+  return normX < 0 ? 'foot-l' : 'foot-r'
+}
+
+function buildBodyModel(scene: any, _zones: BodyZone[], onLoaded: () => void, onError: (err: any) => void) {
+  if (!THREE || typeof window === 'undefined') return
 
   const loader = new GLTFLoader()
   loader.load(
@@ -80,42 +142,53 @@ function buildBodyModel(scene: any, zones: BodyZone[], onLoaded: () => void, onE
           return
         }
 
-        // Assign zone vertex colours to the body mesh
-        const pos    = child.geometry.attributes.position
-        const colors: number[] = []
+        // ── PER-FACE flat colouring ─────────────────────────────────────
+        // Per-VERTEX colours get smoothly interpolated across each triangle,
+        // which on a low-poly mesh blends all zones into one mushy gradient.
+        // Un-indexing makes every triangle own its 3 vertices, so we can paint
+        // each face a single solid zone colour → crisp, distinct regions.
+        let geom = child.geometry
+        if (geom.index) geom = geom.toNonIndexed()
+        child.geometry = geom
 
-        for (let i = 0; i < pos.count; i++) {
-          const v = new THREE.Vector3(pos.getX(i), pos.getY(i), pos.getZ(i))
-          v.applyMatrix4(child.matrixWorld)
+        const pos    = geom.attributes.position
+        const colors = new Float32Array(pos.count * 3)
+        const mw     = child.matrixWorld
 
-          const normY = (v.y - box.min.y) / size.y
-          const normX = (v.x - center.x)  / size.x
-          const normZ =  v.z - center.z
+        const a = new THREE.Vector3(), b = new THREE.Vector3(), c = new THREE.Vector3()
+        const col = new THREE.Color()
 
-          let zoneId = 'socks'
-          if      (normY > 0.88)                          zoneId = 'head'
-          else if (normY > 0.82)                          zoneId = 'collar'
-          else if (normY > 0.45) {
-            if      (normX >  0.22)                       zoneId = 'sleeve-l'
-            else if (normX < -0.22)                       zoneId = 'sleeve-r'
-            else if (normZ  >  0)                         zoneId = 'chest-front'
-            else                                          zoneId = 'back'
+        for (let f = 0; f < pos.count; f += 3) {
+          a.set(pos.getX(f),     pos.getY(f),     pos.getZ(f)).applyMatrix4(mw)
+          b.set(pos.getX(f + 1), pos.getY(f + 1), pos.getZ(f + 1)).applyMatrix4(mw)
+          c.set(pos.getX(f + 2), pos.getY(f + 2), pos.getZ(f + 2)).applyMatrix4(mw)
+
+          // Triangle centroid → decides the whole face's zone
+          const wx = (a.x + b.x + c.x) / 3
+          const wy = (a.y + b.y + c.y) / 3
+          const wz = (a.z + b.z + c.z) / 3
+
+          const normY = (wy - box.min.y) / size.y
+          const normX = (wx - center.x)  / size.x
+          const normZ =  wz - center.z
+
+          const zoneId = assignZoneId(normX, normY, normZ)
+          const hue    = ZONE_CONFIG[zoneId]?.hue ?? 180
+          col.set(zoneBodyHex(hue))
+
+          for (let k = 0; k < 3; k++) {
+            colors[(f + k) * 3]     = col.r
+            colors[(f + k) * 3 + 1] = col.g
+            colors[(f + k) * 3 + 2] = col.b
           }
-          else if (normY > 0.35)                          zoneId = 'shorts'
-
-          const pct = zoneMap[zoneId] ?? 0
-          const hex = percentToHex(pct)
-          const c   = new THREE.Color(hex)
-          colors.push(c.r, c.g, c.b)
         }
 
-        child.geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3))
-        child.material = new THREE.MeshStandardMaterial({
+        geom.setAttribute('color', new THREE.BufferAttribute(colors, 3))
+        // flatShading + non-indexed geometry → each face uniformly lit, giving
+        // the crisp blocky segmentation look (no Gouraud cross-face blending).
+        child.material = new THREE.MeshLambertMaterial({
           vertexColors: true,
-          roughness: 0.55,
-          metalness: 0.05,
-          transparent: true,
-          opacity: 0.97,
+          flatShading: true,
         })
       })
 
@@ -142,15 +215,29 @@ function buildBodyModel(scene: any, zones: BodyZone[], onLoaded: () => void, onE
 function Body2DFallback({ zones }: { zones: BodyZone[] }) {
   const [hovered, setHovered] = useState<string | null>(null)
 
+  // SVG front-view (300×400): -l zones on LEFT, -r on RIGHT.
+  // Back zones (spine, back-l, back-r) have no position → skipped in front view.
   const zonePositions: Record<string, { x: number; y: number; w: number; h: number }> = {
-    'head':        { x: 130, y: 10,  w: 40, h: 45 },
-    'collar':      { x: 128, y: 60,  w: 44, h: 18 },
-    'chest-front': { x: 108, y: 82,  w: 84, h: 80 },
-    'back':        { x: 112, y: 165, w: 76, h: 45 },
-    'sleeve-l':    { x: 60,  y: 85,  w: 44, h: 70 },
-    'sleeve-r':    { x: 196, y: 85,  w: 44, h: 70 },
-    'shorts':      { x: 108, y: 215, w: 84, h: 60 },
-    'socks':       { x: 118, y: 325, w: 64, h: 55 },
+    'head':         { x: 130, y:   8, w:  40, h: 44 },
+    'neck':         { x: 141, y:  54, w:  18, h: 20 },
+    'chest-l':      { x: 115, y:  78, w:  35, h: 90 },
+    'chest-r':      { x: 150, y:  78, w:  35, h: 90 },
+    'shoulder-l':   { x:  68, y:  80, w:  42, h: 24 },
+    'shoulder-r':   { x: 190, y:  80, w:  42, h: 24 },
+    'upper-arm-l':  { x:  68, y: 104, w:  40, h: 26 },
+    'upper-arm-r':  { x: 192, y: 104, w:  40, h: 26 },
+    'forearm-l':    { x:  70, y: 130, w:  38, h: 26 },
+    'forearm-r':    { x: 192, y: 130, w:  38, h: 26 },
+    'hand-l':       { x:  72, y: 156, w:  35, h: 16 },
+    'hand-r':       { x: 193, y: 156, w:  35, h: 16 },
+    'hip-l':        { x: 115, y: 170, w:  35, h: 52 },
+    'hip-r':        { x: 150, y: 170, w:  35, h: 52 },
+    'upper-leg-l':  { x: 119, y: 224, w:  26, h: 88 },
+    'upper-leg-r':  { x: 155, y: 224, w:  26, h: 88 },
+    'lower-leg-l':  { x: 121, y: 314, w:  23, h: 65 },
+    'lower-leg-r':  { x: 156, y: 314, w:  23, h: 65 },
+    'foot-l':       { x: 115, y: 381, w:  28, h: 12 },
+    'foot-r':       { x: 156, y: 381, w:  28, h: 12 },
   }
 
   return (
@@ -195,7 +282,7 @@ function Body2DFallback({ zones }: { zones: BodyZone[] }) {
               width={pos.w}
               height={pos.h}
               rx={8}
-              fill={percentToColor(zone.percentage)}
+              fill={zoneColorStr(zone.percentage, ZONE_CONFIG[zone.id]?.hue ?? 180)}
               opacity={isHovered ? 0.9 : 0.6}
               stroke={isHovered ? '#fff' : 'transparent'}
               strokeWidth={1.5}
@@ -224,6 +311,7 @@ function Body2DFallback({ zones }: { zones: BodyZone[] }) {
 
 export default function BodySegmentation3D({ zones = BODY_ZONES }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
+  const labelsCanvasRef = useRef<HTMLCanvasElement | null>(null)
   const rendererRef = useRef<any>(null)
   const sceneRef = useRef<any>(null)
   const cameraRef = useRef<any>(null)
@@ -231,6 +319,9 @@ export default function BodySegmentation3D({ zones = BODY_ZONES }: Props) {
   const [is3DReady, setIs3DReady] = useState(false)
   const [use3D, setUse3D] = useState(true)
   const [hoveredZone, setHoveredZone] = useState<BodyZone | null>(null)
+  const [showLabels, setShowLabels] = useState(true)
+  // Ref copy used inside the animate-loop closure (avoids stale state)
+  const showLabelsRef = useRef(true)
 
   // Mouse interaction state — dist tracks camera distance for scroll-zoom
   const mouseRef = useRef({ down: false, prevX: 0, prevY: 0, rotX: 0.12, rotY: 0, dist: 7 })
@@ -256,30 +347,32 @@ export default function BodySegmentation3D({ zones = BODY_ZONES }: Props) {
     camera.lookAt(0, LOOK_AT_Y, 0)
     cameraRef.current = camera
 
-    // Renderer
+    // Renderer — NoToneMapping keeps the flat zone colours exactly as assigned
+    // (ACES would desaturate / shift the hues into a washed gradient).
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
     renderer.setSize(width, height)
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-    renderer.toneMapping = THREE.ACESFilmicToneMapping
-    renderer.toneMappingExposure = 1.1
+    renderer.toneMapping = THREE.NoToneMapping
     rendererRef.current = renderer
     container.appendChild(renderer.domElement)
 
-    // Lights
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.4)
+    // Size the 2D labels overlay canvas
+    const lc = labelsCanvasRef.current
+    if (lc) { lc.width = width; lc.height = height }
+
+    // Lights — ALL NEUTRAL WHITE. Coloured lights would tint the flat zone
+    // colours (blue back + green rim caused the washed blue→green gradient).
+    // High ambient keeps hues true; one soft key light gives gentle 3D form.
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.82)
     scene.add(ambientLight)
 
-    const frontLight = new THREE.DirectionalLight(0xffffff, 0.8)
-    frontLight.position.set(2, 4, 5)
-    scene.add(frontLight)
+    const keyLight = new THREE.DirectionalLight(0xffffff, 0.28)
+    keyLight.position.set(1, 3, 4)
+    scene.add(keyLight)
 
-    const backLight = new THREE.DirectionalLight(0x6688ff, 0.3)
-    backLight.position.set(-2, 2, -4)
-    scene.add(backLight)
-
-    const rimLight = new THREE.PointLight(0xC5F000, 0.3, 15)
-    rimLight.position.set(3, 3, 2)
-    scene.add(rimLight)
+    const fillLight = new THREE.DirectionalLight(0xffffff, 0.14)
+    fillLight.position.set(-2, 1, -3)
+    scene.add(fillLight)
 
     // Ground grid — sits at y=0 where the model's feet land
     const gridHelper = new THREE.GridHelper(10, 20, 0x222222, 0x151515)
@@ -391,6 +484,122 @@ export default function BodySegmentation3D({ zones = BODY_ZONES }: Props) {
     }
     container.addEventListener('wheel', onWheel, { passive: false })
 
+    // ── Zone label overlay — back-face culled + edge-anchored columns ────
+    // Labels are stacked down the left/right edges (no overlap) with leader
+    // lines to each body point, matching a medical-style segmentation diagram.
+    const drawZoneLabels = (cam: any) => {
+      const canvas = labelsCanvasRef.current
+      if (!canvas) return
+      const ctx = canvas.getContext('2d')
+      if (!ctx) return
+
+      const w = canvas.width
+      const h = canvas.height
+      ctx.clearRect(0, 0, w, h)
+      if (!showLabelsRef.current) return
+
+      const BOX_W = 104
+      const BOX_H = 30
+      const PAD_Y = 5            // min vertical gap between stacked boxes
+      const SLOT  = BOX_H + PAD_Y
+
+      // Camera's horizontal viewing direction (body is centred on x=z=0)
+      const camDir = Math.hypot(cam.position.x, cam.position.z) || 1
+      const cdx = cam.position.x / camDir
+      const cdz = cam.position.z / camDir
+
+      // Build the visible set (cull zones whose surface faces away)
+      type Lbl = { label: string; pct: number; color: string; sx: number; sy: number }
+      const left: Lbl[]  = []
+      const right: Lbl[] = []
+
+      for (const anchor of ZONE_ANCHORS) {
+        // Outward surface normal (horizontal) ≈ direction of anchor from axis
+        const nLen = Math.hypot(anchor.x, anchor.z) || 1
+        const nx = anchor.x / nLen
+        const nz = anchor.z / nLen
+        // Facing camera when normal·cameraDir > margin
+        if (nx * cdx + nz * cdz < -0.15) continue
+
+        const v = new THREE.Vector3(anchor.x, anchor.y, anchor.z)
+        v.project(cam)
+        if (v.z > 1) continue
+        const sx = (v.x + 1) / 2 * w
+        const sy = (-v.y + 1) / 2 * h
+
+        const zone  = zones.find(z => z.id === anchor.id)
+        const pct   = zone?.percentage ?? 0
+        const color = zoneColorStr(50, ZONE_CONFIG[anchor.id]?.hue ?? 180)
+        const item: Lbl = { label: anchor.label, pct, color, sx, sy }
+        ;(sx < w / 2 ? left : right).push(item)
+      }
+
+      // Distribute boxes down an edge without overlapping
+      const layout = (items: Lbl[], edgeX: number, isLeft: boolean) => {
+        items.sort((a, b) => a.sy - b.sy)
+        const ys = items.map(it => Math.max(4, Math.min(h - BOX_H - 4, it.sy - BOX_H / 2)))
+        for (let i = 1; i < ys.length; i++) {
+          if (ys[i] < ys[i - 1] + SLOT) ys[i] = ys[i - 1] + SLOT
+        }
+        const overflow = ys.length ? (ys[ys.length - 1] + BOX_H + 4 - h) : 0
+        if (overflow > 0) for (let i = 0; i < ys.length; i++) ys[i] = Math.max(4, ys[i] - overflow)
+
+        items.forEach((it, i) => {
+          const by = ys[i]
+          const lineStartX = isLeft ? edgeX + BOX_W : edgeX
+          const lineStartY = by + BOX_H / 2
+
+          // Leader line: box → anchor dot
+          ctx.strokeStyle = 'rgba(255,255,255,0.28)'
+          ctx.lineWidth = 1
+          ctx.beginPath()
+          ctx.moveTo(lineStartX, lineStartY)
+          ctx.lineTo(it.sx, it.sy)
+          ctx.stroke()
+
+          // Anchor dot
+          ctx.fillStyle = it.color
+          ctx.beginPath()
+          ctx.arc(it.sx, it.sy, 3, 0, Math.PI * 2)
+          ctx.fill()
+
+          // Box
+          const r = 4
+          ctx.fillStyle = 'rgba(10,10,14,0.92)'
+          ctx.strokeStyle = it.color
+          ctx.lineWidth = 1.25
+          ctx.beginPath()
+          ctx.moveTo(edgeX + r, by)
+          ctx.lineTo(edgeX + BOX_W - r, by)
+          ctx.quadraticCurveTo(edgeX + BOX_W, by, edgeX + BOX_W, by + r)
+          ctx.lineTo(edgeX + BOX_W, by + BOX_H - r)
+          ctx.quadraticCurveTo(edgeX + BOX_W, by + BOX_H, edgeX + BOX_W - r, by + BOX_H)
+          ctx.lineTo(edgeX + r, by + BOX_H)
+          ctx.quadraticCurveTo(edgeX, by + BOX_H, edgeX, by + BOX_H - r)
+          ctx.lineTo(edgeX, by + r)
+          ctx.quadraticCurveTo(edgeX, by, edgeX + r, by)
+          ctx.closePath()
+          ctx.fill()
+          ctx.stroke()
+
+          // Colour swatch
+          ctx.fillStyle = it.color
+          ctx.fillRect(edgeX + 7, by + 9, 11, 11)
+
+          // Name + percentage
+          ctx.fillStyle = 'rgba(190,190,205,0.95)'
+          ctx.font = '8.5px system-ui, sans-serif'
+          ctx.fillText(it.label.toUpperCase(), edgeX + 23, by + 13)
+          ctx.fillStyle = it.color
+          ctx.font = 'bold 12px system-ui, monospace'
+          ctx.fillText(`${it.pct}%`, edgeX + 23, by + 25)
+        })
+      }
+
+      layout(left, 6, true)
+      layout(right, w - BOX_W - 6, false)
+    }
+
     // Animation loop
     const animate = () => {
       animRef.current = requestAnimationFrame(animate)
@@ -406,6 +615,7 @@ export default function BodySegmentation3D({ zones = BODY_ZONES }: Props) {
       camera.lookAt(0, LOOK_AT_Y, 0)
 
       renderer.render(scene, camera)
+      drawZoneLabels(camera)
     }
     animate()
 
@@ -416,6 +626,8 @@ export default function BodySegmentation3D({ zones = BODY_ZONES }: Props) {
       camera.aspect = w / h
       camera.updateProjectionMatrix()
       renderer.setSize(w, h)
+      const lc2 = labelsCanvasRef.current
+      if (lc2) { lc2.width = w; lc2.height = h }
     }
     window.addEventListener('resize', onResize)
 
@@ -506,6 +718,58 @@ export default function BodySegmentation3D({ zones = BODY_ZONES }: Props) {
                 overflow: 'hidden',
               }}
             >
+              {/* 2D labels overlay — drawn every frame, pointer-events off */}
+              <canvas
+                ref={labelsCanvasRef}
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  pointerEvents: 'none',
+                  zIndex: 5,
+                }}
+              />
+
+              {/* Toggle zone stats */}
+              {is3DReady && (
+                <button
+                  onClick={() => {
+                    const next = !showLabels
+                    setShowLabels(next)
+                    showLabelsRef.current = next
+                  }}
+                  style={{
+                    position: 'absolute',
+                    top: 10,
+                    right: 10,
+                    zIndex: 10,
+                    background: showLabels ? 'rgba(22,22,32,0.92)' : 'rgba(14,14,20,0.75)',
+                    border: `1px solid ${showLabels ? 'var(--c-wire-s)' : 'var(--c-wire)'}`,
+                    borderRadius: 6,
+                    color: showLabels ? 'var(--c-ink)' : 'var(--c-ghost)',
+                    padding: '5px 11px',
+                    fontSize: 11,
+                    fontWeight: 500,
+                    cursor: 'pointer',
+                    letterSpacing: '0.04em',
+                    backdropFilter: 'blur(6px)',
+                    transition: 'all 0.15s',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                  }}
+                >
+                  <span style={{
+                    display: 'inline-block',
+                    width: 7,
+                    height: 7,
+                    borderRadius: '50%',
+                    background: showLabels ? 'var(--c-spark)' : 'var(--c-ghost)',
+                    transition: 'background 0.15s',
+                  }} />
+                  {showLabels ? 'Stats On' : 'Stats Off'}
+                </button>
+              )}
+
               {!is3DReady && (
                 <div style={{
                   position: 'absolute',
@@ -540,7 +804,7 @@ export default function BodySegmentation3D({ zones = BODY_ZONES }: Props) {
                   <div className="num" style={{
                     fontSize: 22,
                     fontWeight: 700,
-                    color: percentToColor(hoveredZone.percentage),
+                    color: zoneColorStr(hoveredZone.percentage, ZONE_CONFIG[hoveredZone.id]?.hue ?? 180),
                   }}>
                     {hoveredZone.percentage}%
                   </div>
@@ -606,12 +870,12 @@ export default function BodySegmentation3D({ zones = BODY_ZONES }: Props) {
                   {i + 1}
                 </span>
 
-                {/* Color dot */}
+                {/* Color dot — unique hue per zone */}
                 <div style={{
                   width: 10,
                   height: 10,
                   borderRadius: 3,
-                  background: percentToColor(zone.percentage),
+                  background: zoneColorStr(zone.percentage, ZONE_CONFIG[zone.id]?.hue ?? 180),
                   flexShrink: 0,
                 }} />
 
@@ -637,7 +901,7 @@ export default function BodySegmentation3D({ zones = BODY_ZONES }: Props) {
                   <div style={{
                     height: '100%',
                     width: `${Math.min(100, (zone.percentage / 35) * 100)}%`,
-                    background: percentToColor(zone.percentage),
+                    background: zoneColorStr(zone.percentage, ZONE_CONFIG[zone.id]?.hue ?? 180),
                     borderRadius: 2,
                     transition: 'width 0.6s ease',
                   }} />
@@ -647,7 +911,7 @@ export default function BodySegmentation3D({ zones = BODY_ZONES }: Props) {
                 <span className="num" style={{
                   fontSize: 13,
                   fontWeight: 600,
-                  color: percentToColor(zone.percentage),
+                  color: zoneColorStr(zone.percentage, ZONE_CONFIG[zone.id]?.hue ?? 180),
                   minWidth: 42,
                   textAlign: 'right',
                 }}>
@@ -657,30 +921,26 @@ export default function BodySegmentation3D({ zones = BODY_ZONES }: Props) {
             )
           })}
 
-          {/* Color scale legend */}
+          {/* Zone colour key — one swatch per zone replacing the old single-gradient heat scale */}
           <div style={{
             marginTop: 16,
-            padding: '12px 10px',
+            padding: '10px 10px',
             borderTop: '1px solid var(--c-wire)',
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: '6px 10px',
           }}>
-            <div style={{ fontSize: 10, color: 'var(--c-ghost)', marginBottom: 6, letterSpacing: '0.06em' }}>
-              HEAT SCALE
-            </div>
-            <div style={{
-              height: 8,
-              borderRadius: 4,
-              background: `linear-gradient(90deg, ${percentToColor(0)}, ${percentToColor(10)}, ${percentToColor(20)}, ${percentToColor(35)})`,
-            }} />
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              fontSize: 10,
-              color: 'var(--c-ghost)',
-              marginTop: 4,
-            }}>
-              <span>Low</span>
-              <span>High</span>
-            </div>
+            {ZONE_ANCHORS.map(a => (
+              <div key={a.id} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                <div style={{
+                  width: 8, height: 8, borderRadius: 2,
+                  background: zoneColorStr(50, a.hue),
+                }} />
+                <span style={{ fontSize: 9, color: 'var(--c-ghost)', letterSpacing: '0.04em' }}>
+                  {a.label.toUpperCase()}
+                </span>
+              </div>
+            ))}
           </div>
         </div>
       </div>
