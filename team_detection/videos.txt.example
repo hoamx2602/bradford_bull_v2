@@ -1,0 +1,6 @@
+# Example videos list for batch_run.bat
+# Create a file named videos.txt (one path per line) to use with batch_run.bat
+
+C:\path\to\clip_001.mp4
+C:\path\to\clip_002.mp4
+C:\path\to\clip_003.mp4
