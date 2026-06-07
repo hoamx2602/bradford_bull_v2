@@ -1,11 +1,10 @@
 'use client'
 
 import { useRef, useEffect, useState, useMemo } from 'react'
+import * as THREE from 'three'
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import type { BodyZone } from '@/lib/types'
 import { BODY_ZONES } from '@/lib/mock-data'
-
-// We dynamically import Three.js only on client
-let THREE: typeof import('three') | null = null
 
 interface Props {
   zones?: BodyZone[]
@@ -43,134 +42,99 @@ function percentToHex(pct: number): number {
 
 // ── 3D Body Builder ─────────────────────────────────────────────────
 
-function buildBodyModel(scene: any, zones: BodyZone[]) {
-  if (!THREE) return
+const TARGET_HEIGHT = 3.6  // world-unit height the model is scaled to
+const LOOK_AT_Y     = TARGET_HEIGHT * 0.52  // camera focal point (slightly above mid)
+
+function buildBodyModel(scene: any, zones: BodyZone[], onLoaded: () => void, onError: (err: any) => void) {
+  if (!THREE || typeof window === 'undefined') return
 
   const zoneMap: Record<string, number> = {}
   zones.forEach(z => { zoneMap[z.id] = z.percentage })
 
-  const material = (pct: number) => new THREE!.MeshStandardMaterial({
-    color: percentToHex(pct),
-    roughness: 0.6,
-    metalness: 0.15,
-    transparent: true,
-    opacity: 0.92,
-  })
+  const loader = new GLTFLoader()
+  loader.load(
+    '/male_model.glb',
+    (gltf: any) => {
+      const model = gltf.scene
 
-  const glowMat = (pct: number) => new THREE!.MeshStandardMaterial({
-    color: percentToHex(pct),
-    roughness: 0.3,
-    metalness: 0.3,
-    emissive: percentToHex(pct),
-    emissiveIntensity: 0.15,
-    transparent: true,
-    opacity: 0.95,
-  })
+      // Must call this before Box3 or matrixWorld usage —
+      // GLTFLoader applies a -90° X rotation (Blender→GLTF) that isn't
+      // propagated to matrixWorld until the first updateMatrixWorld pass.
+      model.updateMatrixWorld(true)
 
-  // Head
-  const headGeo = new THREE!.SphereGeometry(0.35, 32, 32)
-  const head = new THREE!.Mesh(headGeo, glowMat(zoneMap['head'] || 0))
-  head.position.set(0, 3.1, 0)
-  head.userData = { zone: 'head' }
-  scene.add(head)
+      // ── 1. Bounding box in world space (after matrix update) ─────────────
+      const box    = new THREE.Box3().setFromObject(model)
+      const size   = box.getSize(new THREE.Vector3())
+      const center = box.getCenter(new THREE.Vector3())
 
-  // Neck
-  const neckGeo = new THREE!.CylinderGeometry(0.12, 0.15, 0.25, 16)
-  const neck = new THREE!.Mesh(neckGeo, material(zoneMap['collar'] || 0))
-  neck.position.set(0, 2.65, 0)
-  neck.userData = { zone: 'collar' }
-  scene.add(neck)
+      // ── 2. Hide known props by node name; colour the body mesh ───────────
+      // GLB node names: "Axe-colonly", "Pickaxe-colonly" → props to hide.
+      // "mesh" (node[57], 1226 verts, skinned) → the actual body.
+      model.traverse((child: any) => {
+        if (!child.isMesh || !child.geometry) return
 
-  // Torso (chest front)
-  const torsoGeo = new THREE!.BoxGeometry(1.0, 1.2, 0.55)
-  // Round the edges
-  const torso = new THREE!.Mesh(torsoGeo, glowMat(zoneMap['chest-front'] || 0))
-  torso.position.set(0, 1.9, 0)
-  torso.userData = { zone: 'chest-front' }
-  scene.add(torso)
+        const name = (child.name ?? '').toLowerCase()
+        if (name.includes('axe') || name.includes('pickaxe') ||
+            name.includes('weapon') || name.includes('prop')) {
+          child.visible = false
+          return
+        }
 
-  // Belly
-  const bellyGeo = new THREE!.BoxGeometry(0.9, 0.6, 0.5)
-  const belly = new THREE!.Mesh(bellyGeo, material(zoneMap['back'] || 0))
-  belly.position.set(0, 1.1, 0)
-  belly.userData = { zone: 'back' }
-  scene.add(belly)
+        // Assign zone vertex colours to the body mesh
+        const pos    = child.geometry.attributes.position
+        const colors: number[] = []
 
-  // Left upper arm
-  const armGeo = new THREE!.CylinderGeometry(0.14, 0.12, 0.85, 16)
-  const leftArm = new THREE!.Mesh(armGeo, glowMat(zoneMap['sleeve-l'] || 0))
-  leftArm.position.set(-0.72, 2.2, 0)
-  leftArm.rotation.z = 0.15
-  leftArm.userData = { zone: 'sleeve-l' }
-  scene.add(leftArm)
+        for (let i = 0; i < pos.count; i++) {
+          const v = new THREE.Vector3(pos.getX(i), pos.getY(i), pos.getZ(i))
+          v.applyMatrix4(child.matrixWorld)
 
-  // Left forearm
-  const forearmGeo = new THREE!.CylinderGeometry(0.11, 0.1, 0.75, 16)
-  const leftForearm = new THREE!.Mesh(forearmGeo, material(zoneMap['sleeve-l'] || 0))
-  leftForearm.position.set(-0.82, 1.45, 0)
-  leftForearm.rotation.z = 0.1
-  leftForearm.userData = { zone: 'sleeve-l' }
-  scene.add(leftForearm)
+          const normY = (v.y - box.min.y) / size.y
+          const normX = (v.x - center.x)  / size.x
+          const normZ =  v.z - center.z
 
-  // Right upper arm
-  const rightArm = new THREE!.Mesh(armGeo.clone(), glowMat(zoneMap['sleeve-r'] || 0))
-  rightArm.position.set(0.72, 2.2, 0)
-  rightArm.rotation.z = -0.15
-  rightArm.userData = { zone: 'sleeve-r' }
-  scene.add(rightArm)
+          let zoneId = 'socks'
+          if      (normY > 0.88)                          zoneId = 'head'
+          else if (normY > 0.82)                          zoneId = 'collar'
+          else if (normY > 0.45) {
+            if      (normX >  0.22)                       zoneId = 'sleeve-l'
+            else if (normX < -0.22)                       zoneId = 'sleeve-r'
+            else if (normZ  >  0)                         zoneId = 'chest-front'
+            else                                          zoneId = 'back'
+          }
+          else if (normY > 0.35)                          zoneId = 'shorts'
 
-  // Right forearm
-  const rightForearm = new THREE!.Mesh(forearmGeo.clone(), material(zoneMap['sleeve-r'] || 0))
-  rightForearm.position.set(0.82, 1.45, 0)
-  rightForearm.rotation.z = -0.1
-  rightForearm.userData = { zone: 'sleeve-r' }
-  scene.add(rightForearm)
+          const pct = zoneMap[zoneId] ?? 0
+          const hex = percentToHex(pct)
+          const c   = new THREE.Color(hex)
+          colors.push(c.r, c.g, c.b)
+        }
 
-  // Shorts / hips
-  const shortsGeo = new THREE!.BoxGeometry(0.95, 0.65, 0.48)
-  const shorts = new THREE!.Mesh(shortsGeo, glowMat(zoneMap['shorts'] || 0))
-  shorts.position.set(0, 0.55, 0)
-  shorts.userData = { zone: 'shorts' }
-  scene.add(shorts)
+        child.geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3))
+        child.material = new THREE.MeshStandardMaterial({
+          vertexColors: true,
+          roughness: 0.55,
+          metalness: 0.05,
+          transparent: true,
+          opacity: 0.97,
+        })
+      })
 
-  // Left thigh
-  const thighGeo = new THREE!.CylinderGeometry(0.18, 0.15, 0.9, 16)
-  const leftThigh = new THREE!.Mesh(thighGeo, material(zoneMap['shorts'] || 0))
-  leftThigh.position.set(-0.25, -0.15, 0)
-  leftThigh.userData = { zone: 'shorts' }
-  scene.add(leftThigh)
+      // ── 3. Scale so the model is exactly TARGET_HEIGHT units tall ─────────
+      const scaleFactor = TARGET_HEIGHT / size.y
+      model.scale.setScalar(scaleFactor)
 
-  // Right thigh
-  const rightThigh = new THREE!.Mesh(thighGeo.clone(), material(zoneMap['shorts'] || 0))
-  rightThigh.position.set(0.25, -0.15, 0)
-  rightThigh.userData = { zone: 'shorts' }
-  scene.add(rightThigh)
+      // ── 4. Centre model: feet at y=0, centred on x/z ──────────────────────
+      model.position.x = -scaleFactor * center.x
+      model.position.z = -scaleFactor * center.z
+      model.position.y = -scaleFactor * box.min.y
 
-  // Left calf
-  const calfGeo = new THREE!.CylinderGeometry(0.14, 0.1, 0.9, 16)
-  const leftCalf = new THREE!.Mesh(calfGeo, glowMat(zoneMap['socks'] || 0))
-  leftCalf.position.set(-0.25, -1.0, 0)
-  leftCalf.userData = { zone: 'socks' }
-  scene.add(leftCalf)
-
-  // Right calf
-  const rightCalf = new THREE!.Mesh(calfGeo.clone(), glowMat(zoneMap['socks'] || 0))
-  rightCalf.position.set(0.25, -1.0, 0)
-  rightCalf.userData = { zone: 'socks' }
-  scene.add(rightCalf)
-
-  // Left foot
-  const footGeo = new THREE!.BoxGeometry(0.2, 0.12, 0.35)
-  const leftFoot = new THREE!.Mesh(footGeo, material(zoneMap['socks'] || 0))
-  leftFoot.position.set(-0.25, -1.5, 0.08)
-  leftFoot.userData = { zone: 'socks' }
-  scene.add(leftFoot)
-
-  // Right foot
-  const rightFoot = new THREE!.Mesh(footGeo.clone(), material(zoneMap['socks'] || 0))
-  rightFoot.position.set(0.25, -1.5, 0.08)
-  rightFoot.userData = { zone: 'socks' }
-  scene.add(rightFoot)
+      model.name = 'RealisticBody'
+      scene.add(model)
+      onLoaded()
+    },
+    undefined,
+    onError,
+  )
 }
 
 // ── 2D SVG Fallback ─────────────────────────────────────────────────
@@ -268,172 +232,208 @@ export default function BodySegmentation3D({ zones = BODY_ZONES }: Props) {
   const [use3D, setUse3D] = useState(true)
   const [hoveredZone, setHoveredZone] = useState<BodyZone | null>(null)
 
-  // Mouse interaction state
-  const mouseRef = useRef({ down: false, prevX: 0, prevY: 0, rotX: 0.15, rotY: 0 })
+  // Mouse interaction state — dist tracks camera distance for scroll-zoom
+  const mouseRef = useRef({ down: false, prevX: 0, prevY: 0, rotX: 0.12, rotY: 0, dist: 7 })
 
   useEffect(() => {
     if (!use3D || !containerRef.current) return
 
     let cancelled = false
+    const container = containerRef.current
+    if (!container) return
 
-    // Dynamic import of Three.js
-    import('three').then(mod => {
-      if (cancelled) return
-      THREE = mod
+    const width = container.clientWidth
+    const height = 480
 
-      const container = containerRef.current
-      if (!container) return
+    // Scene
+    const scene = new THREE.Scene()
+    scene.background = new THREE.Color(0x080808)
+    sceneRef.current = scene
 
-      const width = container.clientWidth
-      const height = 480
+    // Camera — positioned to show full model (feet at y=0, top at y=TARGET_HEIGHT)
+    const camera = new THREE.PerspectiveCamera(38, width / height, 0.1, 100)
+    camera.position.set(0, LOOK_AT_Y, mouseRef.current.dist)
+    camera.lookAt(0, LOOK_AT_Y, 0)
+    cameraRef.current = camera
 
-      // Scene
-      const scene = new THREE!.Scene()
-      scene.background = new THREE!.Color(0x080808)
-      sceneRef.current = scene
+    // Renderer
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
+    renderer.setSize(width, height)
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+    renderer.toneMapping = THREE.ACESFilmicToneMapping
+    renderer.toneMappingExposure = 1.1
+    rendererRef.current = renderer
+    container.appendChild(renderer.domElement)
 
-      // Camera
-      const camera = new THREE!.PerspectiveCamera(40, width / height, 0.1, 100)
-      camera.position.set(0, 1.2, 7)
-      camera.lookAt(0, 1.0, 0)
-      cameraRef.current = camera
+    // Lights
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.4)
+    scene.add(ambientLight)
 
-      // Renderer
-      const renderer = new THREE!.WebGLRenderer({ antialias: true, alpha: true })
-      renderer.setSize(width, height)
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-      renderer.toneMapping = THREE!.ACESFilmicToneMapping
-      renderer.toneMappingExposure = 1.1
-      rendererRef.current = renderer
-      container.appendChild(renderer.domElement)
+    const frontLight = new THREE.DirectionalLight(0xffffff, 0.8)
+    frontLight.position.set(2, 4, 5)
+    scene.add(frontLight)
 
-      // Lights
-      const ambientLight = new THREE!.AmbientLight(0xffffff, 0.4)
-      scene.add(ambientLight)
+    const backLight = new THREE.DirectionalLight(0x6688ff, 0.3)
+    backLight.position.set(-2, 2, -4)
+    scene.add(backLight)
 
-      const frontLight = new THREE!.DirectionalLight(0xffffff, 0.8)
-      frontLight.position.set(2, 4, 5)
-      scene.add(frontLight)
+    const rimLight = new THREE.PointLight(0xC5F000, 0.3, 15)
+    rimLight.position.set(3, 3, 2)
+    scene.add(rimLight)
 
-      const backLight = new THREE!.DirectionalLight(0x6688ff, 0.3)
-      backLight.position.set(-2, 2, -4)
-      scene.add(backLight)
+    // Ground grid — sits at y=0 where the model's feet land
+    const gridHelper = new THREE.GridHelper(10, 20, 0x222222, 0x151515)
+    gridHelper.position.y = -0.02
+    scene.add(gridHelper)
 
-      const rimLight = new THREE!.PointLight(0xC5F000, 0.3, 15)
-      rimLight.position.set(3, 3, 2)
-      scene.add(rimLight)
+    // Build body model asynchronously
+    buildBodyModel(
+      scene, 
+      zones, 
+      () => {
+        if (!cancelled) setIs3DReady(true)
+      },
+      (err) => {
+        console.error('Failed to load 3D model:', err)
+        if (!cancelled) setUse3D(false)
+      }
+    )
 
-      // Ground grid
-      const gridHelper = new THREE!.GridHelper(10, 20, 0x222222, 0x151515)
-      gridHelper.position.y = -1.6
-      scene.add(gridHelper)
+    // Raycaster for hover
+    const raycaster = new THREE.Raycaster()
+    const mouse = new THREE.Vector2()
 
-      // Build body model
-      buildBodyModel(scene, zones)
+    const onMouseMoveRay = (e: MouseEvent) => {
+      const rect = container.getBoundingClientRect()
+      mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1
+      mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1
 
-      // Raycaster for hover
-      const raycaster = new THREE!.Raycaster()
-      const mouse = new THREE!.Vector2()
-
-      const onMouseMoveRay = (e: MouseEvent) => {
-        const rect = container.getBoundingClientRect()
-        mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1
-        mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1
-
-        raycaster.setFromCamera(mouse, camera)
-        const intersects = raycaster.intersectObjects(scene.children)
-        if (intersects.length > 0 && intersects[0].object.userData.zone) {
-          const zoneId = intersects[0].object.userData.zone
-          const found = zones.find(z => z.id === zoneId)
-          setHoveredZone(found || null)
-        } else {
-          setHoveredZone(null)
+      raycaster.setFromCamera(mouse, camera)
+      
+      // Ensure we check all descendants
+      const intersects = raycaster.intersectObjects(scene.children, true)
+      
+      let foundZoneId: string | null = null
+      
+      if (intersects.length > 0) {
+        const hit = intersects[0]
+        // If it's the realistic model, use intersection point to determine zone
+        if ((hit.object as any).isMesh) {
+            const model = scene.getObjectByName('RealisticBody')
+            if (model) {
+              const box = new THREE.Box3().setFromObject(model)
+              const size = box.getSize(new THREE.Vector3())
+              const center = box.getCenter(new THREE.Vector3())
+              
+              // The hit point is in world space
+              const y = hit.point.y - box.min.y
+              const x = hit.point.x - center.x
+              const z = hit.point.z - center.z
+              
+              const normY = y / size.y
+              const normX = x / size.x
+              
+              let zoneId = 'socks'
+              if (normY > 0.88) zoneId = 'head'
+              else if (normY > 0.82) zoneId = 'collar'
+              else if (normY > 0.45) {
+                if (normX > 0.22) zoneId = 'sleeve-l'
+                else if (normX < -0.22) zoneId = 'sleeve-r'
+                else if (z > 0) zoneId = 'chest-front'
+                else zoneId = 'back'
+              }
+              else if (normY > 0.35) zoneId = 'shorts'
+              else zoneId = 'socks'
+              
+              foundZoneId = zoneId
+            }
         }
       }
-
-      container.addEventListener('mousemove', onMouseMoveRay)
-
-      // Mouse rotation controls
-      const onMouseDown = (e: MouseEvent) => {
-        mouseRef.current.down = true
-        mouseRef.current.prevX = e.clientX
-        mouseRef.current.prevY = e.clientY
+      
+      if (foundZoneId) {
+        const found = zones.find(z => z.id === foundZoneId)
+        setHoveredZone(found || null)
+      } else {
+        setHoveredZone(null)
       }
+    }
 
-      const onMouseMove = (e: MouseEvent) => {
-        if (!mouseRef.current.down) return
-        const dx = e.clientX - mouseRef.current.prevX
-        const dy = e.clientY - mouseRef.current.prevY
-        mouseRef.current.rotY += dx * 0.008
-        mouseRef.current.rotX += dy * 0.005
-        mouseRef.current.rotX = Math.max(-0.5, Math.min(0.8, mouseRef.current.rotX))
-        mouseRef.current.prevX = e.clientX
-        mouseRef.current.prevY = e.clientY
+    container.addEventListener('mousemove', onMouseMoveRay)
+
+    // Mouse rotation controls
+    const onMouseDown = (e: MouseEvent) => {
+      mouseRef.current.down = true
+      mouseRef.current.prevX = e.clientX
+      mouseRef.current.prevY = e.clientY
+    }
+
+    const onMouseMove = (e: MouseEvent) => {
+      if (!mouseRef.current.down) return
+      const dx = e.clientX - mouseRef.current.prevX
+      const dy = e.clientY - mouseRef.current.prevY
+      mouseRef.current.rotY += dx * 0.008
+      mouseRef.current.rotX += dy * 0.005
+      mouseRef.current.rotX = Math.max(-0.5, Math.min(0.8, mouseRef.current.rotX))
+      mouseRef.current.prevX = e.clientX
+      mouseRef.current.prevY = e.clientY
+    }
+
+    const onMouseUp = () => { mouseRef.current.down = false }
+
+    container.addEventListener('mousedown', onMouseDown)
+    window.addEventListener('mousemove', onMouseMove)
+    window.addEventListener('mouseup', onMouseUp)
+
+    // Scroll zoom — store distance separately so the animate loop can use it
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault()
+      mouseRef.current.dist = Math.max(4, Math.min(12, mouseRef.current.dist + e.deltaY * 0.005))
+    }
+    container.addEventListener('wheel', onWheel, { passive: false })
+
+    // Animation loop
+    const animate = () => {
+      animRef.current = requestAnimationFrame(animate)
+
+      const rY   = mouseRef.current.rotY
+      const rX   = mouseRef.current.rotX
+      const dist = mouseRef.current.dist
+
+      // Orbit camera around the model centre
+      camera.position.x = dist * Math.sin(rY)
+      camera.position.z = dist * Math.cos(rY)
+      camera.position.y = LOOK_AT_Y + rX * 3
+      camera.lookAt(0, LOOK_AT_Y, 0)
+
+      renderer.render(scene, camera)
+    }
+    animate()
+
+    // Resize handler
+    const onResize = () => {
+      const w = container.clientWidth
+      const h = 480
+      camera.aspect = w / h
+      camera.updateProjectionMatrix()
+      renderer.setSize(w, h)
+    }
+    window.addEventListener('resize', onResize)
+
+    // Cleanup
+    return () => {
+      cancelled = true
+      cancelAnimationFrame(animRef.current)
+      window.removeEventListener('mousemove', onMouseMove)
+      window.removeEventListener('mouseup', onMouseUp)
+      window.removeEventListener('resize', onResize)
+      container.removeEventListener('mousedown', onMouseDown)
+      container.removeEventListener('mousemove', onMouseMoveRay)
+      container.removeEventListener('wheel', onWheel)
+      if (renderer.domElement.parentNode === container) {
+        container.removeChild(renderer.domElement)
       }
-
-      const onMouseUp = () => { mouseRef.current.down = false }
-
-      container.addEventListener('mousedown', onMouseDown)
-      window.addEventListener('mousemove', onMouseMove)
-      window.addEventListener('mouseup', onMouseUp)
-
-      // Scroll zoom
-      const onWheel = (e: WheelEvent) => {
-        e.preventDefault()
-        camera.position.z = Math.max(4, Math.min(12, camera.position.z + e.deltaY * 0.005))
-      }
-      container.addEventListener('wheel', onWheel, { passive: false })
-
-      // Animation loop
-      const animate = () => {
-        animRef.current = requestAnimationFrame(animate)
-
-        // Apply rotation
-        const bodyGroup = scene.children.filter((c: any) => c.userData.zone)
-        const rY = mouseRef.current.rotY
-        const rX = mouseRef.current.rotX
-
-        camera.position.x = 7 * Math.sin(rY)
-        camera.position.z = 7 * Math.cos(rY)
-        camera.position.y = 1.2 + rX * 3
-        camera.lookAt(0, 1.0, 0)
-
-        renderer.render(scene, camera)
-      }
-      animate()
-
-      setIs3DReady(true)
-
-      // Resize
-      const onResize = () => {
-        const w = container.clientWidth
-        const h = 480
-        camera.aspect = w / h
-        camera.updateProjectionMatrix()
-        renderer.setSize(w, h)
-      }
-      window.addEventListener('resize', onResize)
-
-      // Cleanup
-      return () => {
-        cancelled = true
-        cancelAnimationFrame(animRef.current)
-        window.removeEventListener('mousemove', onMouseMove)
-        window.removeEventListener('mouseup', onMouseUp)
-        window.removeEventListener('resize', onResize)
-        container.removeEventListener('mousedown', onMouseDown)
-        container.removeEventListener('mousemove', onMouseMoveRay)
-        container.removeEventListener('wheel', onWheel)
-        if (renderer.domElement.parentNode === container) {
-          container.removeChild(renderer.domElement)
-        }
-        renderer.dispose()
-      }
-    }).catch(() => {
-      setUse3D(false)
-    })
-
-    return () => { cancelled = true }
+      renderer.dispose()
+    }
   }, [use3D, zones])
 
   // Sort zones by percentage for the sidebar
