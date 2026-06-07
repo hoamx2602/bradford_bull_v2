@@ -43,3 +43,30 @@ export interface AnalysisResult {
   totalQualityExposureSeconds: number
   avgVisibilityScore: number
 }
+
+// ── New types for dashboard redesign ─────────────────────────────────
+
+export interface MatchEntry {
+  id: string
+  eventName: string
+  date: string
+  videoName: string
+  durationSeconds: number
+  logoCount: number
+  totalEmv: number
+  result: AnalysisResult
+}
+
+export interface BodyZone {
+  id: string
+  name: string
+  percentage: number
+  color: string
+}
+
+export interface TimeSeriesPoint {
+  minuteMark: number
+  logoId: string
+  logoName: string
+  cumulativeExposure: number
+}

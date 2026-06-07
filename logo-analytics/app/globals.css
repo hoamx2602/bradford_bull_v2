@@ -13,6 +13,18 @@
   --c-ghost:   #383838;
   --c-spark:   #C5F000;
   --c-spark-bg:rgba(197,240,0,0.07);
+
+  /* Brand chart colors */
+  --chart-0: #C5F000;
+  --chart-1: #00D4FF;
+  --chart-2: #FF6B6B;
+  --chart-3: #A78BFA;
+  --chart-4: #F59E0B;
+  --chart-5: #34D399;
+  --chart-6: #F472B6;
+  --chart-7: #60A5FA;
+  --chart-8: #FBBF24;
+  --chart-9: #A3E635;
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -77,3 +89,63 @@ button { font-family: inherit; cursor: pointer; }
   to   { opacity: 1; transform: translateY(0); }
 }
 .slide-up { animation: slide-up 0.4s ease forwards; }
+
+/* ── Tab navigation ─────────────────────────────────────────────── */
+
+@keyframes tab-underline {
+  from { width: 0; }
+  to   { width: 100%; }
+}
+
+@keyframes fade-scale-in {
+  from { opacity: 0; transform: scale(0.98) translateY(8px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+.fade-scale-in { animation: fade-scale-in 0.35s ease forwards; }
+
+/* ── Chart animations ───────────────────────────────────────────── */
+
+@keyframes chart-draw {
+  from { stroke-dashoffset: var(--path-length, 2000); }
+  to   { stroke-dashoffset: 0; }
+}
+
+@keyframes pie-spin-in {
+  from { transform: rotate(-90deg) scale(0.8); opacity: 0; }
+  to   { transform: rotate(-90deg) scale(1); opacity: 1; }
+}
+
+@keyframes zone-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+/* ── Video card ─────────────────────────────────────────────────── */
+
+.video-card {
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.video-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--c-wire-s) !important;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+}
+
+/* ── 3D canvas ──────────────────────────────────────────────────── */
+
+.canvas-3d {
+  border-radius: 10px;
+  overflow: hidden;
+  touch-action: none;
+}
+.canvas-3d canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* ── Pie chart tooltip ──────────────────────────────────────────── */
+
+.pie-label {
+  transition: font-size 0.15s, opacity 0.15s;
+}

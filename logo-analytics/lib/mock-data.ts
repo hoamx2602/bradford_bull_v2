@@ -1,4 +1,4 @@
-import type { AnalysisResult, LogoResult, Segment } from './types'
+import type { AnalysisResult, LogoResult, Segment, MatchEntry, BodyZone, TimeSeriesPoint } from './types'
 
 // Deterministic seeded value — always same output for same seed
 const s = (seed: number) => {
@@ -94,3 +94,156 @@ export const MOCK_RESULT: AnalysisResult = {
   avgVisibilityScore:
     Math.round((logos.reduce((s, l) => s + l.avgVisibilityScore, 0) / logos.length) * 100) / 100,
 }
+
+// ── Brand color palette for charts ──────────────────────────────────
+
+export const BRAND_COLORS: Record<string, string> = {
+  'logo-0': '#C5F000', // Castore — spark green
+  'logo-1': '#00D4FF', // Bartercard — cyan
+  'logo-2': '#FF6B6B', // Kinetic — coral
+  'logo-3': '#A78BFA', // Summit — violet
+  'logo-4': '#F59E0B', // ACS Group — amber
+  'logo-5': '#34D399', // MNA Cladding — emerald
+  'logo-6': '#F472B6', // ATM Hospitality — pink
+  'logo-7': '#60A5FA', // Sports Events — blue
+  'logo-8': '#FBBF24', // KLG — gold
+  'logo-9': '#A3E635', // Floor Tonic — lime
+}
+
+export function getBrandColor(logoId: string): string {
+  return BRAND_COLORS[logoId] || '#787878'
+}
+
+// ── Multiple match entries ──────────────────────────────────────────
+
+function buildMatchResult(
+  id: string,
+  eventName: string,
+  videoName: string,
+  date: string,
+  audienceSize: number,
+  emvMultiplier: number,
+): AnalysisResult {
+  const matchLogos = CONFIGS.map((cfg, i) => {
+    const adjusted = { ...cfg, emv: Math.round(cfg.emv * emvMultiplier) }
+    return buildLogo(adjusted, i + parseInt(id.replace('match-', '')) * 100)
+  })
+
+  return {
+    id: `analysis-${id}`,
+    eventName,
+    videoName,
+    videoDurationSeconds: VIDEO_DURATION,
+    analyzedAt: date,
+    metadata: {
+      audienceSize,
+      placementType: 'Live Broadcast TV',
+      cpmBase: 22,
+      placementMultiplier: 1.0,
+    },
+    logos: matchLogos,
+    totalEmvUsd: matchLogos.reduce((s, l) => s + l.emvUsd, 0),
+    totalQualityExposureSeconds: matchLogos.reduce((s, l) => s + l.qualityExposureSeconds, 0),
+    avgVisibilityScore:
+      Math.round((matchLogos.reduce((s, l) => s + l.avgVisibilityScore, 0) / matchLogos.length) * 100) / 100,
+  }
+}
+
+export const MOCK_MATCHES: MatchEntry[] = [
+  {
+    id: 'match-1',
+    eventName: 'Arsenal vs Chelsea — Premier League',
+    date: '2026-06-06T14:32:11Z',
+    videoName: 'Premier_League_Arsenal_Chelsea_2026.mp4',
+    durationSeconds: 5400,
+    logoCount: 10,
+    totalEmv: MOCK_RESULT.totalEmvUsd,
+    result: MOCK_RESULT,
+  },
+  {
+    id: 'match-2',
+    eventName: 'Bradford Bulls vs Leeds Rhinos — Super League',
+    date: '2026-05-28T19:45:00Z',
+    videoName: 'SuperLeague_Bradford_Leeds_2026.mp4',
+    durationSeconds: 4800,
+    logoCount: 10,
+    totalEmv: 158400,
+    result: buildMatchResult('match-2', 'Bradford Bulls vs Leeds Rhinos — Super League', 'SuperLeague_Bradford_Leeds_2026.mp4', '2026-05-28T19:45:00Z', 1_800_000, 0.85),
+  },
+  {
+    id: 'match-3',
+    eventName: 'Wigan Warriors vs Bradford Bulls — Challenge Cup',
+    date: '2026-05-15T15:00:00Z',
+    videoName: 'ChallengeCup_Wigan_Bradford_2026.mp4',
+    durationSeconds: 4800,
+    logoCount: 10,
+    totalEmv: 142560,
+    result: buildMatchResult('match-3', 'Wigan Warriors vs Bradford Bulls — Challenge Cup', 'ChallengeCup_Wigan_Bradford_2026.mp4', '2026-05-15T15:00:00Z', 1_500_000, 0.76),
+  },
+  {
+    id: 'match-4',
+    eventName: 'Bradford Bulls vs Hull FC — Super League',
+    date: '2026-04-30T20:00:00Z',
+    videoName: 'SuperLeague_Bradford_Hull_2026.mp4',
+    durationSeconds: 5400,
+    logoCount: 10,
+    totalEmv: 169200,
+    result: buildMatchResult('match-4', 'Bradford Bulls vs Hull FC — Super League', 'SuperLeague_Bradford_Hull_2026.mp4', '2026-04-30T20:00:00Z', 2_100_000, 0.9),
+  },
+]
+
+// ── Time-series data for line chart ─────────────────────────────────
+
+export function buildTimeSeries(result: AnalysisResult): TimeSeriesPoint[] {
+  const points: TimeSeriesPoint[] = []
+  const interval = 300 // 5-minute intervals
+  const steps = Math.ceil(result.videoDurationSeconds / interval)
+
+  for (const logo of result.logos) {
+    let cumulative = 0
+    for (let step = 0; step <= steps; step++) {
+      const minuteMark = step * (interval / 60)
+      const timeNow = step * interval
+
+      // Sum exposure from segments that end before this time point
+      for (const seg of logo.segments) {
+        if (seg.startTime < timeNow && seg.endTime <= timeNow) {
+          const dur = seg.endTime - seg.startTime
+          if (!points.some(p => p.minuteMark === minuteMark && p.logoId === logo.id)) {
+            // Only count once
+          }
+        }
+      }
+
+      // Calculate cumulative exposure up to this time point
+      cumulative = logo.segments
+        .filter(seg => seg.startTime < timeNow)
+        .reduce((sum, seg) => {
+          const effectiveEnd = Math.min(seg.endTime, timeNow)
+          return sum + (effectiveEnd - seg.startTime) * seg.avgVisibility
+        }, 0)
+
+      points.push({
+        minuteMark,
+        logoId: logo.id,
+        logoName: logo.name,
+        cumulativeExposure: Math.round(cumulative * 10) / 10,
+      })
+    }
+  }
+
+  return points
+}
+
+// ── Body zone exposure data ─────────────────────────────────────────
+
+export const BODY_ZONES: BodyZone[] = [
+  { id: 'chest-front', name: 'Chest (Front)',  percentage: 32.5, color: '#FF3B30' },
+  { id: 'back',        name: 'Back',           percentage: 8.2,  color: '#34C759' },
+  { id: 'sleeve-l',    name: 'Left Sleeve',    percentage: 18.7, color: '#FF9500' },
+  { id: 'sleeve-r',    name: 'Right Sleeve',   percentage: 17.3, color: '#FFCC00' },
+  { id: 'shorts',      name: 'Shorts',         percentage: 12.8, color: '#5AC8FA' },
+  { id: 'socks',       name: 'Socks',          percentage: 4.1,  color: '#AF52DE' },
+  { id: 'head',        name: 'Head / Cap',     percentage: 3.9,  color: '#FF2D55' },
+  { id: 'collar',      name: 'Collar Area',    percentage: 2.5,  color: '#64D2FF' },
+]
