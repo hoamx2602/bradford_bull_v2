@@ -502,10 +502,14 @@ if __name__ == '__main__':
     p = argparse.ArgumentParser()
     p.add_argument('--video',          required=True)
     p.add_argument('--refs',           required=True)
-    p.add_argument('--tracker',        default='sam2', choices=['sam2','byte'])
-    p.add_argument('--tracker_cfg',    default='bytetrack.yaml',
-                   help='YOLO tracker config. Default bytetrack.yaml; use '
-                        'botsort_gmc.yaml for clips with heavy camera panning')
+    p.add_argument('--tracker',        default='byte', choices=['sam2','byte'],
+                   help="'byte' runs the YOLO.track path (see --tracker_cfg); "
+                        "'sam2' uses the init-only SAM2 camera predictor "
+                        "(only tracks players present in the first frame)")
+    p.add_argument('--tracker_cfg',    default='botsort_gmc.yaml',
+                   help='YOLO tracker config. botsort_gmc.yaml (default) gives '
+                        'the fewest fragmented/duplicate IDs on broadcast '
+                        'footage; bytetrack.yaml is the lighter fallback')
     p.add_argument('--swap_teams',     action='store_true',
                    help='Swap Team A and Team B if initial assignment is reversed')
     p.add_argument('--sam2_size',      default='large',
