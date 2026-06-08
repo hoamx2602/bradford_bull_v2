@@ -83,6 +83,71 @@ function zoneBodyHex(hue: number): number {
   return (r << 16) | (g << 8) | b
 }
 
+// ── Per-fragment zone material ───────────────────────────────────────
+// Classifying each PIXEL (not each face) makes zone boundaries pixel-perfect
+// smooth instead of jagged low-poly staircases. The body's normalized coords
+// (normX, normY, normZ) are baked per-vertex as `aBodyCoord`; the fragment
+// shader interpolates them and runs the SAME zone logic as assignZoneId().
+//
+// zoneHue() / zhsl() below are GLSL ports of assignZoneId() + zoneBodyHex().
+const ZONE_GLSL = /* glsl */`
+float zoneHue(float nx, float ny, float nz){
+  float ax = abs(nx);
+  if(ny>0.88) return 270.0;
+  if(ny>0.82) return 35.0;
+  if(ny>0.50 && ax>0.22){
+    if(ax<0.36) return nx<0.0?200.0:140.0;
+    if(ax<0.54) return nx<0.0?35.0:300.0;
+    if(ax<0.70) return nx<0.0?170.0:95.0;
+    return nx<0.0?330.0:250.0;
+  }
+  if(ny>0.65){
+    if(nz>=0.0) return nx<0.0?220.0:8.0;
+    if(ax<0.10) return 50.0;
+    return nx<0.0?185.0:285.0;
+  }
+  if(ny>0.50){
+    if(nz>=0.0) return nx<0.0?315.0:175.0;
+    return nx<0.0?95.0:25.0;
+  }
+  if(ny>0.38) return nx<0.0?110.0:20.0;
+  if(ny>0.22) return nx<0.0?280.0:160.0;
+  if(ny>0.07) return nx<0.0?45.0:240.0;
+  return nx<0.0?150.0:320.0;
+}
+float zchan(float n, float h, float a, float l){
+  float k = mod(n + h*12.0, 12.0);
+  return l - a*max(-1.0, min(min(k-3.0, 9.0-k), 1.0));
+}
+vec3 zhsl(float h, float s, float l){      // h in [0,1]
+  float a = s*min(l, 1.0-l);
+  return vec3(zchan(0.0,h,a,l), zchan(8.0,h,a,l), zchan(4.0,h,a,l));
+}`
+
+function makeZoneMaterial(): any {
+  const mat = new THREE.MeshLambertMaterial()
+  mat.onBeforeCompile = (shader: any) => {
+    shader.vertexShader =
+      'attribute vec3 aBodyCoord;\nvarying vec3 vBodyCoord;\n' +
+      shader.vertexShader.replace(
+        'void main() {',
+        'void main() {\n  vBodyCoord = aBodyCoord;'
+      )
+    shader.fragmentShader =
+      'varying vec3 vBodyCoord;\n' + ZONE_GLSL + '\n' +
+      shader.fragmentShader.replace(
+        '#include <color_fragment>',
+        `#include <color_fragment>
+        {
+          float h = zoneHue(vBodyCoord.x, vBodyCoord.y, vBodyCoord.z) / 360.0;
+          vec3 srgb = zhsl(h, 0.82, 0.54);
+          diffuseColor.rgb = pow(srgb, vec3(2.2));   // sRGB → linear
+        }`
+      )
+  }
+  return mat
+}
+
 // ── 3D Body Builder ─────────────────────────────────────────────────
 
 const TARGET_HEIGHT = 3.6  // world-unit height the model is scaled to
@@ -183,46 +248,24 @@ function buildBodyModel(
       }
       onAnterior?.(1)   // model is now canonical: front = +Z
 
-      // ── 3. PER-FACE flat colouring (crisp, non-interpolated zones) ──────
-      let geom = bodyMesh.geometry
-      if (geom.index) geom = geom.toNonIndexed()
-      bodyMesh.geometry = geom
+      // ── 3. Bake per-vertex normalized body coords for the shader ────────
+      // The fragment shader classifies each pixel from the interpolated coord,
+      // so boundaries are smooth (no per-face staircase, no un-indexing).
+      const geom = bodyMesh.geometry
+      const pos  = geom.attributes.position
+      const mw   = bodyMesh.matrixWorld
+      const bodyCoord = new Float32Array(pos.count * 3)
+      const v = new THREE.Vector3()
 
-      const pos    = geom.attributes.position
-      const colors = new Float32Array(pos.count * 3)
-      const mw     = bodyMesh.matrixWorld
-      const a = new THREE.Vector3(), b = new THREE.Vector3(), c = new THREE.Vector3()
-      const col = new THREE.Color()
-
-      for (let f = 0; f < pos.count; f += 3) {
-        a.set(pos.getX(f),     pos.getY(f),     pos.getZ(f)).applyMatrix4(mw)
-        b.set(pos.getX(f + 1), pos.getY(f + 1), pos.getZ(f + 1)).applyMatrix4(mw)
-        c.set(pos.getX(f + 2), pos.getY(f + 2), pos.getZ(f + 2)).applyMatrix4(mw)
-
-        const wx = (a.x + b.x + c.x) / 3
-        const wy = (a.y + b.y + c.y) / 3
-        const wz = (a.z + b.z + c.z) / 3
-
-        const normY = (wy - box.min.y) / size.y
-        const normX = (wx - center.x)  / size.x
-        const normZ =  wz - center.z              // >0 = front (canonical)
-
-        const zoneId = assignZoneId(normX, normY, normZ)
-        const hue    = ZONE_CONFIG[zoneId]?.hue ?? 180
-        col.set(zoneBodyHex(hue))
-
-        for (let k = 0; k < 3; k++) {
-          colors[(f + k) * 3]     = col.r
-          colors[(f + k) * 3 + 1] = col.g
-          colors[(f + k) * 3 + 2] = col.b
-        }
+      for (let i = 0; i < pos.count; i++) {
+        v.set(pos.getX(i), pos.getY(i), pos.getZ(i)).applyMatrix4(mw)
+        bodyCoord[i * 3]     = (v.x - center.x)  / size.x   // normX
+        bodyCoord[i * 3 + 1] = (v.y - box.min.y) / size.y   // normY
+        bodyCoord[i * 3 + 2] =  v.z - center.z               // normZ (>0 = front)
       }
 
-      geom.setAttribute('color', new THREE.BufferAttribute(colors, 3))
-      bodyMesh.material = new THREE.MeshLambertMaterial({
-        vertexColors: true,
-        flatShading: true,
-      })
+      geom.setAttribute('aBodyCoord', new THREE.BufferAttribute(bodyCoord, 3))
+      bodyMesh.material = makeZoneMaterial()
 
       // ── 4. Scale to TARGET_HEIGHT and centre (feet at y=0) ───────────────
       const scaleFactor = TARGET_HEIGHT / size.y
