@@ -18,17 +18,21 @@ const ZONE_CONFIG: Record<string, { label: string; hue: number; x: number; y: nu
   'neck':          { label: 'Neck',          hue:  35, x:  0.00, y: 3.04, z:  0.14, front: true  },
   'shoulder-l':    { label: 'Shoulder L',    hue: 200, x: -0.32, y: 2.82, z:  0.05, front: true  },
   'shoulder-r':    { label: 'Shoulder R',    hue: 140, x:  0.32, y: 2.82, z:  0.05, front: true  },
-  'chest-l':       { label: 'Chest L',       hue: 220, x: -0.12, y: 2.50, z:  0.22, front: true  },
-  'chest-r':       { label: 'Chest R',       hue:   8, x:  0.12, y: 2.50, z:  0.22, front: true  },
+  'chest-l':       { label: 'Chest L',       hue: 220, x: -0.12, y: 2.60, z:  0.22, front: true  },
+  'chest-r':       { label: 'Chest R',       hue:   8, x:  0.12, y: 2.60, z:  0.22, front: true  },
+  'abdomen-l':     { label: 'Abdomen L',     hue: 315, x: -0.12, y: 2.12, z:  0.20, front: true  },
+  'abdomen-r':     { label: 'Abdomen R',     hue: 175, x:  0.12, y: 2.12, z:  0.20, front: true  },
   'upper-arm-l':   { label: 'Upper Arm L',   hue:  35, x: -0.50, y: 2.65, z:  0.00, front: true  },
   'upper-arm-r':   { label: 'Upper Arm R',   hue: 300, x:  0.50, y: 2.65, z:  0.00, front: true  },
   'forearm-l':     { label: 'Forearm L',     hue: 170, x: -0.65, y: 2.46, z:  0.00, front: true  },
   'forearm-r':     { label: 'Forearm R',     hue:  95, x:  0.65, y: 2.46, z:  0.00, front: true  },
   'hand-l':        { label: 'Hand L',        hue: 330, x: -0.78, y: 2.28, z:  0.00, front: true  },
   'hand-r':        { label: 'Hand R',        hue: 250, x:  0.78, y: 2.28, z:  0.00, front: true  },
-  'spine':         { label: 'Spine',         hue:  50, x:  0.00, y: 2.42, z: -0.22, front: false },
-  'back-l':        { label: 'Back L',        hue: 185, x: -0.16, y: 2.42, z: -0.22, front: false },
-  'back-r':        { label: 'Back R',        hue: 285, x:  0.16, y: 2.42, z: -0.22, front: false },
+  'spine':         { label: 'Spine',         hue:  50, x:  0.00, y: 2.60, z: -0.22, front: false },
+  'back-l':        { label: 'Back L',        hue: 185, x: -0.16, y: 2.60, z: -0.22, front: false },
+  'back-r':        { label: 'Back R',        hue: 285, x:  0.16, y: 2.60, z: -0.22, front: false },
+  'lowerback-l':   { label: 'Low Back L',    hue:  95, x: -0.16, y: 2.12, z: -0.22, front: false },
+  'lowerback-r':   { label: 'Low Back R',    hue:  25, x:  0.16, y: 2.12, z: -0.22, front: false },
   'hip-l':         { label: 'Hip L',         hue: 110, x: -0.14, y: 1.76, z:  0.18, front: true  },
   'hip-r':         { label: 'Hip R',         hue:  20, x:  0.14, y: 1.76, z:  0.18, front: true  },
   'upper-leg-l':   { label: 'Upper Leg L',   hue: 280, x: -0.12, y: 1.28, z:  0.14, front: true  },
@@ -100,9 +104,15 @@ function assignZoneId(normX: number, normY: number, normZ: number): string {
     if (absX < 0.70) return `forearm-${side}`
     return `hand-${side}`
   }
-  if (normY > 0.50) {
+  // Upper torso: chest (front) / shoulder-blade back (back)
+  if (normY > 0.65) {
     if (normZ >= 0) return normX < 0 ? 'chest-l' : 'chest-r'
     return absX < 0.10 ? 'spine' : (normX < 0 ? 'back-l' : 'back-r')
+  }
+  // Lower torso: abdomen (front) / lower back (back)
+  if (normY > 0.50) {
+    if (normZ >= 0) return normX < 0 ? 'abdomen-l' : 'abdomen-r'
+    return normX < 0 ? 'lowerback-l' : 'lowerback-r'
   }
   if (normY > 0.38) return normX < 0 ? 'hip-l' : 'hip-r'
   if (normY > 0.22) return normX < 0 ? 'upper-leg-l' : 'upper-leg-r'
@@ -110,7 +120,13 @@ function assignZoneId(normX: number, normY: number, normZ: number): string {
   return normX < 0 ? 'foot-l' : 'foot-r'
 }
 
-function buildBodyModel(scene: any, _zones: BodyZone[], onLoaded: () => void, onError: (err: any) => void) {
+function buildBodyModel(
+  scene: any,
+  _zones: BodyZone[],
+  onLoaded: () => void,
+  onError: (err: any) => void,
+  onAnterior?: (sign: number) => void,
+) {
   if (!THREE || typeof window === 'undefined') return
 
   const loader = new GLTFLoader()
@@ -118,85 +134,99 @@ function buildBodyModel(scene: any, _zones: BodyZone[], onLoaded: () => void, on
     '/male_model.glb',
     (gltf: any) => {
       const model = gltf.scene
-
-      // Must call this before Box3 or matrixWorld usage —
-      // GLTFLoader applies a -90° X rotation (Blender→GLTF) that isn't
-      // propagated to matrixWorld until the first updateMatrixWorld pass.
       model.updateMatrixWorld(true)
 
-      // ── 1. Bounding box in world space (after matrix update) ─────────────
-      const box    = new THREE.Box3().setFromObject(model)
-      const size   = box.getSize(new THREE.Vector3())
-      const center = box.getCenter(new THREE.Vector3())
+      // ── 1. Identify the body mesh (most vertices) and hide the props ─────
+      // GLB contains "mesh" (1226 verts, body) + "Axe"/"Pickaxe" collision
+      // props (143 / 237 verts). Pick the largest mesh as the body.
+      const meshes: any[] = []
+      model.traverse((c: any) => { if (c.isMesh && c.geometry) meshes.push(c) })
+      let bodyMesh = meshes[0]
+      for (const m of meshes) {
+        if ((m.geometry.attributes.position?.count ?? 0) >
+            (bodyMesh.geometry.attributes.position?.count ?? 0)) bodyMesh = m
+      }
+      meshes.forEach(m => { if (m !== bodyMesh) m.visible = false })
 
-      // ── 2. Hide known props by node name; colour the body mesh ───────────
-      // GLB node names: "Axe-colonly", "Pickaxe-colonly" → props to hide.
-      // "mesh" (node[57], 1226 verts, skinned) → the actual body.
-      model.traverse((child: any) => {
-        if (!child.isMesh || !child.geometry) return
+      // ── 2. Normalise orientation so X = left-right and +Z = front ────────
+      // The GLB's left-right axis is whichever HORIZONTAL axis has the larger
+      // span (the arm span), and the feet/toes point toward the front. We
+      // rotate the whole model so the rest of the pipeline can assume the
+      // canonical frame (matches the hand-authored label anchors too).
+      const bboxBody = () => new THREE.Box3().setFromObject(bodyMesh)
+      let box  = bboxBody()
+      let size = box.getSize(new THREE.Vector3())
 
-        const name = (child.name ?? '').toLowerCase()
-        if (name.includes('axe') || name.includes('pickaxe') ||
-            name.includes('weapon') || name.includes('prop')) {
-          child.visible = false
-          return
+      // If the wider horizontal axis is Z, rotate 90° so it becomes X.
+      if (size.z > size.x) {
+        model.rotateY(Math.PI / 2)
+        model.updateMatrixWorld(true)
+        box = bboxBody(); size = box.getSize(size)
+      }
+      let center = box.getCenter(new THREE.Vector3())
+
+      // Feet (lowest 7%) extend toward the front → decide the +Z direction.
+      {
+        const posA = bodyMesh.geometry.attributes.position
+        const mwA  = bodyMesh.matrixWorld
+        const t    = new THREE.Vector3()
+        let footZSum = 0, footN = 0
+        for (let i = 0; i < posA.count; i++) {
+          t.set(posA.getX(i), posA.getY(i), posA.getZ(i)).applyMatrix4(mwA)
+          if ((t.y - box.min.y) / size.y < 0.07) { footZSum += t.z; footN++ }
         }
-
-        // ── PER-FACE flat colouring ─────────────────────────────────────
-        // Per-VERTEX colours get smoothly interpolated across each triangle,
-        // which on a low-poly mesh blends all zones into one mushy gradient.
-        // Un-indexing makes every triangle own its 3 vertices, so we can paint
-        // each face a single solid zone colour → crisp, distinct regions.
-        let geom = child.geometry
-        if (geom.index) geom = geom.toNonIndexed()
-        child.geometry = geom
-
-        const pos    = geom.attributes.position
-        const colors = new Float32Array(pos.count * 3)
-        const mw     = child.matrixWorld
-
-        const a = new THREE.Vector3(), b = new THREE.Vector3(), c = new THREE.Vector3()
-        const col = new THREE.Color()
-
-        for (let f = 0; f < pos.count; f += 3) {
-          a.set(pos.getX(f),     pos.getY(f),     pos.getZ(f)).applyMatrix4(mw)
-          b.set(pos.getX(f + 1), pos.getY(f + 1), pos.getZ(f + 1)).applyMatrix4(mw)
-          c.set(pos.getX(f + 2), pos.getY(f + 2), pos.getZ(f + 2)).applyMatrix4(mw)
-
-          // Triangle centroid → decides the whole face's zone
-          const wx = (a.x + b.x + c.x) / 3
-          const wy = (a.y + b.y + c.y) / 3
-          const wz = (a.z + b.z + c.z) / 3
-
-          const normY = (wy - box.min.y) / size.y
-          const normX = (wx - center.x)  / size.x
-          const normZ =  wz - center.z
-
-          const zoneId = assignZoneId(normX, normY, normZ)
-          const hue    = ZONE_CONFIG[zoneId]?.hue ?? 180
-          col.set(zoneBodyHex(hue))
-
-          for (let k = 0; k < 3; k++) {
-            colors[(f + k) * 3]     = col.r
-            colors[(f + k) * 3 + 1] = col.g
-            colors[(f + k) * 3 + 2] = col.b
-          }
+        if (footN && (footZSum / footN - center.z) < 0) {
+          model.rotateY(Math.PI)          // front was -Z → spin 180°
+          model.updateMatrixWorld(true)
+          box = bboxBody(); size = box.getSize(size); center = box.getCenter(center)
         }
+      }
+      onAnterior?.(1)   // model is now canonical: front = +Z
 
-        geom.setAttribute('color', new THREE.BufferAttribute(colors, 3))
-        // flatShading + non-indexed geometry → each face uniformly lit, giving
-        // the crisp blocky segmentation look (no Gouraud cross-face blending).
-        child.material = new THREE.MeshLambertMaterial({
-          vertexColors: true,
-          flatShading: true,
-        })
+      // ── 3. PER-FACE flat colouring (crisp, non-interpolated zones) ──────
+      let geom = bodyMesh.geometry
+      if (geom.index) geom = geom.toNonIndexed()
+      bodyMesh.geometry = geom
+
+      const pos    = geom.attributes.position
+      const colors = new Float32Array(pos.count * 3)
+      const mw     = bodyMesh.matrixWorld
+      const a = new THREE.Vector3(), b = new THREE.Vector3(), c = new THREE.Vector3()
+      const col = new THREE.Color()
+
+      for (let f = 0; f < pos.count; f += 3) {
+        a.set(pos.getX(f),     pos.getY(f),     pos.getZ(f)).applyMatrix4(mw)
+        b.set(pos.getX(f + 1), pos.getY(f + 1), pos.getZ(f + 1)).applyMatrix4(mw)
+        c.set(pos.getX(f + 2), pos.getY(f + 2), pos.getZ(f + 2)).applyMatrix4(mw)
+
+        const wx = (a.x + b.x + c.x) / 3
+        const wy = (a.y + b.y + c.y) / 3
+        const wz = (a.z + b.z + c.z) / 3
+
+        const normY = (wy - box.min.y) / size.y
+        const normX = (wx - center.x)  / size.x
+        const normZ =  wz - center.z              // >0 = front (canonical)
+
+        const zoneId = assignZoneId(normX, normY, normZ)
+        const hue    = ZONE_CONFIG[zoneId]?.hue ?? 180
+        col.set(zoneBodyHex(hue))
+
+        for (let k = 0; k < 3; k++) {
+          colors[(f + k) * 3]     = col.r
+          colors[(f + k) * 3 + 1] = col.g
+          colors[(f + k) * 3 + 2] = col.b
+        }
+      }
+
+      geom.setAttribute('color', new THREE.BufferAttribute(colors, 3))
+      bodyMesh.material = new THREE.MeshLambertMaterial({
+        vertexColors: true,
+        flatShading: true,
       })
 
-      // ── 3. Scale so the model is exactly TARGET_HEIGHT units tall ─────────
+      // ── 4. Scale to TARGET_HEIGHT and centre (feet at y=0) ───────────────
       const scaleFactor = TARGET_HEIGHT / size.y
       model.scale.setScalar(scaleFactor)
-
-      // ── 4. Centre model: feet at y=0, centred on x/z ──────────────────────
       model.position.x = -scaleFactor * center.x
       model.position.z = -scaleFactor * center.z
       model.position.y = -scaleFactor * box.min.y
@@ -220,8 +250,10 @@ function Body2DFallback({ zones }: { zones: BodyZone[] }) {
   const zonePositions: Record<string, { x: number; y: number; w: number; h: number }> = {
     'head':         { x: 130, y:   8, w:  40, h: 44 },
     'neck':         { x: 141, y:  54, w:  18, h: 20 },
-    'chest-l':      { x: 115, y:  78, w:  35, h: 90 },
-    'chest-r':      { x: 150, y:  78, w:  35, h: 90 },
+    'chest-l':      { x: 115, y:  78, w:  35, h: 52 },
+    'chest-r':      { x: 150, y:  78, w:  35, h: 52 },
+    'abdomen-l':    { x: 115, y: 130, w:  35, h: 38 },
+    'abdomen-r':    { x: 150, y: 130, w:  35, h: 38 },
     'shoulder-l':   { x:  68, y:  80, w:  42, h: 24 },
     'shoulder-r':   { x: 190, y:  80, w:  42, h: 24 },
     'upper-arm-l':  { x:  68, y: 104, w:  40, h: 26 },
@@ -322,6 +354,9 @@ export default function BodySegmentation3D({ zones = BODY_ZONES }: Props) {
   const [showLabels, setShowLabels] = useState(true)
   // Ref copy used inside the animate-loop closure (avoids stale state)
   const showLabelsRef = useRef(true)
+  // Detected anterior (forward) Z sign of the GLB model; keeps labels in sync
+  // with the body's front/back colouring (set once the model loads).
+  const anteriorSignRef = useRef(1)
 
   // Mouse interaction state — dist tracks camera distance for scroll-zoom
   const mouseRef = useRef({ down: false, prevX: 0, prevY: 0, rotX: 0.12, rotY: 0, dist: 7 })
@@ -381,15 +416,16 @@ export default function BodySegmentation3D({ zones = BODY_ZONES }: Props) {
 
     // Build body model asynchronously
     buildBodyModel(
-      scene, 
-      zones, 
+      scene,
+      zones,
       () => {
         if (!cancelled) setIs3DReady(true)
       },
       (err) => {
         console.error('Failed to load 3D model:', err)
         if (!cancelled) setUse3D(false)
-      }
+      },
+      (sign) => { anteriorSignRef.current = sign },
     )
 
     // Raycaster for hover
@@ -417,28 +453,13 @@ export default function BodySegmentation3D({ zones = BODY_ZONES }: Props) {
               const box = new THREE.Box3().setFromObject(model)
               const size = box.getSize(new THREE.Vector3())
               const center = box.getCenter(new THREE.Vector3())
-              
-              // The hit point is in world space
-              const y = hit.point.y - box.min.y
-              const x = hit.point.x - center.x
-              const z = hit.point.z - center.z
-              
-              const normY = y / size.y
-              const normX = x / size.x
-              
-              let zoneId = 'socks'
-              if (normY > 0.88) zoneId = 'head'
-              else if (normY > 0.82) zoneId = 'collar'
-              else if (normY > 0.45) {
-                if (normX > 0.22) zoneId = 'sleeve-l'
-                else if (normX < -0.22) zoneId = 'sleeve-r'
-                else if (z > 0) zoneId = 'chest-front'
-                else zoneId = 'back'
-              }
-              else if (normY > 0.35) zoneId = 'shorts'
-              else zoneId = 'socks'
-              
-              foundZoneId = zoneId
+
+              // Hit point in world space → same normalisation the colouring uses
+              const normY  = (hit.point.y - box.min.y) / size.y
+              const normX  = (hit.point.x - center.x)  / size.x
+              const facing = (hit.point.z - center.z)  * anteriorSignRef.current
+
+              foundZoneId = assignZoneId(normX, normY, facing)
             }
         }
       }
@@ -513,15 +534,19 @@ export default function BodySegmentation3D({ zones = BODY_ZONES }: Props) {
       const left: Lbl[]  = []
       const right: Lbl[] = []
 
+      // Flip anchor Z to match the body's detected front/back orientation
+      const aSign = anteriorSignRef.current
+
       for (const anchor of ZONE_ANCHORS) {
+        const az = anchor.z * aSign
         // Outward surface normal (horizontal) ≈ direction of anchor from axis
-        const nLen = Math.hypot(anchor.x, anchor.z) || 1
+        const nLen = Math.hypot(anchor.x, az) || 1
         const nx = anchor.x / nLen
-        const nz = anchor.z / nLen
+        const nz = az / nLen
         // Facing camera when normal·cameraDir > margin
         if (nx * cdx + nz * cdz < -0.15) continue
 
-        const v = new THREE.Vector3(anchor.x, anchor.y, anchor.z)
+        const v = new THREE.Vector3(anchor.x, anchor.y, az)
         v.project(cam)
         if (v.z > 1) continue
         const sx = (v.x + 1) / 2 * w
