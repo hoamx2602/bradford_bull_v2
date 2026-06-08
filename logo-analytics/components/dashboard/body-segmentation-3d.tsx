@@ -16,18 +16,18 @@ interface Props {
 const ZONE_CONFIG: Record<string, { label: string; hue: number; x: number; y: number; z: number; front: boolean }> = {
   'head':          { label: 'Head',          hue: 270, x:  0.00, y: 3.30, z:  0.15, front: true  },
   'neck':          { label: 'Neck',          hue:  35, x:  0.00, y: 3.04, z:  0.14, front: true  },
-  'shoulder-l':    { label: 'Shoulder L',    hue: 200, x: -0.32, y: 2.82, z:  0.05, front: true  },
-  'shoulder-r':    { label: 'Shoulder R',    hue: 140, x:  0.32, y: 2.82, z:  0.05, front: true  },
+  'shoulder-l':    { label: 'Shoulder L',    hue: 200, x: -0.61, y: 2.48, z:  0.05, front: true  },
+  'shoulder-r':    { label: 'Shoulder R',    hue: 140, x:  0.61, y: 2.48, z:  0.05, front: true  },
   'chest-l':       { label: 'Chest L',       hue: 220, x: -0.12, y: 2.60, z:  0.22, front: true  },
   'chest-r':       { label: 'Chest R',       hue:   8, x:  0.12, y: 2.60, z:  0.22, front: true  },
   'abdomen-l':     { label: 'Abdomen L',     hue: 315, x: -0.12, y: 2.12, z:  0.20, front: true  },
   'abdomen-r':     { label: 'Abdomen R',     hue: 175, x:  0.12, y: 2.12, z:  0.20, front: true  },
-  'upper-arm-l':   { label: 'Upper Arm L',   hue:  35, x: -0.50, y: 2.65, z:  0.00, front: true  },
-  'upper-arm-r':   { label: 'Upper Arm R',   hue: 300, x:  0.50, y: 2.65, z:  0.00, front: true  },
-  'forearm-l':     { label: 'Forearm L',     hue: 170, x: -0.65, y: 2.46, z:  0.00, front: true  },
-  'forearm-r':     { label: 'Forearm R',     hue:  95, x:  0.65, y: 2.46, z:  0.00, front: true  },
-  'hand-l':        { label: 'Hand L',        hue: 330, x: -0.78, y: 2.28, z:  0.00, front: true  },
-  'hand-r':        { label: 'Hand R',        hue: 250, x:  0.78, y: 2.28, z:  0.00, front: true  },
+  'upper-arm-l':   { label: 'Upper Arm L',   hue:  35, x: -0.75, y: 2.28, z:  0.00, front: true  },
+  'upper-arm-r':   { label: 'Upper Arm R',   hue: 300, x:  0.75, y: 2.28, z:  0.00, front: true  },
+  'forearm-l':     { label: 'Forearm L',     hue: 170, x: -0.88, y: 2.09, z:  0.00, front: true  },
+  'forearm-r':     { label: 'Forearm R',     hue:  95, x:  0.88, y: 2.09, z:  0.00, front: true  },
+  'hand-l':        { label: 'Hand L',        hue: 330, x: -1.01, y: 1.90, z:  0.00, front: true  },
+  'hand-r':        { label: 'Hand R',        hue: 250, x:  1.01, y: 1.90, z:  0.00, front: true  },
   'spine':         { label: 'Spine',         hue:  50, x:  0.00, y: 2.60, z: -0.22, front: false },
   'back-l':        { label: 'Back L',        hue: 185, x: -0.16, y: 2.60, z: -0.22, front: false },
   'back-r':        { label: 'Back R',        hue: 285, x:  0.16, y: 2.60, z: -0.22, front: false },
@@ -95,11 +95,18 @@ float zoneHue(float nx, float ny, float nz){
   float ax = abs(nx);
   if(ny>0.88) return 270.0;
   if(ny>0.82) return 35.0;
-  if(ny>0.50 && ax>0.22){
-    if(ax<0.36) return nx<0.0?200.0:140.0;
-    if(ax<0.54) return nx<0.0?35.0:300.0;
-    if(ax<0.70) return nx<0.0?170.0:95.0;
-    return nx<0.0?330.0:250.0;
+  // Arm cylinder (world-aspect): along = band coord, perp = distance from axis
+  float px = 1.167*ax - 0.292;
+  float py = 1.945*ny - 1.400;
+  float along = px*0.563 + py*(-0.829);
+  float perpx = px - along*0.563;
+  float perpy = py - along*(-0.829);
+  float perp  = sqrt(perpx*perpx + perpy*perpy);
+  if(along>-0.04 && along<0.70 && perp<0.12){
+    if(along<0.11) return nx<0.0?200.0:140.0;   // shoulder
+    if(along<0.27) return nx<0.0?35.0:300.0;     // upper-arm
+    if(along<0.41) return nx<0.0?170.0:95.0;     // forearm
+    return nx<0.0?330.0:250.0;                    // hand
   }
   if(ny>0.65){
     if(nz>=0.0) return nx<0.0?220.0:8.0;
@@ -156,17 +163,37 @@ const LOOK_AT_Y     = TARGET_HEIGHT * 0.52  // camera focal point (slightly abov
 // Iterable array derived from ZONE_CONFIG — used by the label overlay loop
 const ZONE_ANCHORS = Object.entries(ZONE_CONFIG).map(([id, cfg]) => ({ id, ...cfg }))
 
-// Map a normalized body coordinate to one of the 23 zone ids.
+// Map a normalized body coordinate to one of the body zone ids.
 //   normY: 0 (feet) → 1 (head top);  normX: -0.5 (left) → +0.5 (right);  normZ: world z relative to centre (>0 front)
+//
+// The arm is modelled as a CYLINDER around its axis (computed in WORLD-aspect
+// space so angles match the real model, not the vertically-stretched normalized
+// space). From the mesh the arm runs shoulder ~(|x|0.25, y0.72) → hand
+// ~(|x|0.50, y0.50); in world units (sx=1.167, sy=1.945) that's a ~56° axis
+// d=(0.563,-0.829) from root S=(0.292,1.400).
+//   along = distance projected onto the axis (= the band coordinate)
+//   perp  = perpendicular distance from the axis (< ARM_R ⇒ inside the arm)
+// Using perp (not a vertical |x| plane) keeps the torso-side strip out of the
+// arm and makes the shoulder a clean rounded cap. Keep ZONE_GLSL in sync.
 function assignZoneId(normX: number, normY: number, normZ: number): string {
   const absX = Math.abs(normX)
   if (normY > 0.88) return 'head'
   if (normY > 0.82) return 'neck'
-  if (normY > 0.50 && absX > 0.22) {
+
+  // Arm cylinder test (world-aspect)
+  const px = 1.167 * absX - 0.292
+  const py = 1.945 * normY - 1.400
+  const along = px * 0.563 + py * (-0.829)
+  const perpx = px - along * 0.563
+  const perpy = py - along * (-0.829)
+  // Measured: real arm verts have perp ≤ 0.063, torso verts perp ≥ 0.171 —
+  // so 0.12 cleanly separates the arm tube from the torso (incl. the deltoid cap).
+  const perp = Math.hypot(perpx, perpy)
+  if (along > -0.04 && along < 0.70 && perp < 0.12) {
     const side = normX < 0 ? 'l' : 'r'
-    if (absX < 0.36) return `shoulder-${side}`
-    if (absX < 0.54) return `upper-arm-${side}`
-    if (absX < 0.70) return `forearm-${side}`
+    if (along < 0.11) return `shoulder-${side}`
+    if (along < 0.27) return `upper-arm-${side}`
+    if (along < 0.41) return `forearm-${side}`
     return `hand-${side}`
   }
   // Upper torso: chest (front) / shoulder-blade back (back)
