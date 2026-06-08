@@ -172,7 +172,8 @@ def classify_and_vote(frame, detections, masks, classifier, voter,
 def _detect_players(yolo_model, frame: np.ndarray, args) -> sv.Detections:
     """Run YOLO and return sv.Detections filtered by min height."""
     H = frame.shape[0]
-    results    = yolo_model(frame, verbose=False, conf=args.conf, classes=[0])[0]
+    results    = yolo_model(frame, verbose=False, conf=args.conf, iou=args.iou,
+                            imgsz=args.imgsz, classes=[0])[0]
     detections = sv.Detections.from_ultralytics(results)
     if len(detections) == 0:
         return detections
@@ -187,7 +188,9 @@ def _build_annotators(palette: sv.ColorPalette):
         color=palette, thickness=2, color_lookup=sv.ColorLookup.INDEX)
     lbl_ann = sv.LabelAnnotator(
         color=palette, text_color=sv.Color.WHITE,
-        text_scale=0.50, color_lookup=sv.ColorLookup.INDEX)
+        text_scale=0.45, text_padding=4,
+        color_lookup=sv.ColorLookup.INDEX,
+        smart_position=True)   # nudge overlapping labels apart in pile-ups
     return mask_ann, box_ann, lbl_ann
 
 
@@ -231,7 +234,7 @@ def run_sam2(args, classifier, label_map, teams,
     mask_ann, box_ann, lbl_ann = _build_annotators(palette)
 
     video_info  = sv.VideoInfo.from_video_path(args.video)
-    yolo        = YOLO('yolo26n.pt')
+    yolo        = YOLO(args.yolo_model)
 
     # ── First frame: YOLO detect → SAM2 init ─────────────────────────────────
     gen         = sv.get_video_frames_generator(args.video)
@@ -329,7 +332,7 @@ def run_bytetrack(args, classifier, label_map, teams,
 
     video_info = sv.VideoInfo.from_video_path(args.video)
     src_fps    = video_info.fps or 30.0
-    yolo       = YOLO('yolo26n.pt')
+    yolo       = YOLO(args.yolo_model)
 
     voter      = VoteTracker(teams, hysteresis=args.vote_hysteresis)
     holder     = DrawHolder(hold=args.label_hold)
@@ -338,8 +341,8 @@ def run_bytetrack(args, classifier, label_map, teams,
 
     def callback(frame: np.ndarray, index: int) -> np.ndarray:
         results    = yolo.track(frame, persist=True, verbose=False,
-                                conf=args.conf, classes=[0],
-                                tracker=args.tracker_cfg)
+                                conf=args.conf, iou=args.iou, imgsz=args.imgsz,
+                                classes=[0], tracker=args.tracker_cfg)
         detections = sv.Detections.from_ultralytics(results[0])
 
         if len(detections) == 0 or detections.tracker_id is None:
@@ -511,8 +514,19 @@ if __name__ == '__main__':
     p.add_argument('--team_b_label',   default=None)
     p.add_argument('--other_label',    default=None)
     p.add_argument('--siglip_model',   default='google/siglip-base-patch16-224')
+    p.add_argument('--yolo_model',     default='yolo11x.pt',
+                   help='YOLO weights. Larger models (yolo11x) recover far more '
+                        'players in crowded pile-ups than yolo26n')
     p.add_argument('--output_dir',     default='output')
-    p.add_argument('--conf',           type=float, default=0.50)
+    p.add_argument('--conf',           type=float, default=0.25,
+                   help='YOLO confidence. Lower = better recall on occluded '
+                        'players in pile-ups')
+    p.add_argument('--iou',            type=float, default=0.70,
+                   help='NMS IoU threshold. Higher keeps overlapping player '
+                        'boxes from being suppressed against each other')
+    p.add_argument('--imgsz',          type=int,   default=1280,
+                   help='YOLO inference resolution. Larger detects small / '
+                        'partly-occluded players in crowds')
     p.add_argument('--min_height',     type=float, default=0.07)
     p.add_argument('--smoothing',      type=int,   default=20)
     p.add_argument('--vote_hysteresis', type=float, default=1.25,
