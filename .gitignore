@@ -37,3 +37,4 @@ frame_extraction
 create_notebook.py
 /videos
 /short-clips
+team_detection/output

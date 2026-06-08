@@ -26,8 +26,8 @@ $RUN pip install -r requirements.txt
 
 # ── SAM2 ──────────────────────────────────────────────────────────────────
 echo ""
-echo "Installing SAM2 ..."
-$RUN pip install git+https://github.com/facebookresearch/sam2.git
+echo "Installing SAM2 real-time fork ..."
+$RUN pip install git+https://github.com/Gy920/segment-anything-2-real-time.git --no-build-isolation
 
 # ── Download SAM2 checkpoints ─────────────────────────────────────────────
 echo ""
@@ -48,8 +48,8 @@ if torch.cuda.is_available():
 import transformers; print(f'Transformers: {transformers.__version__}')
 import umap;         print(f'UMAP     : {umap.__version__}')
 try:
-    from sam2.build_sam import build_sam2_video_predictor
-    print('SAM2     : OK')
+    from sam2.build_sam import build_sam2_camera_predictor
+    print('SAM2     : OK (camera predictor)')
 except ImportError as e:
     print(f'SAM2     : NOT FOUND ({e})')
 "

@@ -9,6 +9,7 @@ Usage:
 """
 import argparse
 import pickle
+import shutil
 import subprocess
 from pathlib import Path
 
@@ -190,11 +191,25 @@ def _build_annotators(palette: sv.ColorPalette):
     return mask_ann, box_ann, lbl_ann
 
 
-def _reencode(src: str, dst: Path) -> None:
-    subprocess.run(
-        ['ffmpeg', '-y', '-i', src,
-         '-c:v', 'libx264', '-preset', 'fast', '-crf', '20', str(dst)],
-        check=True, capture_output=True)
+def _raw_video_path(output_dir: Path) -> Path:
+    output_dir.mkdir(parents=True, exist_ok=True)
+    return output_dir / '_team_detect_raw.mp4'
+
+
+def _reencode(src: Path, dst: Path) -> None:
+    try:
+        subprocess.run(
+            ['ffmpeg', '-y', '-i', str(src),
+             '-c:v', 'libx264', '-preset', 'fast', '-crf', '20', str(dst)],
+            check=True, capture_output=True, text=True)
+    except FileNotFoundError:
+        print('ffmpeg not found — copying raw video without re-encode')
+        shutil.copy2(src, dst)
+    except subprocess.CalledProcessError as e:
+        err = (e.stderr or '').strip()
+        raise RuntimeError(f'ffmpeg re-encode failed: {err}') from e
+    finally:
+        src.unlink(missing_ok=True)
 
 
 # ── SAM2 path ─────────────────────────────────────────────────────────────────
@@ -287,12 +302,12 @@ def run_sam2(args, classifier, label_map, teams,
 
     # ── Process ───────────────────────────────────────────────────────────────
     stem      = Path(args.video).stem
-    tmp_path  = '/tmp/_team_detect_raw.mp4'
+    tmp_path  = _raw_video_path(output_dir)
     out_video = output_dir / f'{stem}_team_detection.mp4'
 
     sv.process_video(
         source_path=args.video,
-        target_path=tmp_path,
+        target_path=str(tmp_path),
         callback=callback,
         show_progress=True)
 
@@ -374,12 +389,12 @@ def run_bytetrack(args, classifier, label_map, teams,
         return annotated
 
     stem      = Path(args.video).stem
-    tmp_path  = '/tmp/_team_detect_raw.mp4'
+    tmp_path  = _raw_video_path(output_dir)
     out_video = output_dir / f'{stem}_team_detection.mp4'
 
     sv.process_video(
         source_path=args.video,
-        target_path=tmp_path,
+        target_path=str(tmp_path),
         callback=callback,
         show_progress=True)
 

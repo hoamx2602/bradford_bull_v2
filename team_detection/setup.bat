@@ -49,22 +49,10 @@ goto :download_checkpoints
 
 :install_git_sam2
 echo.
-echo Installing SAM2 from GitHub (requires git)...
-python -m pip install git+https://github.com/facebookresearch/sam2.git
-if errorlevel 1 goto :sam2_zip_fallback
-goto :download_checkpoints
-
-:sam2_zip_fallback
-echo.
-echo SAM2 git install failed. Attempting ZIP fallback install...
-if exist sam2-main.zip del /f /q sam2-main.zip
-powershell -Command "Invoke-WebRequest -Uri 'https://github.com/facebookresearch/sam2/archive/refs/heads/main.zip' -OutFile 'sam2-main.zip' -UseBasicParsing"
-if exist sam2-src rd /s /q sam2-src
-mkdir sam2-src
-powershell -Command "Expand-Archive -Path 'sam2-main.zip' -DestinationPath 'sam2-src'"
-python -m pip install .\sam2-src\sam2-main
+echo Installing SAM2 real-time fork from GitHub (requires git)...
+python -m pip install git+https://github.com/Gy920/segment-anything-2-real-time.git --no-build-isolation
 if errorlevel 1 (
-    echo SAM2 ZIP fallback install failed.
+    echo SAM2 real-time fork install failed.
     popd
     exit /b 1
 )
@@ -86,7 +74,7 @@ echo.
 python -c "exec('try:\n import torch\n print(\"PyTorch  :\", getattr(torch,\"__version__\",None))\n print(\"CUDA     :\", torch.cuda.is_available())\nexcept Exception as e:\n print(\"PyTorch not available:\", e)')"
 python -c "exec('try:\n import transformers\n print(\"Transformers:\", transformers.__version__)\nexcept Exception as e:\n print(\"Transformers not available:\", e)')"
 python -c "exec('try:\n import umap\n print(\"UMAP     :\", umap.__version__)\nexcept Exception as e:\n print(\"UMAP not available:\", e)')"
-python -c "exec('try:\n from sam2.build_sam import build_sam2_video_predictor\n print(\"SAM2     : OK\")\nexcept Exception as e:\n print(\"SAM2     : NOT FOUND\", e)')"
+python -c "exec('try:\n from sam2.build_sam import build_sam2_camera_predictor\n print(\"SAM2     : OK (camera predictor)\")\nexcept Exception as e:\n print(\"SAM2     : NOT FOUND\", e)')"
 
 popd
 exit /b 0
