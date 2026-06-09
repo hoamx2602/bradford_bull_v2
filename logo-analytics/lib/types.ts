@@ -45,6 +45,8 @@ export interface AnalysisResult {
   // Returned by the backend (YOLO-pose body-zone attribution); optional so mock
   // data without it still type-checks.
   bodyZones?: BodyZone[]
+  // True when the backend produced an annotated preview video (boxes drawn).
+  previewAvailable?: boolean
 }
 
 // ── New types for dashboard redesign ─────────────────────────────────

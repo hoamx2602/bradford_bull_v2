@@ -69,5 +69,8 @@ class Analysis(Base):
     logo_count: Mapped[int] = mapped_column(Integer, default=0)
     analyzed_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
 
+    # Storage key of the annotated preview video (boxes drawn), if produced.
+    preview_key: Mapped[str | None] = mapped_column(String(512), nullable=True)
+
     # Full AnalysisResult payload (already camelCase, ready for the frontend).
     result_json: Mapped[dict] = mapped_column(JSON, default=dict)

@@ -11,7 +11,7 @@ import Timeline from '@/components/dashboard/timeline'
 import LogoTable from '@/components/dashboard/logo-table'
 import PipelineView from '@/components/dashboard/pipeline'
 import { MOCK_RESULT, MOCK_MATCHES } from '@/lib/mock-data'
-import { listAnalyses } from '@/lib/api'
+import { listAnalyses, videoUrl } from '@/lib/api'
 import { formatCurrency, formatDate, formatNumber, formatSeconds, exportCSV } from '@/lib/utils'
 import type { AnalysisResult, EventMeta, MatchEntry } from '@/lib/types'
 
@@ -199,6 +199,29 @@ export default function DashboardPage() {
                   sub="Across all detections"
                 />
               </div>
+
+              {/* Annotated detection preview video */}
+              {result.previewAvailable && (
+                <Section title="Detection Preview">
+                  <div style={{
+                    background: 'var(--c-panel)',
+                    border: '1px solid var(--c-wire)',
+                    borderRadius: 10,
+                    padding: 12,
+                  }}>
+                    <video
+                      key={result.id}
+                      src={videoUrl(result.id)}
+                      controls
+                      playsInline
+                      style={{ width: '100%', borderRadius: 8, display: 'block', background: '#000' }}
+                    />
+                    <div style={{ fontSize: 12, color: 'var(--c-ghost)', marginTop: 10 }}>
+                      Sampled frames overlaid with model detections — brand + confidence, one colour per brand.
+                    </div>
+                  </div>
+                </Section>
+              )}
 
               {/* Pipeline */}
               <Section title="Processing Pipeline">

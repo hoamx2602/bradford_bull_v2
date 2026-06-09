@@ -74,6 +74,7 @@ docker compose up --build        # serves on :8000, mounts the trained weights
 | GET  | `/api/jobs/{id}` | poll `{status, progress, stage, stageDetail, analysisId?, error?}` |
 | GET  | `/api/analyses` | list (dashboard match selector) |
 | GET  | `/api/analyses/{id}` | full `AnalysisResult` (matches `lib/types.ts`) |
+| GET  | `/api/analyses/{id}/video` | annotated preview MP4 (logo boxes drawn), HTTP-Range enabled |
 | GET  | `/api/analyses/{id}/export.csv` | per-brand CSV |
 | GET  | `/api/health` | device / model info |
 
@@ -93,6 +94,9 @@ Everything is env-driven (`app/config.py`). Common knobs:
 - `DEVICE` — `auto` picks CUDA → Apple MPS → CPU.
 - `ENABLE_POSE` — set `false` to skip body-zone attribution.
 - `VISIBILITY_FLOOR` (default 0.02) — minimum per-frame visibility to count.
+- `PREVIEW_ENABLED` (default true) — render the annotated detection video at the
+  source's native fps (boxes interpolated between detections for smoothness). Tune
+  `PREVIEW_WIDTH` (960) and `PREVIEW_MAX_FRAMES` (1800 ≈ first ~60–72s of footage).
 
 ## Scaling to full production
 

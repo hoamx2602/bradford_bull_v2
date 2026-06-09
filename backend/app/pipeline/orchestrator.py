@@ -64,6 +64,9 @@ def run_analysis(job_id: str) -> None:
         poser = PoseEstimator() if settings.enable_pose else None
         body = BodyZoneAccumulator()
 
+        # Per-sampled-frame detections, kept for the smooth preview second pass.
+        frames_data: list[tuple[float, list]] = []
+
         all_dets = []
         n = 0
         for t, frame in frames.iter_sampled_frames(video_path, meta, settings.sample_fps):
@@ -72,6 +75,8 @@ def run_analysis(job_id: str) -> None:
             if poser is not None:
                 persons = poser.infer(frame)
                 body.add_frame(dets, persons)
+            if settings.preview_enabled:
+                frames_data.append((t, dets))
             all_dets.extend(dets)
 
             n += 1
@@ -96,7 +101,23 @@ def run_analysis(job_id: str) -> None:
             placement_type=ctx["placement_type"],
         )
 
-        # 6. Assemble + persist.
+        # 6. Render the smooth annotated preview (full-fps second pass) -> storage.
+        preview_key = None
+        if settings.preview_enabled and frames_data:
+            _update(job_id, P_PRICING, "preview", "Rendering annotated video")
+            from app.pipeline.annotate import render_preview
+
+            preview_tmp = video_path.parent / f"{video_path.stem}_preview.mp4"
+            preview_path = render_preview(
+                video_path, meta.fps, meta.width, meta.height, frames_data, preview_tmp,
+                max_width=settings.preview_width, max_frames=settings.preview_max_frames,
+            )
+            if preview_path is not None:
+                with preview_path.open("rb") as fh:
+                    preview_key = storage.save(fh, preview_path.name)
+                preview_path.unlink(missing_ok=True)
+
+        # 7. Assemble + persist.
         analysis_id = AnalysisRepository.new_id()
         result = aggregate.build_analysis_result(
             analysis_id=analysis_id,
@@ -110,9 +131,10 @@ def run_analysis(job_id: str) -> None:
             body_zones=body.result(),
             frames_analyzed=n,
         )
+        result["previewAvailable"] = preview_key is not None
 
         with session_scope() as s:
-            AnalysisRepository(s).create(result)
+            AnalysisRepository(s).create(result, preview_key=preview_key)
             JobRepository(s).mark_done(job_id, analysis_id)
         log.info("job %s done -> analysis %s (%d brands)", job_id, analysis_id, len(logos))
 

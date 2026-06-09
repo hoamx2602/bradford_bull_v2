@@ -5,12 +5,14 @@ import csv
 import io
 
 from fastapi import APIRouter, Depends, HTTPException
-from fastapi.responses import StreamingResponse
+from fastapi.responses import FileResponse, StreamingResponse
 from sqlalchemy.orm import Session
 
 from app.api.schemas import MatchEntryOut
 from app.db.base import get_session
+from app.db.models import Analysis
 from app.db.repository import AnalysisRepository
+from app.storage import get_storage
 
 router = APIRouter(prefix="/api/analyses", tags=["analyses"])
 
@@ -39,6 +41,20 @@ def get_analysis(analysis_id: str, session: Session = Depends(get_session)) -> d
     if a is None:
         raise HTTPException(status_code=404, detail="Analysis not found")
     return a.result_json
+
+
+@router.get("/{analysis_id}/video")
+def get_preview_video(analysis_id: str, session: Session = Depends(get_session)):
+    """Annotated preview MP4 (logo boxes drawn). FileResponse handles HTTP Range
+    requests so the <video> element can seek."""
+    a: Analysis | None = AnalysisRepository(session).get(analysis_id)
+    if a is None or not a.preview_key:
+        raise HTTPException(status_code=404, detail="No preview video for this analysis")
+    path = get_storage().local_path(a.preview_key)
+    if not path.exists():
+        raise HTTPException(status_code=404, detail="Preview file missing")
+    # No `filename=` -> inline (Content-Disposition: inline) so <video> plays it.
+    return FileResponse(path, media_type="video/mp4")
 
 
 @router.get("/{analysis_id}/export.csv")

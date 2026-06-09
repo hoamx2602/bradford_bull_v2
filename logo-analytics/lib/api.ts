@@ -64,3 +64,8 @@ export async function getAnalysis(id: string): Promise<AnalysisResult> {
 export function csvUrl(id: string): string {
   return `${API_BASE}/api/analyses/${id}/export.csv`
 }
+
+/** Annotated preview video (logo boxes drawn) for an analysis. */
+export function videoUrl(id: string): string {
+  return `${API_BASE}/api/analyses/${id}/video`
+}
