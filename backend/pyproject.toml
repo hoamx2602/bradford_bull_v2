@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "logo-analytics-backend"
+version = "0.1.0"
+description = "Production pipeline for sponsor logo exposure analytics (Bradford Bulls)."
+requires-python = ">=3.11"
+dependencies = [
+    # Web
+    "fastapi>=0.110",
+    "uvicorn[standard]>=0.29",
+    "python-multipart>=0.0.9",      # multipart upload
+    "pydantic>=2.6",
+    "pydantic-settings>=2.2",
+    # Persistence (swap DB_URL -> postgres later, no code change)
+    "SQLAlchemy>=2.0",
+    # ML / vision — ultralytics 8.3.40 verified to load the fine-tuned yolo26m weights
+    "ultralytics==8.3.40",
+    "lapx>=0.5.2",                   # required by ByteTrack tracker
+    "opencv-python-headless>=4.8",
+    "numpy>=1.24",
+    "Pillow>=10",
+]
+
+[project.optional-dependencies]
+dev = ["pytest", "pytest-cov", "httpx"]
+# Uncomment / install when promoting to the full production stack:
+# full = ["celery[redis]>=5.3", "redis>=5", "psycopg[binary]>=3.1", "boto3>=1.34"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["app*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+filterwarnings = ["ignore::DeprecationWarning"]

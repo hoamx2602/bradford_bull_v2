@@ -11,6 +11,7 @@ import Timeline from '@/components/dashboard/timeline'
 import LogoTable from '@/components/dashboard/logo-table'
 import PipelineView from '@/components/dashboard/pipeline'
 import { MOCK_RESULT, MOCK_MATCHES } from '@/lib/mock-data'
+import { listAnalyses } from '@/lib/api'
 import { formatCurrency, formatDate, formatNumber, formatSeconds, exportCSV } from '@/lib/utils'
 import type { AnalysisResult, EventMeta, MatchEntry } from '@/lib/types'
 
@@ -56,25 +57,47 @@ function KpiCard({ label, value, sub, accent }: { label: string; value: string; 
 
 export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState('overview')
+  const [matches, setMatches] = useState<MatchEntry[]>(MOCK_MATCHES)
   const [selectedMatchId, setSelectedMatchId] = useState('match-1')
   const [result, setResult] = useState<AnalysisResult>(MOCK_RESULT)
-  const [meta, setMeta] = useState<EventMeta | null>(null)
+  const [usingBackend, setUsingBackend] = useState(false)
 
-  // When match selection changes, update the result
+  // Load real analyses from the backend; fall back to mock data if unavailable.
   useEffect(() => {
-    const match = MOCK_MATCHES.find(m => m.id === selectedMatchId)
-    if (match) {
-      setResult(match.result)
-    }
-  }, [selectedMatchId])
+    let cancelled = false
+    ;(async () => {
+      try {
+        const list = await listAnalyses()
+        if (cancelled || list.length === 0) return
+        setMatches(list)
+        setUsingBackend(true)
+        // Prefer the analysis just produced (?analysis= or sl_analysis), else newest.
+        const params = new URLSearchParams(window.location.search)
+        const wantId = params.get('analysis') || localStorage.getItem('sl_analysis')
+        const chosen = list.find(m => m.result.id === wantId) ?? list[0]
+        setSelectedMatchId(chosen.id)
+        setResult(chosen.result)
+      } catch {
+        // Backend unreachable — keep mock data + the localStorage meta merge below.
+      }
+    })()
+    return () => { cancelled = true }
+  }, [])
 
+  // When match selection changes, update the result.
   useEffect(() => {
+    const match = matches.find(m => m.id === selectedMatchId)
+    if (match) setResult(match.result)
+  }, [selectedMatchId, matches])
+
+  // Mock-only: reflect the upload form metadata in the demo result header.
+  // Skipped once real backend data has loaded (it carries its own metadata).
+  useEffect(() => {
+    if (usingBackend) return
     try {
       const raw = localStorage.getItem('sl_meta')
       if (raw) {
         const m: EventMeta = JSON.parse(raw)
-        setMeta(m)
-        // Merge user-provided metadata into mock result display
         setResult(prev => ({
           ...prev,
           eventName: m.eventName || prev.eventName,
@@ -88,7 +111,7 @@ export default function DashboardPage() {
         }))
       }
     } catch {}
-  }, [])
+  }, [usingBackend])
 
   const totalSegments = result.logos.reduce((s, l) => s + l.segmentCount, 0)
 
@@ -267,7 +290,7 @@ export default function DashboardPage() {
                   Select a match to view its analysis. The selected match data is used across all dashboard tabs.
                 </div>
                 <VideoGallery
-                  matches={MOCK_MATCHES}
+                  matches={matches}
                   selectedId={selectedMatchId}
                   onSelect={setSelectedMatchId}
                 />
@@ -316,7 +339,8 @@ export default function DashboardPage() {
                 <ExposurePieChart result={result} />
               </Section>
 
-              {/* Quick stats */}
+              {/* Quick stats — needs at least one detected brand (reduce has no seed) */}
+              {result.logos.length > 0 && (
               <div style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(3, 1fr)',
@@ -372,13 +396,14 @@ export default function DashboardPage() {
                   </div>
                 </div>
               </div>
+              )}
             </>
           )}
 
           {/* ═══════════════════════ BODY TAB ══════════════════════════ */}
           {activeTab === 'body' && (
             <Section title="Body Zone Exposure Analysis">
-              <BodySegmentation3D />
+              <BodySegmentation3D zones={result.bodyZones} />
             </Section>
           )}
 

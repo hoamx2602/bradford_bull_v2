@@ -42,6 +42,9 @@ export interface AnalysisResult {
   totalEmvUsd: number
   totalQualityExposureSeconds: number
   avgVisibilityScore: number
+  // Returned by the backend (YOLO-pose body-zone attribution); optional so mock
+  // data without it still type-checks.
+  bodyZones?: BodyZone[]
 }
 
 // ── New types for dashboard redesign ─────────────────────────────────

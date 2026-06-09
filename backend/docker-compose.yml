@@ -1,0 +1,56 @@
+# Lean single-service stack that runs today.
+#
+# To promote to the full production stack later, uncomment the `postgres`,
+# `redis`, and `minio` services + the `worker` service below, set the matching
+# env vars on `api`, and switch STORAGE_BACKEND=s3 / QUEUE_BACKEND=celery /
+# DB_URL=postgresql+psycopg://...  — no application code changes required.
+
+services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - CORS_ORIGINS=http://localhost:3000
+      - DEVICE=auto
+      - SAMPLE_FPS=2.0
+      - IMGSZ=1280
+      # - DB_URL=postgresql+psycopg://logo:logo@postgres:5432/logo
+      # - STORAGE_BACKEND=s3
+      # - QUEUE_BACKEND=celery
+    volumes:
+      # Mount the trained weights and a persistent data dir.
+      - ../logo_detection/runs:/logo_detection/runs:ro
+      - ./data:/app/data
+    # The default CMD already runs uvicorn; the in-process worker runs inside it.
+
+  # ── Full-stack services (commented until needed) ─────────────────────────
+  # worker:
+  #   build: .
+  #   command: celery -A app.jobs.celery_app worker --concurrency=2
+  #   environment: [ *same as api* ]
+  #   volumes: [ ../logo_detection/runs:/logo_detection/runs:ro, ./data:/app/data ]
+  #   depends_on: [redis, postgres]
+  #
+  # postgres:
+  #   image: timescale/timescaledb:latest-pg16
+  #   environment:
+  #     POSTGRES_USER: logo
+  #     POSTGRES_PASSWORD: logo
+  #     POSTGRES_DB: logo
+  #   volumes: [pgdata:/var/lib/postgresql/data]
+  #
+  # redis:
+  #   image: redis:7-alpine
+  #
+  # minio:
+  #   image: minio/minio
+  #   command: server /data --console-address ":9001"
+  #   environment:
+  #     MINIO_ROOT_USER: minio
+  #     MINIO_ROOT_PASSWORD: minio123
+  #   volumes: [miniodata:/data]
+  #
+# volumes:
+#   pgdata:
+#   miniodata:

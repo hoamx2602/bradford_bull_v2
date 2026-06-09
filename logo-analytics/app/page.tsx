@@ -3,6 +3,7 @@
 import { useCallback, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Nav from '@/components/nav'
+import { createJob } from '@/lib/api'
 
 const PLACEMENTS = [
   { value: 'live-tv', label: 'Live Broadcast TV', mult: 1.0 },
@@ -42,18 +43,33 @@ export default function UploadPage() {
     return `${(bytes / 1e6).toFixed(0)} MB`
   }
 
-  const canSubmit = file && eventName.trim() && audience && cpm
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  const handleSubmit = () => {
+  const canSubmit = file && eventName.trim() && audience && cpm && !submitting
+
+  const handleSubmit = async () => {
     if (!canSubmit) return
-    localStorage.setItem('sl_meta', JSON.stringify({
+    const meta = {
       eventName: eventName.trim(),
       videoName: file!.name,
       audienceSize: parseInt(audience),
       placementType: PLACEMENTS.find(p => p.value === placement)?.label ?? 'Live Broadcast TV',
       cpmBase: parseFloat(cpm),
-    }))
-    router.push('/processing')
+    }
+    // Keep metadata for the processing/dashboard screens to display immediately.
+    localStorage.setItem('sl_meta', JSON.stringify(meta))
+
+    setSubmitting(true)
+    setError(null)
+    try {
+      const { jobId } = await createJob(file!, meta)
+      localStorage.setItem('sl_job', jobId)
+      router.push('/processing')
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Upload failed')
+      setSubmitting(false)
+    }
   }
 
   const label: React.CSSProperties = {
@@ -221,14 +237,22 @@ export default function UploadPage() {
               gap: 8,
             }}
           >
-            Start Analysis
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
-            </svg>
+            {submitting ? 'Uploading…' : 'Start Analysis'}
+            {!submitting && (
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
+              </svg>
+            )}
           </button>
 
+          {error && (
+            <p style={{ textAlign: 'center', color: '#FF6B6B', fontSize: 12, marginTop: 12 }}>
+              {error}
+            </p>
+          )}
+
           <p style={{ textAlign: 'center', color: 'var(--c-ghost)', fontSize: 12, marginTop: 16 }}>
-            Video is processed locally — no data is uploaded to external servers.
+            Video is uploaded to the analysis backend and processed with YOLO26.
           </p>
         </div>
       </main>

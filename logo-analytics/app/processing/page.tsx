@@ -3,13 +3,19 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Nav from '@/components/nav'
+import { getJob } from '@/lib/api'
 
 const STEPS = [
-  { label: 'Frame extraction',       detail: (n: string) => `${n} frames extracted` },
-  { label: 'YOLO26 logo detection',  detail: () => '10 brands identified across frames' },
-  { label: 'Computing exposure scores', detail: () => 'Quality-weighted segments calculated' },
-  { label: 'Calculating media value',   detail: () => 'EMV computed per brand' },
+  { label: 'Frame extraction',       detail: (n: string) => n || 'Frames extracted' },
+  { label: 'YOLO26 logo detection',  detail: (n: string) => n || 'Brands identified across frames' },
+  { label: 'Computing exposure scores', detail: (n: string) => n || 'Quality-weighted segments calculated' },
+  { label: 'Calculating media value',   detail: (n: string) => n || 'EMV computed per brand' },
 ]
+
+// Backend pipeline stage -> index of the last COMPLETED step (0-indexed).
+const STAGE_TO_STEP: Record<string, number> = {
+  queued: -1, frames: -1, detect: 0, exposure: 1, pricing: 2, done: 3,
+}
 
 export default function ProcessingPage() {
   const router = useRouter()
@@ -17,6 +23,8 @@ export default function ProcessingPage() {
   const [step, setStep] = useState(-1)   // which step is complete (0-indexed)
   const [pct, setPct] = useState(0)
   const [done, setDone] = useState(false)
+  const [detail, setDetail] = useState('')
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     try {
@@ -25,31 +33,49 @@ export default function ProcessingPage() {
     } catch {}
   }, [])
 
-  // Animate progress bar
+  // Poll the backend job and drive the UI from real progress.
   useEffect(() => {
-    const target = done ? 100 : step < 0 ? 0 : Math.round(((step + 1) / STEPS.length) * 95)
-    const timer = setInterval(() => {
-      setPct(prev => {
-        if (prev >= target) { clearInterval(timer); return prev }
-        return Math.min(target, prev + 1)
-      })
-    }, 18)
-    return () => clearInterval(timer)
-  }, [step, done])
+    const jobId = typeof window !== 'undefined' ? localStorage.getItem('sl_job') : null
+    if (!jobId) {
+      // No job (e.g. opened directly) — fall back to the demo dashboard.
+      router.push('/dashboard')
+      return
+    }
 
-  // Step sequence
-  useEffect(() => {
-    const delays = [400, 1800, 3400, 5000, 6400]
-    const timers = delays.map((d, i) => setTimeout(() => {
-      if (i < STEPS.length) setStep(i)
-      else { setDone(true); setTimeout(() => router.push('/dashboard'), 900) }
-    }, d))
-    return () => timers.forEach(clearTimeout)
+    let cancelled = false
+    const tick = async () => {
+      try {
+        const job = await getJob(jobId)
+        if (cancelled) return
+        setPct(job.progress)
+        setDetail(job.stageDetail || '')
+        setStep(STAGE_TO_STEP[job.stage] ?? -1)
+
+        if (job.status === 'done' && job.analysisId) {
+          setDone(true)
+          setPct(100)
+          setStep(STEPS.length - 1)
+          localStorage.setItem('sl_analysis', job.analysisId)
+          setTimeout(() => router.push(`/dashboard?analysis=${job.analysisId}`), 700)
+          return
+        }
+        if (job.status === 'error') {
+          setError(job.error || 'Analysis failed')
+          return
+        }
+        timer = setTimeout(tick, 1500)
+      } catch (e) {
+        if (cancelled) return
+        setError(e instanceof Error ? e.message : 'Could not reach the analysis backend')
+      }
+    }
+    let timer = setTimeout(tick, 300)
+    return () => { cancelled = true; clearTimeout(timer) }
   }, [router])
 
   const videoName = meta?.videoName ?? 'broadcast_video.mp4'
   const eventName = meta?.eventName ?? 'Sports Event'
-  const frameCount = '5,400'
+  const frameCount = detail
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
@@ -146,14 +172,30 @@ export default function ProcessingPage() {
             })}
           </div>
 
+          {/* Error state */}
+          {error && (
+            <div style={{ marginTop: 28, textAlign: 'center' }} className="slide-up">
+              <div style={{ color: '#FF6B6B', fontSize: 13, marginBottom: 12 }}>{error}</div>
+              <button
+                onClick={() => router.push('/')}
+                style={{
+                  background: 'none', border: '1px solid var(--c-wire)', borderRadius: 6,
+                  color: 'var(--c-dim)', padding: '8px 16px', fontSize: 12,
+                }}
+              >
+                Back to upload
+              </button>
+            </div>
+          )}
+
           {/* Done state */}
-          {done && (
+          {done && !error && (
             <div style={{ marginTop: 28, textAlign: 'center' }} className="slide-up">
               <div style={{ color: 'var(--c-dim)', fontSize: 13 }}>Redirecting to results…</div>
             </div>
           )}
 
-          {!done && (
+          {!done && !error && (
             <div style={{ marginTop: 28, color: 'var(--c-ghost)', fontSize: 12 }}>
               {step < 0 ? 'Initialising…' : `Step ${Math.min(step + 2, STEPS.length)} of ${STEPS.length}`}
             </div>
