@@ -1,9 +1,10 @@
 import cv2
+import numpy as np
 
 BOX_COLORS_BGR = {
     'Team A':  (255, 80,  80 ),   # blue
     'Team B':  (80,  80,  255),   # red
-    'Referee': (0,   220, 220),   # yellow
+    'Other':   (0,   220, 220),   # cyan
     'Unknown': (180, 180, 180),   # grey
 }
 
@@ -18,3 +19,12 @@ def draw_label_box(img_bgr, box, label: str, team: str) -> None:
     cv2.rectangle(img_bgr, (x1, y1 - th - 6), (x1 + tw + 6, y1), color, -1)
     cv2.putText(img_bgr, label, (x1 + 3, y1 - 4),
                 cv2.FONT_HERSHEY_SIMPLEX, 0.50, (255, 255, 255), 1, cv2.LINE_AA)
+
+
+def draw_mask_overlay(img_bgr: np.ndarray, mask: np.ndarray,
+                      team: str, alpha: float = 0.35) -> None:
+    """Paint a semi-transparent coloured mask over the player silhouette."""
+    color = BOX_COLORS_BGR.get(team, BOX_COLORS_BGR['Unknown'])
+    overlay = img_bgr.copy()
+    overlay[mask] = color
+    cv2.addWeighted(overlay, alpha, img_bgr, 1.0 - alpha, 0, img_bgr)

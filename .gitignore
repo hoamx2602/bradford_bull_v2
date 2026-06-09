@@ -37,3 +37,6 @@ frame_extraction
 create_notebook.py
 /videos
 /short-clips
+team_detection/output
+/logo-dataset
+/logo_detection/data

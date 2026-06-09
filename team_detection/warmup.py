@@ -156,12 +156,12 @@ def main(args):
     print(f"""
 Next steps:
   1. Open {img_path}
-  2. Identify which cluster = Bradford / Opponent / Referee
+  2. Identify which cluster = Bradford / Opponent / Other
   3. Run:
        bash run.sh --video {args.video} \\
                    --team_a <cluster_num> \\
                    --team_b <cluster_num> \\
-                   --referee <cluster_num>  # optional
+                   --other <cluster_num>  # optional
 """)
 
 

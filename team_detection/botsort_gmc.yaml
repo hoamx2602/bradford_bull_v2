@@ -1,0 +1,26 @@
+# BoT-SORT with Global Motion Compensation — OPT-IN alternative to bytetrack.
+#
+# When to use:  clips with strong camera panning/zooming where ByteTrack starts
+# dropping/swapping IDs.  GMC compensates the camera motion before association.
+#
+# ReID is intentionally OFF: `with_reid: auto` is unreliable on ultralytics
+# 8.4.60 (the feature extractor mis-resolves its source) and, combined with the
+# temporal voting in process_video.py, gave no flip reduction in testing.
+#
+# Use with:  --tracker_cfg botsort_gmc.yaml
+
+tracker_type: botsort
+
+track_high_thresh: 0.25
+track_low_thresh: 0.1
+new_track_thresh: 0.30   # slightly higher → fewer spurious tracks in crowds
+track_buffer: 60         # ~2s @ 30fps: survive longer occlusions
+match_thresh: 0.8
+fuse_score: True
+
+gmc_method: sparseOptFlow   # camera-motion compensation (the reason to pick this)
+
+proximity_thresh: 0.5
+appearance_thresh: 0.8
+with_reid: False
+model: auto
