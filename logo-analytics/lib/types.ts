@@ -47,6 +47,21 @@ export interface AnalysisResult {
   bodyZones?: BodyZone[]
   // True when the backend produced an annotated preview video (boxes drawn).
   previewAvailable?: boolean
+  // Raw on-screen intervals per brand — matches the boxes drawn on the preview
+  // video (NOT the EMV-filtered segments). Drives the player timeline.
+  detectionTimeline?: DetectionTimelineBrand[]
+}
+
+export interface DetectionInterval {
+  start: number
+  end: number
+}
+
+export interface DetectionTimelineBrand {
+  name: string
+  class: string
+  color: string
+  intervals: DetectionInterval[]
 }
 
 // ── New types for dashboard redesign ─────────────────────────────────

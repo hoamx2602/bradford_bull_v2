@@ -7,11 +7,12 @@ import VideoGallery from '@/components/dashboard/video-gallery'
 import ExposureLineChart from '@/components/dashboard/exposure-line-chart'
 import ExposurePieChart from '@/components/dashboard/exposure-pie-chart'
 import BodySegmentation3D from '@/components/dashboard/body-segmentation-3d'
+import DetectionPlayer from '@/components/dashboard/detection-player'
 import Timeline from '@/components/dashboard/timeline'
 import LogoTable from '@/components/dashboard/logo-table'
 import PipelineView from '@/components/dashboard/pipeline'
 import { MOCK_RESULT, MOCK_MATCHES } from '@/lib/mock-data'
-import { listAnalyses, videoUrl } from '@/lib/api'
+import { listAnalyses } from '@/lib/api'
 import { formatCurrency, formatDate, formatNumber, formatSeconds, exportCSV } from '@/lib/utils'
 import type { AnalysisResult, EventMeta, MatchEntry } from '@/lib/types'
 
@@ -200,7 +201,7 @@ export default function DashboardPage() {
                 />
               </div>
 
-              {/* Annotated detection preview video */}
+              {/* Annotated detection preview video + per-brand timeline */}
               {result.previewAvailable && (
                 <Section title="Detection Preview">
                   <div style={{
@@ -209,15 +210,10 @@ export default function DashboardPage() {
                     borderRadius: 10,
                     padding: 12,
                   }}>
-                    <video
-                      key={result.id}
-                      src={videoUrl(result.id)}
-                      controls
-                      playsInline
-                      style={{ width: '100%', borderRadius: 8, display: 'block', background: '#000' }}
-                    />
-                    <div style={{ fontSize: 12, color: 'var(--c-ghost)', marginTop: 10 }}>
-                      Sampled frames overlaid with model detections — brand + confidence, one colour per brand.
+                    <DetectionPlayer result={result} />
+                    <div style={{ fontSize: 12, color: 'var(--c-ghost)', marginTop: 12 }}>
+                      Boxes are model detections (brand + confidence). The bars below show when each
+                      brand is on screen — click anywhere on the timeline to jump the video there.
                     </div>
                   </div>
                 </Section>

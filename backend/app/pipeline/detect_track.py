@@ -61,3 +61,44 @@ class LogoDetector:
                 )
             )
         return out
+
+    def detect_boxes(self, frame, t: float, imgsz: int | None = None) -> list[Detection]:
+        """Plain per-frame detection (no tracker) for the full-fps preview pass.
+
+        Runs at `imgsz` (smaller than analytics for speed) and returns boxes with
+        track_id=-1; the preview doesn't need tracking, just every frame drawn.
+        """
+        h, w = frame.shape[:2]
+        results = self.model.predict(
+            frame,
+            imgsz=imgsz or self.settings.imgsz,
+            conf=self.settings.conf,
+            iou=self.settings.iou,
+            device=self.device,
+            verbose=False,
+        )
+        out: list[Detection] = []
+        if not results:
+            return out
+        boxes = getattr(results[0], "boxes", None)
+        if boxes is None or boxes.shape[0] == 0:
+            return out
+        for i in range(boxes.shape[0]):
+            cls_id = int(boxes.cls[i].item())
+            raw = self.names.get(cls_id, str(cls_id))
+            xyxy = tuple(float(v) for v in boxes.xyxy[i].tolist())
+            out.append(
+                Detection(
+                    t=t,
+                    class_id=cls_id,
+                    raw_name=raw,
+                    brand_key=normalize_class(raw),
+                    brand_name=display_name(raw),
+                    conf=float(boxes.conf[i].item()),
+                    xyxy=xyxy,  # type: ignore[arg-type]
+                    track_id=-1,
+                    frame_w=w,
+                    frame_h=h,
+                )
+            )
+        return out

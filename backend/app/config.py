@@ -72,9 +72,11 @@ class Settings(BaseSettings):
     # ── Annotated preview video ──────────────────────────────────────────
     preview_enabled: bool = True
     preview_width: int = 960        # downscale preview frames to this width
-    # Preview is rendered at the video's native fps (smooth, boxes interpolated
-    # between sampled detections). Cap total output frames so a long match
-    # doesn't blow up file size — 1800 native frames ≈ 60–72s of footage.
+    preview_imgsz: int = 960        # detection size for the preview pass (speed)
+    # Preview runs detection on EVERY frame at native fps (smooth, like the YOLO
+    # notebook), separate from the sampled analytics pass. Cap total frames so a
+    # long match doesn't trigger full-fps inference over hours — 1800 native
+    # frames ≈ first 60–72s of footage.
     preview_max_frames: int = 1800
 
     # ── Upload limits ────────────────────────────────────────────────────

@@ -14,7 +14,7 @@ import logging
 from app.db.base import session_scope
 from app.db.repository import AnalysisRepository, JobRepository
 from app.config import get_settings
-from app.pipeline import aggregate, exposure, frames, ingest, pricing, visibility
+from app.pipeline import aggregate, exposure, frames, ingest, pricing, timeline, visibility
 from app.pipeline.bodyzones import BodyZoneAccumulator
 from app.storage import get_storage
 
@@ -64,9 +64,6 @@ def run_analysis(job_id: str) -> None:
         poser = PoseEstimator() if settings.enable_pose else None
         body = BodyZoneAccumulator()
 
-        # Per-sampled-frame detections, kept for the smooth preview second pass.
-        frames_data: list[tuple[float, list]] = []
-
         all_dets = []
         n = 0
         for t, frame in frames.iter_sampled_frames(video_path, meta, settings.sample_fps):
@@ -75,8 +72,6 @@ def run_analysis(job_id: str) -> None:
             if poser is not None:
                 persons = poser.infer(frame)
                 body.add_frame(dets, persons)
-            if settings.preview_enabled:
-                frames_data.append((t, dets))
             all_dets.extend(dets)
 
             n += 1
@@ -101,21 +96,29 @@ def run_analysis(job_id: str) -> None:
             placement_type=ctx["placement_type"],
         )
 
-        # 6. Render the smooth annotated preview (full-fps second pass) -> storage.
+        # 6. Render the smooth annotated preview — full-fps detection on every
+        #    frame (like the reference notebook). Its detections also drive the
+        #    timeline, so bars match the boxes exactly. Falls back to the 2fps
+        #    analytics detections for the timeline if the preview is disabled.
         preview_key = None
-        if settings.preview_enabled and frames_data:
+        timeline_dets = all_dets
+        timeline_fps = settings.sample_fps
+        if settings.preview_enabled:
             _update(job_id, P_PRICING, "preview", "Rendering annotated video")
             from app.pipeline.annotate import render_preview
 
             preview_tmp = video_path.parent / f"{video_path.stem}_preview.mp4"
-            preview_path = render_preview(
-                video_path, meta.fps, meta.width, meta.height, frames_data, preview_tmp,
-                max_width=settings.preview_width, max_frames=settings.preview_max_frames,
+            preview_path, preview_dets = render_preview(
+                video_path, meta.fps, meta.width, meta.height, detector.detect_boxes,
+                preview_tmp, max_width=settings.preview_width,
+                max_frames=settings.preview_max_frames, detect_imgsz=settings.preview_imgsz,
             )
             if preview_path is not None:
                 with preview_path.open("rb") as fh:
                     preview_key = storage.save(fh, preview_path.name)
                 preview_path.unlink(missing_ok=True)
+                timeline_dets = preview_dets
+                timeline_fps = meta.fps
 
         # 7. Assemble + persist.
         analysis_id = AnalysisRepository.new_id()
@@ -129,6 +132,7 @@ def run_analysis(job_id: str) -> None:
             cpm_base=ctx["cpm_base"],
             logos=logos,
             body_zones=body.result(),
+            detection_timeline=timeline.build_detection_timeline(timeline_dets, timeline_fps),
             frames_analyzed=n,
         )
         result["previewAvailable"] = preview_key is not None

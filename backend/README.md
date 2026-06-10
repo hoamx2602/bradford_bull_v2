@@ -94,9 +94,11 @@ Everything is env-driven (`app/config.py`). Common knobs:
 - `DEVICE` — `auto` picks CUDA → Apple MPS → CPU.
 - `ENABLE_POSE` — set `false` to skip body-zone attribution.
 - `VISIBILITY_FLOOR` (default 0.02) — minimum per-frame visibility to count.
-- `PREVIEW_ENABLED` (default true) — render the annotated detection video at the
-  source's native fps (boxes interpolated between detections for smoothness). Tune
-  `PREVIEW_WIDTH` (960) and `PREVIEW_MAX_FRAMES` (1800 ≈ first ~60–72s of footage).
+- `PREVIEW_ENABLED` (default true) — render the annotated detection video by
+  detecting on **every frame** at native fps (smooth, like `model.predict(...,
+  stream=True)`), separate from the sampled analytics pass. Tune `PREVIEW_WIDTH`
+  (960), `PREVIEW_IMGSZ` (960, detection size for speed) and `PREVIEW_MAX_FRAMES`
+  (1800 ≈ first ~60–72s — caps full-fps inference on long matches).
 
 ## Scaling to full production
 

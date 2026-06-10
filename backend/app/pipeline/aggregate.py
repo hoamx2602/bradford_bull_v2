@@ -21,6 +21,7 @@ def build_analysis_result(
     cpm_base: float,
     logos: list[dict],
     body_zones: list[dict],
+    detection_timeline: list[dict],
     frames_analyzed: int,
 ) -> dict:
     # Strip private helper keys before serialising.
@@ -51,6 +52,7 @@ def build_analysis_result(
         },
         "logos": clean_logos,
         "bodyZones": body_zones,
+        "detectionTimeline": detection_timeline,
         "totalEmvUsd": total_emv,
         "totalQualityExposureSeconds": total_quality,
         "avgVisibilityScore": avg_vis,
