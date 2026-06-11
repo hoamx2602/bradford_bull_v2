@@ -47,6 +47,10 @@ export interface AnalysisResult {
   bodyZones?: BodyZone[]
   // True when the backend produced an annotated preview video (boxes drawn).
   previewAvailable?: boolean
+  // True when the DensePose body-part segmentation overlay video was produced.
+  bodysegAvailable?: boolean
+  // Body-part group → % of person pixels (from DensePose), if available.
+  bodysegGroups?: Record<string, number>
   // Raw on-screen intervals per brand — matches the boxes drawn on the preview
   // video (NOT the EMV-filtered segments). Drives the player timeline.
   detectionTimeline?: DetectionTimelineBrand[]

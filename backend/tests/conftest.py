@@ -12,6 +12,7 @@ os.environ.setdefault("STORAGE_DIR", str(_TMP / "uploads"))
 os.environ.setdefault("SAMPLE_FPS", "2")
 os.environ.setdefault("IMGSZ", "640")        # fast for the smoke test
 os.environ.setdefault("ENABLE_POSE", "false")  # skip pose for the HTTP smoke test
+os.environ.setdefault("ENABLE_BODYSEG", "false")  # skip heavy DensePose in tests
 
 import cv2  # noqa: E402
 import numpy as np  # noqa: E402

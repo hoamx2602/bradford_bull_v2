@@ -79,6 +79,28 @@ class Settings(BaseSettings):
     # frames ≈ first 60–72s of footage.
     preview_max_frames: int = 1800
 
+    # ── Body-part segmentation (DensePose / Detectron2) ──────────────────
+    # Heavy + needs detectron2+densepose (CUDA recommended). The stage is
+    # skipped gracefully if those aren't importable, so the rest of the
+    # pipeline always runs. On CPU keep fps/frames low.
+    enable_bodyseg: bool = True
+    # Engine: "yolo" = YOLO11-seg + pose (runs on MPS/GPU, fast, segments every
+    # frame → smooth, multi-person). "densepose" = DensePose (CUDA/CPU only,
+    # pixel-perfect, no MPS). Default yolo so Apple GPUs are used.
+    bodyseg_engine: str = "yolo"
+    bodyseg_seg_model: str = "yolo11n-seg.pt"  # ultralytics seg weights (yolo engine)
+    bodyseg_fps: float = 3.0          # DensePose-only: refresh rate/sec (overlay
+                                      # held between runs). yolo runs every frame.
+    bodyseg_max_frames: int = 900     # cap on native output frames (~30s @30fps)
+    bodyseg_width: int = 960          # downscale output width
+    bodyseg_alpha: float = 0.55       # overlay opacity over the frame
+    bodyseg_conf: float = 0.7         # person detection threshold
+    bodyseg_config: str = ""          # densepose yaml path; empty -> auto-detect
+    bodyseg_weights: str = (
+        "https://dl.fbaipublicfiles.com/densepose/"
+        "densepose_rcnn_R_50_FPN_s1x/165712039/model_final_162be9.pkl"
+    )
+
     # ── Upload limits ────────────────────────────────────────────────────
     max_upload_mb: int = 2048
     allowed_ext: str = ".mp4,.mov,.avi,.mkv"

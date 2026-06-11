@@ -69,3 +69,8 @@ export function csvUrl(id: string): string {
 export function videoUrl(id: string): string {
   return `${API_BASE}/api/analyses/${id}/video`
 }
+
+/** Body-part segmentation overlay video (DensePose) for an analysis. */
+export function bodysegVideoUrl(id: string): string {
+  return `${API_BASE}/api/analyses/${id}/bodyseg-video`
+}

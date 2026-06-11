@@ -50,7 +50,62 @@ def get_pose_model():
 
 
 @lru_cache
+def get_seg_model():
+    """YOLO11 instance-segmentation model (person silhouettes) for the MPS
+    body-seg engine."""
+    from ultralytics import YOLO
+
+    settings = get_settings()
+    log.info("loading seg model: %s", settings.bodyseg_seg_model)
+    return YOLO(settings.bodyseg_seg_model)
+
+
+@lru_cache
 def device() -> str:
     d = resolve_device(get_settings().device)
     log.info("inference device: %s", d)
     return d
+
+
+# ── DensePose (body-part segmentation) ───────────────────────────────────
+from pathlib import Path  # noqa: E402
+
+_DENSEPOSE_CONFIGS = Path(__file__).resolve().parent / "densepose_configs"
+
+
+def densepose_available() -> bool:
+    """True if detectron2 + densepose are importable (heavy, often CUDA-only)."""
+    try:
+        import detectron2  # noqa: F401
+        import densepose  # noqa: F401
+
+        return True
+    except Exception:
+        return False
+
+
+def _densepose_config_path() -> str:
+    s = get_settings()
+    if s.bodyseg_config:
+        return s.bodyseg_config
+    return str(_DENSEPOSE_CONFIGS / "densepose_rcnn_R_50_FPN_s1x.yaml")
+
+
+@lru_cache
+def get_densepose_predictor():
+    """Load the DensePose predictor once. detectron2 has no MPS path, so it runs
+    on CUDA when present else CPU (slow)."""
+    import torch
+    from detectron2.config import get_cfg
+    from detectron2.engine import DefaultPredictor
+    from densepose import add_densepose_config
+
+    s = get_settings()
+    cfg = get_cfg()
+    add_densepose_config(cfg)
+    cfg.merge_from_file(_densepose_config_path())
+    cfg.MODEL.WEIGHTS = s.bodyseg_weights
+    cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = s.bodyseg_conf
+    cfg.MODEL.DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+    log.info("loading DensePose predictor on %s", cfg.MODEL.DEVICE)
+    return DefaultPredictor(cfg)

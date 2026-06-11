@@ -88,7 +88,9 @@ class AnalysisRepository:
     def __init__(self, session: Session):
         self.s = session
 
-    def create(self, result: dict, preview_key: str | None = None) -> Analysis:
+    def create(
+        self, result: dict, preview_key: str | None = None, bodyseg_key: str | None = None
+    ) -> Analysis:
         analysis = Analysis(
             id=result["id"],
             event_name=result.get("eventName", ""),
@@ -97,6 +99,7 @@ class AnalysisRepository:
             total_emv_usd=result.get("totalEmvUsd", 0.0),
             logo_count=len(result.get("logos", [])),
             preview_key=preview_key,
+            bodyseg_key=bodyseg_key,
             result_json=result,
         )
         self.s.add(analysis)

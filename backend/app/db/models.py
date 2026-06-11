@@ -71,6 +71,8 @@ class Analysis(Base):
 
     # Storage key of the annotated preview video (boxes drawn), if produced.
     preview_key: Mapped[str | None] = mapped_column(String(512), nullable=True)
+    # Storage key of the body-part segmentation overlay video (DensePose).
+    bodyseg_key: Mapped[str | None] = mapped_column(String(512), nullable=True)
 
     # Full AnalysisResult payload (already camelCase, ready for the frontend).
     result_json: Mapped[dict] = mapped_column(JSON, default=dict)

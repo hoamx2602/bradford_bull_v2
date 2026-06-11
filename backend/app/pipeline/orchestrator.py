@@ -120,6 +120,44 @@ def run_analysis(job_id: str) -> None:
                 timeline_dets = preview_dets
                 timeline_fps = meta.fps
 
+        # 6b. Body-part segmentation overlay video. Engine selectable: "yolo"
+        #     (YOLO11-seg+pose, runs on MPS/GPU, every frame → smooth) or
+        #     "densepose" (CUDA/CPU only, pixel-perfect). Optional + graceful.
+        bodyseg_key = None
+        bodyseg_groups: dict = {}
+        if settings.enable_bodyseg:
+            from app.models_zoo import registry as _reg
+
+            seg_tmp = video_path.parent / f"{video_path.stem}_bodyseg.mp4"
+            seg_path = None
+            if settings.bodyseg_engine == "yolo":
+                _update(job_id, P_PRICING, "bodyseg", "Body-part segmentation (YOLO-seg)")
+                from app.pipeline.bodyseg_yolo import render_bodyseg_yolo_video
+
+                seg_path, bodyseg_groups = render_bodyseg_yolo_video(
+                    video_path, _reg.get_seg_model(), _reg.get_pose_model(), _reg.device(),
+                    meta.fps, meta.width, meta.height, seg_tmp,
+                    max_frames=settings.bodyseg_max_frames, max_width=settings.bodyseg_width,
+                    alpha=settings.bodyseg_alpha, imgsz=min(settings.imgsz, 960), conf=0.4,
+                )
+            elif _reg.densepose_available():
+                _update(job_id, P_PRICING, "bodyseg", "Body-part segmentation (DensePose)")
+                from app.pipeline.bodyseg import render_bodyseg_video
+
+                seg_path, bodyseg_groups = render_bodyseg_video(
+                    video_path, _reg.get_densepose_predictor(), meta.fps, meta.width,
+                    meta.height, seg_tmp, sample_fps=settings.bodyseg_fps,
+                    max_frames=settings.bodyseg_max_frames, max_width=settings.bodyseg_width,
+                    alpha=settings.bodyseg_alpha,
+                )
+            else:
+                log.info("bodyseg skipped: densepose engine selected but not available")
+
+            if seg_path is not None:
+                with seg_path.open("rb") as fh:
+                    bodyseg_key = storage.save(fh, seg_path.name)
+                seg_path.unlink(missing_ok=True)
+
         # 7. Assemble + persist.
         analysis_id = AnalysisRepository.new_id()
         result = aggregate.build_analysis_result(
@@ -136,9 +174,11 @@ def run_analysis(job_id: str) -> None:
             frames_analyzed=n,
         )
         result["previewAvailable"] = preview_key is not None
+        result["bodysegAvailable"] = bodyseg_key is not None
+        result["bodysegGroups"] = bodyseg_groups
 
         with session_scope() as s:
-            AnalysisRepository(s).create(result, preview_key=preview_key)
+            AnalysisRepository(s).create(result, preview_key=preview_key, bodyseg_key=bodyseg_key)
             JobRepository(s).mark_done(job_id, analysis_id)
         log.info("job %s done -> analysis %s (%d brands)", job_id, analysis_id, len(logos))
 

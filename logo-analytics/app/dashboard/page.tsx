@@ -12,7 +12,7 @@ import Timeline from '@/components/dashboard/timeline'
 import LogoTable from '@/components/dashboard/logo-table'
 import PipelineView from '@/components/dashboard/pipeline'
 import { MOCK_RESULT, MOCK_MATCHES } from '@/lib/mock-data'
-import { listAnalyses } from '@/lib/api'
+import { listAnalyses, bodysegVideoUrl } from '@/lib/api'
 import { formatCurrency, formatDate, formatNumber, formatSeconds, exportCSV } from '@/lib/utils'
 import type { AnalysisResult, EventMeta, MatchEntry } from '@/lib/types'
 
@@ -421,9 +421,48 @@ export default function DashboardPage() {
 
           {/* ═══════════════════════ BODY TAB ══════════════════════════ */}
           {activeTab === 'body' && (
-            <Section title="Body Zone Exposure Analysis">
-              <BodySegmentation3D zones={result.bodyZones} />
-            </Section>
+            <>
+              {result.bodysegAvailable && (
+                <Section title="Body-Part Segmentation — DensePose">
+                  <div style={{ background: 'var(--c-panel)', border: '1px solid var(--c-wire)', borderRadius: 10, padding: 12 }}>
+                    <video
+                      key={`seg-${result.id}`}
+                      src={bodysegVideoUrl(result.id)}
+                      controls
+                      playsInline
+                      style={{ width: '100%', borderRadius: 8, display: 'block', background: '#000' }}
+                    />
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px 14px', marginTop: 12 }}>
+                      {[
+                        ['Head', '#FF6347'], ['Torso', '#3CB44B'], ['Upper Arm', '#0082C8'],
+                        ['Lower Arm', '#911EB4'], ['Hands', '#F58230'], ['Upper Leg', '#FFE119'],
+                        ['Lower Leg', '#46F0F0'], ['Feet', '#F032E6'],
+                      ].map(([name, color]) => (
+                        <div key={name} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <span style={{ width: 11, height: 11, borderRadius: 3, background: color }} />
+                          <span style={{ fontSize: 12, color: 'var(--c-dim)' }}>
+                            {name}
+                            {result.bodysegGroups?.[name] != null && (
+                              <span className="num" style={{ color: 'var(--c-ghost)', marginLeft: 5 }}>
+                                {result.bodysegGroups[name]}%
+                              </span>
+                            )}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                    <div style={{ fontSize: 12, color: 'var(--c-ghost)', marginTop: 10 }}>
+                      Every player pixel mapped to a body region (DensePose, 24 surface parts grouped into 8).
+                      Percentages are share of segmented player pixels across analysed frames.
+                    </div>
+                  </div>
+                </Section>
+              )}
+
+              <Section title="Body Zone Exposure Analysis">
+                <BodySegmentation3D zones={result.bodyZones} />
+              </Section>
+            </>
           )}
 
         </div>

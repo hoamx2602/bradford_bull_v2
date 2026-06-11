@@ -235,34 +235,27 @@ export function buildTimeSeries(result: AnalysisResult): TimeSeriesPoint[] {
   return points
 }
 
-// ── Body zone exposure data (23 zones) ─────────────────────────────
+// ── Body zone exposure data (18 kit sponsor slots) ─────────────────
+// Ids must match ZONE_CONFIG in components/dashboard/body-segmentation-3d.tsx
+// and backend app/pipeline/bodyzones.ZONES.
 
 export const BODY_ZONES: BodyZone[] = [
-  { id: 'head',         name: 'Head',          percentage:  4.1, color: '' },
-  { id: 'neck',         name: 'Neck',          percentage:  2.3, color: '' },
-  { id: 'shoulder-l',   name: 'Shoulder L',    percentage:  8.2, color: '' },
-  { id: 'shoulder-r',   name: 'Shoulder R',    percentage:  7.6, color: '' },
-  { id: 'chest-l',      name: 'Chest Left',    percentage: 15.8, color: '' },
-  { id: 'chest-r',      name: 'Chest Right',   percentage: 14.2, color: '' },
-  { id: 'abdomen-l',    name: 'Abdomen Left',  percentage:  9.7, color: '' },
-  { id: 'abdomen-r',    name: 'Abdomen Right', percentage:  8.4, color: '' },
-  { id: 'upper-arm-l',  name: 'Upper Arm L',   percentage: 10.4, color: '' },
-  { id: 'upper-arm-r',  name: 'Upper Arm R',   percentage:  9.1, color: '' },
-  { id: 'forearm-l',    name: 'Forearm L',     percentage:  5.3, color: '' },
-  { id: 'forearm-r',    name: 'Forearm R',     percentage:  4.8, color: '' },
-  { id: 'hand-l',       name: 'Hand L',        percentage:  2.1, color: '' },
-  { id: 'hand-r',       name: 'Hand R',        percentage:  1.9, color: '' },
-  { id: 'spine',        name: 'Spine',         percentage:  2.0, color: '' },
-  { id: 'back-l',       name: 'Back L',        percentage:  5.4, color: '' },
-  { id: 'back-r',       name: 'Back R',        percentage:  4.8, color: '' },
-  { id: 'lowerback-l',  name: 'Low Back L',    percentage:  3.3, color: '' },
-  { id: 'lowerback-r',  name: 'Low Back R',    percentage:  2.9, color: '' },
-  { id: 'hip-l',        name: 'Hip L',         percentage:  6.2, color: '' },
-  { id: 'hip-r',        name: 'Hip R',         percentage:  5.7, color: '' },
-  { id: 'upper-leg-l',  name: 'Upper Leg L',   percentage:  3.9, color: '' },
-  { id: 'upper-leg-r',  name: 'Upper Leg R',   percentage:  3.6, color: '' },
-  { id: 'lower-leg-l',  name: 'Lower Leg L',   percentage:  2.4, color: '' },
-  { id: 'lower-leg-r',  name: 'Lower Leg R',   percentage:  2.1, color: '' },
-  { id: 'foot-l',       name: 'Foot L',        percentage:  0.6, color: '' },
-  { id: 'foot-r',       name: 'Foot R',        percentage:  0.5, color: '' },
+  { id: 'chest-center',   name: 'Chest Centre',   percentage: 16.4, color: '' },
+  { id: 'chest-l',        name: 'Chest Upper L',  percentage:  7.4, color: '' },
+  { id: 'chest-r',        name: 'Chest Upper R',  percentage:  6.9, color: '' },
+  { id: 'shoulder-l',     name: 'Shoulder L',     percentage:  5.8, color: '' },
+  { id: 'shoulder-r',     name: 'Shoulder R',     percentage:  5.3, color: '' },
+  { id: 'sleeve-l',       name: 'Sleeve L',       percentage:  4.7, color: '' },
+  { id: 'sleeve-r',       name: 'Sleeve R',       percentage:  4.3, color: '' },
+  { id: 'abdomen',        name: 'Abdomen',        percentage:  7.2, color: '' },
+  { id: 'back-top',       name: 'Back Top',       percentage: 11.2, color: '' },
+  { id: 'back-center',    name: 'Back Centre',    percentage:  9.6, color: '' },
+  { id: 'back-lower',     name: 'Back Lower',     percentage:  4.1, color: '' },
+  { id: 'shorts-front-l', name: 'Shorts Front L', percentage:  3.6, color: '' },
+  { id: 'shorts-front-r', name: 'Shorts Front R', percentage:  3.2, color: '' },
+  { id: 'shorts-back',    name: 'Shorts Back',    percentage:  5.4, color: '' },
+  { id: 'shorts-leg-l',   name: 'Shorts Leg L',   percentage:  2.1, color: '' },
+  { id: 'shorts-leg-r',   name: 'Shorts Leg R',   percentage:  1.9, color: '' },
+  { id: 'sock-l',         name: 'Sock L',         percentage:  0.6, color: '' },
+  { id: 'sock-r',         name: 'Sock R',         percentage:  0.5, color: '' },
 ]

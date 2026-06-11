@@ -26,6 +26,10 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest", "pytest-cov", "httpx"]
+# Body-part segmentation (DensePose) is NOT a normal pip dep — it builds
+# detectron2 + the DensePose project from source. See README "Body-part
+# segmentation" for the install (incl. the macOS clang build workaround). The
+# pipeline skips the bodyseg stage gracefully when these aren't importable.
 # Uncomment / install when promoting to the full production stack:
 # full = ["celery[redis]>=5.3", "redis>=5", "psycopg[binary]>=3.1", "boto3>=1.34"]
 

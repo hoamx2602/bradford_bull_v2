@@ -1,9 +1,14 @@
 """Body-zone attribution.
 
-Reconstructs 27 body zones (matching the dashboard's 3D model) from COCO-17
-pose keypoints, then assigns each logo detection to the body region it sits on.
-Accumulated per-zone visibility becomes the percentage breakdown the 3D body
-viewer renders.
+Reconstructs 18 KIT SPONSOR SLOTS (matching the dashboard's 3D model) from
+COCO-17 pose keypoints, then assigns each logo detection to the slot it sits
+on. Accumulated per-zone visibility becomes the percentage breakdown the 3D
+body viewer renders.
+
+Zones are the saleable placements on the playing kit (jersey front/back,
+shorts front/back, sleeves, socks) — NOT anatomical regions. Skin areas
+(head, hands, bare thigh, boots) carry no zone, so logos are never
+attributed there.
 
 Side convention follows the frontend (components/dashboard/body-segmentation-3d.tsx):
 "-l" = viewer's LEFT (smaller image x), "-r" = viewer's RIGHT. We assign sides by
@@ -27,21 +32,23 @@ L_ANK, R_ANK = 15, 16
 
 KP_CONF = 0.3  # ignore keypoints below this confidence
 
-# Canonical 27 zones — id -> display name. Order/ids match lib/mock-data.ts.
+# Canonical 18 kit slots — id -> display name. Order/ids match lib/mock-data.ts.
+# Away-kit reference (KIT/Away Kit.jpg): chest-center = Floor Tonic (main),
+# back-top = MCP/Fairway, back-center = ACS Group, shorts-back = KLG,
+# shorts-leg-l/r = Paints & Lacquers / AON, shorts-front-l = Cedar Court,
+# sock = EM Workwear, shoulders = MNA Cladding / MNA Support Services.
 ZONES: list[tuple[str, str]] = [
-    ("head", "Head"), ("neck", "Neck"),
+    ("chest-center", "Chest Centre"),
+    ("chest-l", "Chest Upper L"), ("chest-r", "Chest Upper R"),
     ("shoulder-l", "Shoulder L"), ("shoulder-r", "Shoulder R"),
-    ("chest-l", "Chest Left"), ("chest-r", "Chest Right"),
-    ("abdomen-l", "Abdomen Left"), ("abdomen-r", "Abdomen Right"),
-    ("upper-arm-l", "Upper Arm L"), ("upper-arm-r", "Upper Arm R"),
-    ("forearm-l", "Forearm L"), ("forearm-r", "Forearm R"),
-    ("hand-l", "Hand L"), ("hand-r", "Hand R"),
-    ("spine", "Spine"), ("back-l", "Back L"), ("back-r", "Back R"),
-    ("lowerback-l", "Low Back L"), ("lowerback-r", "Low Back R"),
-    ("hip-l", "Hip L"), ("hip-r", "Hip R"),
-    ("upper-leg-l", "Upper Leg L"), ("upper-leg-r", "Upper Leg R"),
-    ("lower-leg-l", "Lower Leg L"), ("lower-leg-r", "Lower Leg R"),
-    ("foot-l", "Foot L"), ("foot-r", "Foot R"),
+    ("sleeve-l", "Sleeve L"), ("sleeve-r", "Sleeve R"),
+    ("abdomen", "Abdomen"),
+    ("back-top", "Back Top"), ("back-center", "Back Centre"),
+    ("back-lower", "Back Lower"),
+    ("shorts-front-l", "Shorts Front L"), ("shorts-front-r", "Shorts Front R"),
+    ("shorts-back", "Shorts Back"),
+    ("shorts-leg-l", "Shorts Leg L"), ("shorts-leg-r", "Shorts Leg R"),
+    ("sock-l", "Sock L"), ("sock-r", "Sock R"),
 ]
 ZONE_IDS = [z[0] for z in ZONES]
 
@@ -67,10 +74,11 @@ def _is_back_view(person: PersonPose) -> bool:
 
 
 def build_anchors(person: PersonPose) -> dict[str, tuple[float, float]]:
-    """Image-space anchor point for each zone we can place from keypoints.
+    """Image-space anchor point for each kit slot we can place from keypoints.
 
-    Zones whose keypoints are missing are simply omitted (a logo never gets
-    assigned to a region we can't locate).
+    Slots whose keypoints are missing are simply omitted (a logo never gets
+    assigned to a region we can't locate). Skin regions (head, hands, bare
+    thigh, boots) intentionally have NO anchor — they're not saleable.
     """
     a: dict[str, tuple[float, float]] = {}
 
@@ -87,83 +95,76 @@ def build_anchors(person: PersonPose) -> dict[str, tuple[float, float]]:
     hip_l, hip_r = lr(l_hip, r_hip)
     back = _is_back_view(person)
 
-    # Head / neck
-    nose = _kp(person, NOSE)
-    ears = _mid(_kp(person, L_EAR), _kp(person, R_EAR))
-    head = nose or ears or _mid(_kp(person, L_EYE), _kp(person, R_EYE))
-    if head:
-        a["head"] = head
-    neck = _mid(sho_l, sho_r)
-    if neck:
-        a["neck"] = neck
-
-    # Shoulders
+    # Shoulders (MNA Cladding / MNA Support Services)
     if sho_l:
         a["shoulder-l"] = sho_l
     if sho_r:
         a["shoulder-r"] = sho_r
 
-    # Torso: split into upper (chest/back) and lower (abdomen/lowerback) thirds.
     def torso_point(sho, hip, frac):
         if sho is None or hip is None:
             return None
         return (sho[0] + (hip[0] - sho[0]) * frac, sho[1] + (hip[1] - sho[1]) * frac)
 
-    chest_l = torso_point(sho_l, hip_l, 0.30)
-    chest_r = torso_point(sho_r, hip_r, 0.30)
-    abd_l = torso_point(sho_l, hip_l, 0.70)
-    abd_r = torso_point(sho_r, hip_r, 0.70)
+    # Centre-line of the torso: shoulders midpoint -> hips midpoint.
+    sho_mid = _mid(sho_l, sho_r)
+    hip_mid = _mid(hip_l, hip_r)
+
+    def spine_point(frac):
+        return torso_point(sho_mid, hip_mid, frac)
+
     if back:
-        # Same physical spots, but they're the player's back.
-        if chest_l: a["back-l"] = chest_l
-        if chest_r: a["back-r"] = chest_r
-        if abd_l: a["lowerback-l"] = abd_l
-        if abd_r: a["lowerback-r"] = abd_r
-        spine = _mid(_mid(sho_l, sho_r), _mid(hip_l, hip_r))
-        if spine: a["spine"] = spine
+        # Jersey back: sponsor block above the number / below the number / hem.
+        for zid, frac in (("back-top", 0.18), ("back-center", 0.45), ("back-lower", 0.75)):
+            p = spine_point(frac)
+            if p:
+                a[zid] = p
+        # Seat of the shorts (KLG) sits just below the hip line.
+        seat = spine_point(1.05)
+        if seat:
+            a["shorts-back"] = seat
     else:
-        if chest_l: a["chest-l"] = chest_l
-        if chest_r: a["chest-r"] = chest_r
-        if abd_l: a["abdomen-l"] = abd_l
-        if abd_r: a["abdomen-r"] = abd_r
+        # Jersey front: upper-chest side panels + main centre slot + abdomen.
+        chest_l = torso_point(sho_l, hip_l, 0.28)
+        chest_r = torso_point(sho_r, hip_r, 0.28)
+        if chest_l:
+            a["chest-l"] = chest_l
+        if chest_r:
+            a["chest-r"] = chest_r
+        cc = spine_point(0.42)
+        if cc:
+            a["chest-center"] = cc
+        abd = spine_point(0.75)
+        if abd:
+            a["abdomen"] = abd
 
-    # Arms (viewer side resolved per limb by elbow/wrist x vs body centre)
-    centre_x = None
-    mids = _mid(_mid(sho_l, sho_r), _mid(hip_l, hip_r))
-    if mids:
-        centre_x = mids[0]
+    centre = spine_point(0.5)
+    centre_x = centre[0] if centre else None
 
-    def arm(elb_idx, wri_idx, sho):
-        elb = _kp(person, elb_idx)
-        wri = _kp(person, wri_idx)
-        ua = _mid(sho, elb)
-        fa = _mid(elb, wri)
-        return ua, fa, wri
+    # Sleeves: shoulder -> elbow midpoint (viewer side resolved by x).
+    for elb_i, sho in ((L_ELB, l_sho), (R_ELB, r_sho)):
+        ua = _mid(sho, _kp(person, elb_i))
+        if ua is None:
+            continue
+        side = "l" if (centre_x is None or ua[0] <= centre_x) else "r"
+        a.setdefault(f"sleeve-{side}", ua)
 
-    for elb_i, wri_i, sho in ((L_ELB, L_WRI, l_sho), (R_ELB, R_WRI, r_sho)):
-        ua, fa, wri = arm(elb_i, wri_i, sho)
-        for pt, base in ((ua, "upper-arm"), (fa, "forearm"), (wri, "hand")):
-            if pt is None:
-                continue
-            side = "l" if (centre_x is None or pt[0] <= centre_x) else "r"
-            a.setdefault(f"{base}-{side}", pt)
-
-    # Hips / legs
-    if hip_l: a["hip-l"] = hip_l
-    if hip_r: a["hip-r"] = hip_r
+    # Shorts legs (front: Cedar Court / crest; back: Paints & Lacquers / AON)
+    # and socks (EM Workwear). Knee/ankle COCO sides may not equal viewer
+    # side; resolve by x.
     for hip, kne_i, ank_i, side in (
         (hip_l, L_KNE, L_ANK, "l"), (hip_r, R_KNE, R_ANK, "r")
     ):
         kne = _kp(person, kne_i)
         ank = _kp(person, ank_i)
-        # knee/ankle COCO sides may not equal viewer side; resolve by x.
-        ul = _mid(hip, kne)
-        ll = _mid(kne, ank)
-        for pt, base in ((ul, "upper-leg"), (ll, "lower-leg"), (ank, "foot")):
-            if pt is None:
-                continue
-            s = side if centre_x is None else ("l" if pt[0] <= centre_x else "r")
-            a.setdefault(f"{base}-{s}", pt)
+        thigh = _mid(hip, kne)
+        calf = _mid(kne, ank)
+        if thigh is not None:
+            s = side if centre_x is None else ("l" if thigh[0] <= centre_x else "r")
+            a.setdefault(f"shorts-leg-{s}" if back else f"shorts-front-{s}", thigh)
+        if calf is not None:
+            s = side if centre_x is None else ("l" if calf[0] <= centre_x else "r")
+            a.setdefault(f"sock-{s}", calf)
 
     return a
 
@@ -208,7 +209,7 @@ class BodyZoneAccumulator:
         return min(zmap, key=lambda z: (det.cx - zmap[z][0]) ** 2 + (det.cy - zmap[z][1]) ** 2)
 
     def result(self) -> list[dict]:
-        """27 zones with percentage of total attributed exposure."""
+        """18 kit slots with percentage of total attributed exposure."""
         denom = self.attributed or 1.0
         out = []
         for zid, name in ZONES:

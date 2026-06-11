@@ -78,6 +78,36 @@ docker compose up --build        # serves on :8000, mounts the trained weights
 | GET  | `/api/analyses/{id}/export.csv` | per-brand CSV |
 | GET  | `/api/health` | device / model info |
 
+## Body-part segmentation — optional stage (two engines)
+
+The Body tab can show a body-part overlay video (every player pixel coloured by
+region, 8 groups). `ENABLE_BODYSEG=false` turns the stage off. Pick the engine
+with `BODYSEG_ENGINE`:
+
+- **`yolo`** (default) — `app/pipeline/bodyseg_yolo.py`: YOLO11-seg person masks
+  + YOLO11-pose, each mask pixel labelled by nearest skeleton bone. Runs on
+  **MPS / CUDA**, fast enough to segment **every frame → smooth**, multi-person.
+  Part boundaries are skeleton-derived (not pixel-perfect). No extra install.
+- **`densepose`** — `app/pipeline/bodyseg.py`: pixel-perfect 24-part DensePose.
+  **CUDA/CPU only — no Apple-MPS path** (≈1s/frame on Mac CPU), so it's sampled
+  (`BODYSEG_FPS`, default 3, overlay held between → output still native fps) and
+  needs the build below.
+
+### DensePose install (only for `BODYSEG_ENGINE=densepose`)
+
+```bash
+git clone --depth=1 https://github.com/facebookresearch/detectron2 /tmp/detectron2_repo
+# macOS only: newer Xcode/clang rejects torch headers — suppress that one error:
+export CFLAGS="-Wno-invalid-specialization -Wno-error=invalid-specialization"
+export CXXFLAGS="$CFLAGS"
+pip install --no-build-isolation -e /tmp/detectron2_repo
+pip install --no-build-isolation /tmp/detectron2_repo/projects/DensePose
+```
+
+The DensePose config is bundled (`app/models_zoo/densepose_configs/`), so it
+works after the clone is gone. Override the model via `BODYSEG_CONFIG` /
+`BODYSEG_WEIGHTS`.
+
 ## Tests
 
 ```bash
