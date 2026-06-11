@@ -54,6 +54,14 @@ export interface AnalysisResult {
   // Raw on-screen intervals per brand — matches the boxes drawn on the preview
   // video (NOT the EMV-filtered segments). Drives the player timeline.
   detectionTimeline?: DetectionTimelineBrand[]
+  // Target-team filter summary (logos on opponents/referees were dropped
+  // before exposure/EMV), when the stage ran.
+  teamFilter?: {
+    enabled: boolean
+    kept: number
+    dropped: number
+    dropRate: number
+  }
 }
 
 export interface DetectionInterval {

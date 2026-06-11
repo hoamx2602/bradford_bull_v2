@@ -10,6 +10,9 @@ export interface UploadMeta {
   audienceSize: number
   placementType: string
   cpmBase: number
+  // Target-team kit worn in this match — drives the team filter's reference
+  // bootstrap on the backend. "away" (black) | "home" (white).
+  kit: string
 }
 
 export interface JobStatus {
@@ -44,6 +47,7 @@ export async function createJob(
   form.append('audienceSize', String(meta.audienceSize))
   form.append('placementType', meta.placementType)
   form.append('cpmBase', String(meta.cpmBase))
+  form.append('kit', meta.kit || 'away')
 
   const res = await fetch(`${API_BASE}/api/jobs`, { method: 'POST', body: form })
   return asJson(res)

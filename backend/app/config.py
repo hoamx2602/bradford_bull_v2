@@ -101,6 +101,29 @@ class Settings(BaseSettings):
         "densepose_rcnn_R_50_FPN_s1x/165712039/model_final_162be9.pkl"
     )
 
+    # ── Team filter (count only logos on TARGET-team players) ────────────
+    # Filters logo detections to those worn by the target team (Bradford),
+    # dropping opponent/referee/board hits of shared sponsors. Runs as part of
+    # the standard upload flow: if no refs file exists, references are
+    # AUTO-BOOTSTRAPPED from the uploaded video (cluster jerseys, pick the
+    # target cluster via kit anchors or kit luminance). Designed for CUDA
+    # (DEVICE=0); SigLIP falls back to colour-only if transformers is missing;
+    # any failure disables the stage gracefully (analysis runs unfiltered).
+    team_filter_enabled: bool = True
+    team_auto_refs: bool = True           # bootstrap refs from the video itself
+    team_bootstrap_frames: int = 32       # frames sampled for the bootstrap
+    # Kits considered dark for the luminance pick (csv). Bradford away = black.
+    team_dark_kits: str = "away"
+    team_refs_path: str = ""              # default: data/team_refs.pkl
+    team_person_model: str = "yolo11m.pt" # person detector (auto-downloaded)
+    team_person_conf: float = 0.35
+    team_person_imgsz: int = 960
+    team_siglip_every: int = 5            # re-embed each track every N sampled frames
+    team_hysteresis: float = 1.25         # vote lead needed to flip a track's label
+    team_min_votes: float = 2.0           # vote mass before an OTHER label may drop logos
+    team_keep_unknown: bool = True        # keep logos on not-yet-confident tracks
+    team_keep_unassigned: bool = False    # keep logos not attached to any person
+
     # ── Upload limits ────────────────────────────────────────────────────
     max_upload_mb: int = 2048
     allowed_ext: str = ".mp4,.mov,.avi,.mkv"
@@ -116,6 +139,9 @@ class Settings(BaseSettings):
 
     def resolved_model_path(self) -> str:
         return self.model_path or _default_logo_model()
+
+    def resolved_team_refs(self) -> str:
+        return self.team_refs_path or str(BACKEND_DIR / "data" / "team_refs.pkl")
 
     @property
     def cors_list(self) -> list[str]:

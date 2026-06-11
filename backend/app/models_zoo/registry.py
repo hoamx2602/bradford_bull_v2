@@ -50,6 +50,16 @@ def get_pose_model():
 
 
 @lru_cache
+def get_person_model():
+    """Stock person detector for the team filter (tracking + ref bootstrap)."""
+    from ultralytics import YOLO
+
+    settings = get_settings()
+    log.info("loading person model: %s", settings.team_person_model)
+    return YOLO(settings.team_person_model)
+
+
+@lru_cache
 def get_seg_model():
     """YOLO11 instance-segmentation model (person silhouettes) for the MPS
     body-seg engine."""

@@ -31,6 +31,7 @@ class JobRepository:
         audience_size: int,
         placement_type: str,
         cpm_base: float,
+        kit: str = "away",
     ) -> Job:
         job = Job(
             id=_new_id(),
@@ -42,6 +43,7 @@ class JobRepository:
             audience_size=audience_size,
             placement_type=placement_type,
             cpm_base=cpm_base,
+            kit=kit,
         )
         self.s.add(job)
         self.s.commit()

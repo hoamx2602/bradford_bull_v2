@@ -24,6 +24,7 @@ async def create_job(
     audienceSize: int = Form(...),
     placementType: str = Form("Live Broadcast TV"),
     cpmBase: float = Form(22.0),
+    kit: str = Form("away"),
     session: Session = Depends(get_session),
 ) -> JobCreated:
     settings = get_settings()
@@ -48,6 +49,10 @@ async def create_job(
             detail=f"File {size_mb:.0f} MB exceeds limit of {settings.max_upload_mb} MB",
         )
 
+    kit_norm = kit.strip().lower()
+    if kit_norm not in {"home", "away"}:
+        kit_norm = "away"
+
     job = JobRepository(session).create(
         event_name=eventName.strip(),
         video_name=Path(video.filename or "upload.mp4").name,
@@ -55,6 +60,7 @@ async def create_job(
         audience_size=audienceSize,
         placement_type=placementType,
         cpm_base=cpmBase,
+        kit=kit_norm,
     )
 
     get_queue().enqueue(job.id)

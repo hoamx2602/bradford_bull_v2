@@ -47,6 +47,9 @@ class Job(Base):
     audience_size: Mapped[int] = mapped_column(Integer, default=0)
     placement_type: Mapped[str] = mapped_column(String(64), default="Live Broadcast TV")
     cpm_base: Mapped[float] = mapped_column(Float, default=22.0)
+    # Which target-team kit this match uses (drives the team filter's
+    # reference bootstrap): "away" (black) or "home" (white).
+    kit: Mapped[str] = mapped_column(String(16), default="away")
 
     analysis_id: Mapped[str | None] = mapped_column(
         ForeignKey("analyses.id"), nullable=True

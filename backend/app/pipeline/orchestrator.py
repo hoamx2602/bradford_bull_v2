@@ -22,7 +22,8 @@ log = logging.getLogger("app.pipeline")
 
 # Progress budget per stage (must sum to ~100). Detection dominates wall-clock.
 P_INGEST = 5
-P_DETECT_START = 5
+P_TEAM = 8            # kit-reference bootstrap (team filter)
+P_DETECT_START = 10
 P_DETECT_END = 80
 P_EXPOSURE = 92
 P_PRICING = 98
@@ -45,6 +46,7 @@ def run_analysis(job_id: str) -> None:
             "audience_size": job.audience_size,
             "placement_type": job.placement_type,
             "cpm_base": job.cpm_base,
+            "kit": getattr(job, "kit", None) or "away",
         }
 
     try:
@@ -64,11 +66,45 @@ def run_analysis(job_id: str) -> None:
         poser = PoseEstimator() if settings.enable_pose else None
         body = BodyZoneAccumulator()
 
+        # Target-team filter — part of the standard upload flow. Refs priority:
+        # explicit refs file > auto-bootstrap from this very video (cluster
+        # jerseys, pick the target cluster for the kit chosen at upload).
+        # Labels use live vote state, so very early frames of a track may pass
+        # before the vote stabilises (team_keep_unknown policy). Any failure
+        # logs + leaves the analysis unfiltered rather than breaking the job.
+        team_tracker = None
+        if settings.team_filter_enabled:
+            try:
+                from pathlib import Path as _Path
+
+                from app.pipeline.teamid.tracker import TeamTracker
+
+                refs = None
+                if not _Path(settings.resolved_team_refs()).exists() and settings.team_auto_refs:
+                    _update(job_id, P_TEAM, "team",
+                            f"Identifying target-team kit ({ctx['kit']})")
+                    from app.pipeline.teamid.bootstrap import build_refs_from_video
+
+                    refs = build_refs_from_video(video_path, ctx["kit"])
+                    if refs is None:
+                        raise RuntimeError("kit reference bootstrap failed")
+                team_tracker = TeamTracker(refs=refs)
+            except Exception as exc:
+                log.warning("team filter disabled: %s", exc)
+        team_kept = team_dropped = 0
+
         all_dets = []
         n = 0
         for t, frame in frames.iter_sampled_frames(video_path, meta, settings.sample_fps):
             dets = detector.infer(frame, t)
             visibility.annotate(dets)
+            if team_tracker is not None and dets:
+                tracked = team_tracker.process(frame)
+                team_tracker.annotate(dets, tracked)
+                kept = [d for d in dets if d.on_target_team]
+                team_dropped += len(dets) - len(kept)
+                team_kept += len(kept)
+                dets = kept
             if poser is not None:
                 persons = poser.infer(frame)
                 body.add_frame(dets, persons)
@@ -114,9 +150,18 @@ def run_analysis(job_id: str) -> None:
                 max_frames=settings.preview_max_frames, detect_imgsz=settings.preview_imgsz,
             )
             if preview_path is not None:
-                with preview_path.open("rb") as fh:
+                # Restore the original upload's audio (OpenCV writes video-only).
+                from app.pipeline.av import mux_audio
+
+                muxed = mux_audio(
+                    preview_path, video_path,
+                    preview_path.with_name(f"{preview_path.stem}_audio.mp4"),
+                )
+                with muxed.open("rb") as fh:
                     preview_key = storage.save(fh, preview_path.name)
                 preview_path.unlink(missing_ok=True)
+                if muxed != preview_path:
+                    muxed.unlink(missing_ok=True)
                 timeline_dets = preview_dets
                 timeline_fps = meta.fps
 
@@ -154,9 +199,17 @@ def run_analysis(job_id: str) -> None:
                 log.info("bodyseg skipped: densepose engine selected but not available")
 
             if seg_path is not None:
-                with seg_path.open("rb") as fh:
+                from app.pipeline.av import mux_audio
+
+                seg_muxed = mux_audio(
+                    seg_path, video_path,
+                    seg_path.with_name(f"{seg_path.stem}_audio.mp4"),
+                )
+                with seg_muxed.open("rb") as fh:
                     bodyseg_key = storage.save(fh, seg_path.name)
                 seg_path.unlink(missing_ok=True)
+                if seg_muxed != seg_path:
+                    seg_muxed.unlink(missing_ok=True)
 
         # 7. Assemble + persist.
         analysis_id = AnalysisRepository.new_id()
@@ -176,6 +229,15 @@ def run_analysis(job_id: str) -> None:
         result["previewAvailable"] = preview_key is not None
         result["bodysegAvailable"] = bodyseg_key is not None
         result["bodysegGroups"] = bodyseg_groups
+        if team_tracker is not None:
+            total_seen = team_kept + team_dropped
+            result["teamFilter"] = {
+                "enabled": True,
+                "kept": team_kept,
+                "dropped": team_dropped,
+                "dropRate": round(team_dropped / total_seen, 3) if total_seen else 0.0,
+            }
+            log.info("team filter: kept %d, dropped %d logo detections", team_kept, team_dropped)
 
         with session_scope() as s:
             AnalysisRepository(s).create(result, preview_key=preview_key, bodyseg_key=bodyseg_key)

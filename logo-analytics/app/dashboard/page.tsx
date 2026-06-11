@@ -553,6 +553,21 @@ export default function DashboardPage() {
                         <span style={{ color: 'var(--c-wire-s)' }}>·</span>
                         <span>{result.metadata.placementType}</span>
                       </div>
+                      {result.teamFilter?.enabled && (
+                        <div style={{
+                          display: 'inline-flex', alignItems: 'center', gap: 7,
+                          marginTop: 10, padding: '5px 11px',
+                          background: 'var(--c-spark-bg)', border: '1px solid var(--c-wire)',
+                          borderRadius: 14, fontSize: 11.5, color: 'var(--c-dim)',
+                        }}>
+                          <span style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--c-spark)' }} />
+                          Target-team filter:&nbsp;
+                          <span className="num" style={{ color: 'var(--c-ink)', fontWeight: 600 }}>{formatNumber(result.teamFilter.kept)}</span>
+                          &nbsp;detections kept ·&nbsp;
+                          <span className="num" style={{ color: 'var(--c-ink)', fontWeight: 600 }}>{formatNumber(result.teamFilter.dropped)}</span>
+                          &nbsp;dropped ({(result.teamFilter.dropRate * 100).toFixed(1)}% on opponents / refs / boards)
+                        </div>
+                      )}
                     </div>
 
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 16, marginBottom: 24 }}>

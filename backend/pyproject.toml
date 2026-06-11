@@ -20,12 +20,17 @@ dependencies = [
     "ultralytics==8.3.40",
     "lapx>=0.5.2",                   # required by ByteTrack tracker
     "opencv-python-headless>=4.8",
+    "imageio-ffmpeg>=0.4.9",          # bundled ffmpeg: audio mux for output videos
     "numpy>=1.24",
     "Pillow>=10",
 ]
 
 [project.optional-dependencies]
 dev = ["pytest", "pytest-cov", "httpx"]
+# Target-team filter (SigLIP embeddings + ref clustering). Colour-only mode
+# works without these; install for full accuracy:
+#   pip install -e ".[team]"
+team = ["transformers>=4.40", "scikit-learn>=1.3"]
 # Body-part segmentation (DensePose) is NOT a normal pip dep — it builds
 # detectron2 + the DensePose project from source. See README "Body-part
 # segmentation" for the install (incl. the macOS clang build workaround). The
