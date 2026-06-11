@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 """
-Train the sponsor-logo detector (32 classes) on 1080p rugby frames.
+Train the sponsor-logo detector (17 brand classes) on 1080p rugby frames.
 
     conda activate bradford_bulls
     python train.py                       # yolo26m @ 1280, tuned defaults
     python train.py --model yolo26l.pt    # more capacity (only if underfitting)
     python train.py --epochs 200 --batch 12
 
-Dataset: ~2456 frames, 32 classes (home/away sponsor logos), RTX 4500 Ada 20GB.
+Dataset: ~2456 frames, 17 brand classes (home/away merged via
+scripts/merge_home_away.py — downstream is kit-agnostic), RTX 4500 Ada 20GB.
 Split is CLIP-LEVEL (scripts/resplit_data.py) so val mAP is an honest estimate of
 performance on unseen matches — NOT a near-duplicate echo of train. Optimize against
 val mAP; if train mAP >> val mAP the model is overfitting.
@@ -24,12 +25,17 @@ Why the augmentation is tuned the way it is (these are deliberate, non-default):
   * erasing 0.40 -> rugby has heavy occlusion (players block logos).
   * mixup 0.10   -> light regularizer against overfitting on a small dataset.
 
-Rare classes (cch_home=7, chadlaw_home=22, mna_cladding_home=29 instances) are
-data-starved; their per-class mAP is statistical noise no matter the settings.
-Judge the model on the well-sampled classes + false-positive rate, and collect
-more data for the rare `*_home` logos.
+After the home/away merge the smallest class is cch=74 instances (was cch_home=7),
+so imbalance is much milder. Still judge the model on the well-sampled brands +
+false-positive rate; cch / mna_* remain the thinnest and benefit most from more data.
 """
 import argparse
+import os
+
+# Must be set BEFORE torch/CUDA initializes (i.e. before importing ultralytics).
+# Reduces fragmentation OOM ("reserved but unallocated") on the 24GB card.
+os.environ.setdefault("PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True")
+
 from pathlib import Path
 
 from ultralytics import YOLO
@@ -37,11 +43,37 @@ from ultralytics import YOLO
 HERE = Path(__file__).resolve().parent
 
 
+def init_wandb(args):
+    """Pre-init wandb with a clean project name.
+
+    ultralytics 8.4.45's wb callback passes `args.project` (here a Windows path
+    'C:\\...\\runs') straight to wandb as the project NAME, which wandb rejects
+    (it forbids '\\' and ':'). Its callback skips init if a run already exists, so
+    we create the run first with a valid name and it reuses ours. Set the project
+    via $env:WANDB_PROJECT, else default below. No-op if wandb isn't enabled.
+    """
+    try:
+        from ultralytics.utils import SETTINGS
+        if not SETTINGS.get("wandb"):
+            return
+        import wandb
+        if wandb.run is None:
+            wandb.init(
+                project=os.environ.get("WANDB_PROJECT", "bradford-logo-detection"),
+                name=args.name,
+            )
+            print(f"[wandb] logging to project "
+                  f"'{os.environ.get('WANDB_PROJECT', 'bradford-logo-detection')}'")
+    except Exception as e:  # never let logging block training
+        print(f"[wandb] disabled ({e})")
+
+
 def main(args):
     data = (HERE / args.data).resolve()
     if not data.exists():
         raise SystemExit(f"{data} not found — run resplit_data.py / prepare first.")
 
+    init_wandb(args)
     model = YOLO(args.model)
     model.train(
         # ---- data / model ----
@@ -114,5 +146,5 @@ if __name__ == "__main__":
     p.add_argument("--device", default="0")
     p.add_argument("--cache", default=False,
                    help="False | 'ram' | 'disk' — 'ram' speeds I/O if you have spare RAM")
-    p.add_argument("--name", default="logo_yolo26m_clipsplit")
+    p.add_argument("--name", default="logo_yolo26m_17cls")
     main(p.parse_args())

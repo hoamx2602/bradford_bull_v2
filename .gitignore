@@ -43,3 +43,4 @@ team_detection/output
 /draft
 /logo_detection/runs
 /runs
+/wandb
