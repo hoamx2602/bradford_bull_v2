@@ -1,6 +1,6 @@
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
-import type { AnalysisResult } from './types'
+import type { AnalysisResult, MatchEntry } from './types'
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -33,6 +33,69 @@ export function formatDate(iso: string): string {
 
 export function visibilityOpacity(score: number): number {
   return 0.25 + score * 0.75
+}
+
+// ── Portfolio aggregation (Overview / Analytics "All matches" scope) ──
+
+export interface BrandAgg {
+  key: string
+  name: string
+  totalEmv: number
+  totalExposure: number
+  qualityExposure: number
+  avgVisibility: number   // exposure-weighted across matches
+  segmentCount: number
+  matchCount: number
+}
+
+export function aggregateBrands(matches: MatchEntry[]): BrandAgg[] {
+  const map = new Map<string, BrandAgg & { _visW: number }>()
+  for (const m of matches) {
+    for (const l of m.result.logos) {
+      const key = l.class || l.name
+      let b = map.get(key)
+      if (!b) {
+        b = {
+          key, name: l.name, totalEmv: 0, totalExposure: 0, qualityExposure: 0,
+          avgVisibility: 0, segmentCount: 0, matchCount: 0, _visW: 0,
+        }
+        map.set(key, b)
+      }
+      b.totalEmv += l.emvUsd
+      b.totalExposure += l.totalExposureSeconds
+      b.qualityExposure += l.qualityExposureSeconds
+      b.segmentCount += l.segmentCount
+      b.avgVisibility += l.avgVisibilityScore * l.totalExposureSeconds
+      b._visW += l.totalExposureSeconds
+      b.matchCount += 1
+    }
+  }
+  return Array.from(map.values())
+    .map(({ _visW, ...b }) => ({ ...b, avgVisibility: _visW ? b.avgVisibility / _visW : 0 }))
+    .sort((a, b) => b.totalEmv - a.totalEmv)
+}
+
+/** Match filter shared by the Videos tab and report scopes. */
+export function filterMatches(
+  matches: MatchEntry[],
+  query: string,
+  dateFrom: string,
+  dateTo: string,
+): MatchEntry[] {
+  const q = query.trim().toLowerCase()
+  return matches.filter(m => {
+    if (q && !m.eventName.toLowerCase().includes(q) && !m.videoName.toLowerCase().includes(q)) return false
+    const t = new Date(m.date).getTime()
+    if (dateFrom && t < new Date(dateFrom).getTime()) return false
+    // +1 day so an inclusive "to" date covers the whole day.
+    if (dateTo && t >= new Date(dateTo).getTime() + 86_400_000) return false
+    return true
+  })
+}
+
+/** Print-based PDF export — print CSS in globals.css isolates #report-root. */
+export function exportPDF(): void {
+  window.print()
 }
 
 export function exportCSV(result: AnalysisResult): void {

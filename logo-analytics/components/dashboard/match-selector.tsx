@@ -28,6 +28,12 @@ const TabIcon = {
       <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
     </svg>
   ),
+  brands: (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
+      <line x1="7" y1="7" x2="7.01" y2="7" />
+    </svg>
+  ),
   body: (
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <circle cx="12" cy="5" r="3" /><path d="M12 8v4m-4 0l-2 8m10-8l2 8m-10-8h8" />
@@ -38,6 +44,7 @@ const TabIcon = {
 const TABS: Tab[] = [
   { id: 'overview',  label: 'Overview',          icon: TabIcon.overview },
   { id: 'videos',    label: 'Match Videos',      icon: TabIcon.videos },
+  { id: 'brands',    label: 'Brand Insights',    icon: TabIcon.brands },
   { id: 'analytics', label: 'Analytics Report',  icon: TabIcon.analytics },
   { id: 'body',      label: 'Body Segmentation', icon: TabIcon.body },
 ]
