@@ -47,6 +47,33 @@ export interface AnalysisResult {
   bodyZones?: BodyZone[]
   // True when the backend produced an annotated preview video (boxes drawn).
   previewAvailable?: boolean
+  // True when the DensePose body-part segmentation overlay video was produced.
+  bodysegAvailable?: boolean
+  // Body-part group → % of person pixels (from DensePose), if available.
+  bodysegGroups?: Record<string, number>
+  // Raw on-screen intervals per brand — matches the boxes drawn on the preview
+  // video (NOT the EMV-filtered segments). Drives the player timeline.
+  detectionTimeline?: DetectionTimelineBrand[]
+  // Target-team filter summary (logos on opponents/referees were dropped
+  // before exposure/EMV), when the stage ran.
+  teamFilter?: {
+    enabled: boolean
+    kept: number
+    dropped: number
+    dropRate: number
+  }
+}
+
+export interface DetectionInterval {
+  start: number
+  end: number
+}
+
+export interface DetectionTimelineBrand {
+  name: string
+  class: string
+  color: string
+  intervals: DetectionInterval[]
 }
 
 // ── New types for dashboard redesign ─────────────────────────────────

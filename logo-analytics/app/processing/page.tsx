@@ -7,14 +7,18 @@ import { getJob } from '@/lib/api'
 
 const STEPS = [
   { label: 'Frame extraction',       detail: (n: string) => n || 'Frames extracted' },
+  { label: 'Target-team identification', detail: (n: string) => n || 'Kit references + player tracking' },
   { label: 'YOLO26 logo detection',  detail: (n: string) => n || 'Brands identified across frames' },
   { label: 'Computing exposure scores', detail: (n: string) => n || 'Quality-weighted segments calculated' },
   { label: 'Calculating media value',   detail: (n: string) => n || 'EMV computed per brand' },
 ]
 
 // Backend pipeline stage -> index of the last COMPLETED step (0-indexed).
+// `team` only appears when the kit-reference bootstrap runs; the `detect`
+// stage marks both step 0 and 1 complete either way.
 const STAGE_TO_STEP: Record<string, number> = {
-  queued: -1, frames: -1, detect: 0, exposure: 1, pricing: 2, done: 3,
+  queued: -1, frames: -1, team: 0, detect: 1, exposure: 2, pricing: 3,
+  preview: 3, bodyseg: 3, done: 4,
 }
 
 export default function ProcessingPage() {

@@ -149,3 +149,29 @@ button { font-family: inherit; cursor: pointer; }
 .pie-label {
   transition: font-size 0.15s, opacity 0.15s;
 }
+
+/* ── Print / PDF export ─────────────────────────────────────────── */
+/* "Export PDF" calls window.print(); only #report-root is printed.  */
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #report-root, #report-root * {
+    visibility: visible;
+  }
+  #report-root {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    padding: 24px;
+  }
+  .no-print {
+    display: none !important;
+  }
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}

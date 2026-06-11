@@ -72,10 +72,57 @@ class Settings(BaseSettings):
     # ── Annotated preview video ──────────────────────────────────────────
     preview_enabled: bool = True
     preview_width: int = 960        # downscale preview frames to this width
-    # Preview is rendered at the video's native fps (smooth, boxes interpolated
-    # between sampled detections). Cap total output frames so a long match
-    # doesn't blow up file size — 1800 native frames ≈ 60–72s of footage.
+    preview_imgsz: int = 960        # detection size for the preview pass (speed)
+    # Preview runs detection on EVERY frame at native fps (smooth, like the YOLO
+    # notebook), separate from the sampled analytics pass. Cap total frames so a
+    # long match doesn't trigger full-fps inference over hours — 1800 native
+    # frames ≈ first 60–72s of footage.
     preview_max_frames: int = 1800
+
+    # ── Body-part segmentation (DensePose / Detectron2) ──────────────────
+    # Heavy + needs detectron2+densepose (CUDA recommended). The stage is
+    # skipped gracefully if those aren't importable, so the rest of the
+    # pipeline always runs. On CPU keep fps/frames low.
+    enable_bodyseg: bool = True
+    # Engine: "yolo" = YOLO11-seg + pose (runs on MPS/GPU, fast, segments every
+    # frame → smooth, multi-person). "densepose" = DensePose (CUDA/CPU only,
+    # pixel-perfect, no MPS). Default yolo so Apple GPUs are used.
+    bodyseg_engine: str = "yolo"
+    bodyseg_seg_model: str = "yolo11n-seg.pt"  # ultralytics seg weights (yolo engine)
+    bodyseg_fps: float = 3.0          # DensePose-only: refresh rate/sec (overlay
+                                      # held between runs). yolo runs every frame.
+    bodyseg_max_frames: int = 900     # cap on native output frames (~30s @30fps)
+    bodyseg_width: int = 960          # downscale output width
+    bodyseg_alpha: float = 0.55       # overlay opacity over the frame
+    bodyseg_conf: float = 0.7         # person detection threshold
+    bodyseg_config: str = ""          # densepose yaml path; empty -> auto-detect
+    bodyseg_weights: str = (
+        "https://dl.fbaipublicfiles.com/densepose/"
+        "densepose_rcnn_R_50_FPN_s1x/165712039/model_final_162be9.pkl"
+    )
+
+    # ── Team filter (count only logos on TARGET-team players) ────────────
+    # Filters logo detections to those worn by the target team (Bradford),
+    # dropping opponent/referee/board hits of shared sponsors. Runs as part of
+    # the standard upload flow: if no refs file exists, references are
+    # AUTO-BOOTSTRAPPED from the uploaded video (cluster jerseys, pick the
+    # target cluster via kit anchors or kit luminance). Designed for CUDA
+    # (DEVICE=0); SigLIP falls back to colour-only if transformers is missing;
+    # any failure disables the stage gracefully (analysis runs unfiltered).
+    team_filter_enabled: bool = True
+    team_auto_refs: bool = True           # bootstrap refs from the video itself
+    team_bootstrap_frames: int = 32       # frames sampled for the bootstrap
+    # Kits considered dark for the luminance pick (csv). Bradford away = black.
+    team_dark_kits: str = "away"
+    team_refs_path: str = ""              # default: data/team_refs.pkl
+    team_person_model: str = "yolo11m.pt" # person detector (auto-downloaded)
+    team_person_conf: float = 0.35
+    team_person_imgsz: int = 960
+    team_siglip_every: int = 5            # re-embed each track every N sampled frames
+    team_hysteresis: float = 1.25         # vote lead needed to flip a track's label
+    team_min_votes: float = 2.0           # vote mass before an OTHER label may drop logos
+    team_keep_unknown: bool = True        # keep logos on not-yet-confident tracks
+    team_keep_unassigned: bool = False    # keep logos not attached to any person
 
     # ── Upload limits ────────────────────────────────────────────────────
     max_upload_mb: int = 2048
@@ -92,6 +139,9 @@ class Settings(BaseSettings):
 
     def resolved_model_path(self) -> str:
         return self.model_path or _default_logo_model()
+
+    def resolved_team_refs(self) -> str:
+        return self.team_refs_path or str(BACKEND_DIR / "data" / "team_refs.pkl")
 
     @property
     def cors_list(self) -> list[str]:

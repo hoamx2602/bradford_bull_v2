@@ -29,6 +29,9 @@ class Detection:
     frame_h: int
     visibility: float = 0.0  # filled by visibility stage
     body_zone: str | None = None  # filled by body-zone stage
+    # Team-filter verdict: True = on a target-team player (keep), False = on an
+    # opponent/referee or unattached (drop). None = stage disabled.
+    on_target_team: bool | None = None
 
     @property
     def cx(self) -> float:

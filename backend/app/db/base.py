@@ -36,6 +36,16 @@ def init_db() -> None:
     (settings.storage_dir.parent).mkdir(parents=True, exist_ok=True)
     Base.metadata.create_all(engine)
 
+    # Lightweight dev migration: create_all never alters existing tables, so
+    # add columns introduced after a DB was first created. No-op when present.
+    with engine.connect() as conn:
+        try:
+            conn.exec_driver_sql(
+                "ALTER TABLE jobs ADD COLUMN kit VARCHAR(16) DEFAULT 'away'")
+            conn.commit()
+        except Exception:
+            pass
+
 
 @contextmanager
 def session_scope() -> Iterator:

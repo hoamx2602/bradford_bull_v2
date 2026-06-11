@@ -22,6 +22,7 @@ export default function UploadPage() {
   const [audience, setAudience] = useState('2400000')
   const [placement, setPlacement] = useState('live-tv')
   const [cpm, setCpm] = useState('22')
+  const [kit, setKit] = useState('away')
 
   const accept = (f: File) => {
     if (!f.type.startsWith('video/') && !/\.(mp4|mov|avi|mkv)$/i.test(f.name)) return
@@ -56,6 +57,7 @@ export default function UploadPage() {
       audienceSize: parseInt(audience),
       placementType: PLACEMENTS.find(p => p.value === placement)?.label ?? 'Live Broadcast TV',
       cpmBase: parseFloat(cpm),
+      kit,
     }
     // Keep metadata for the processing/dashboard screens to display immediately.
     localStorage.setItem('sl_meta', JSON.stringify(meta))
@@ -204,14 +206,27 @@ export default function UploadPage() {
               </div>
             </div>
 
-            <div>
-              <label style={label}>CPM Base (USD)</label>
-              <input
-                type="number"
-                placeholder="22"
-                value={cpm}
-                onChange={e => setCpm(e.target.value)}
-              />
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+              <div>
+                <label style={label}>CPM Base (USD)</label>
+                <input
+                  type="number"
+                  placeholder="22"
+                  value={cpm}
+                  onChange={e => setCpm(e.target.value)}
+                />
+              </div>
+              <div style={{ position: 'relative' }}>
+                <label style={label}>Bradford Kit</label>
+                <select value={kit} onChange={e => setKit(e.target.value)}>
+                  <option value="away">Away — Black</option>
+                  <option value="home">Home — White</option>
+                </select>
+                <svg style={{ position: 'absolute', right: 12, top: '68%', transform: 'translateY(-50%)', pointerEvents: 'none' }}
+                  width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--c-dim)" strokeWidth="2" strokeLinecap="round">
+                  <polyline points="6 9 12 15 18 9" />
+                </svg>
+              </div>
             </div>
           </div>
 

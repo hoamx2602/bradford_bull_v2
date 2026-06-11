@@ -10,37 +10,33 @@ interface Props {
   zones?: BodyZone[]
 }
 
-// 23-zone body config — one distinct hue per region, flat vivid colour on 3D body.
+// 18 KIT SPONSOR SLOTS — one distinct hue per slot, flat vivid colour on 3D body.
+// Zones map to the saleable placements on the playing kit (see KIT/Away Kit.jpg):
+//   chest-center = Floor Tonic (main) · back-top = MCP/Fairway · back-center = ACS
+//   shorts-back = KLG · shorts-leg-l/r = Paints & Lacquers / AON
+//   shorts-front-l = Cedar Court · sock = EM Workwear · shoulders = MNA x2
+// Skin areas (head, hands, bare thigh, boots) carry NO zone -> neutral grey.
 // Convention: -l = viewer's LEFT (neg X in 3D), -r = viewer's RIGHT (pos X).
 // Anchor (x,y,z) = world-space label point after model is scaled to TARGET_HEIGHT=3.6.
 const ZONE_CONFIG: Record<string, { label: string; hue: number; x: number; y: number; z: number; front: boolean }> = {
-  'head':          { label: 'Head',          hue: 270, x:  0.00, y: 3.30, z:  0.15, front: true  },
-  'neck':          { label: 'Neck',          hue:  35, x:  0.00, y: 3.04, z:  0.14, front: true  },
-  'shoulder-l':    { label: 'Shoulder L',    hue: 200, x: -0.61, y: 2.48, z:  0.05, front: true  },
-  'shoulder-r':    { label: 'Shoulder R',    hue: 140, x:  0.61, y: 2.48, z:  0.05, front: true  },
-  'chest-l':       { label: 'Chest L',       hue: 220, x: -0.12, y: 2.60, z:  0.22, front: true  },
-  'chest-r':       { label: 'Chest R',       hue:   8, x:  0.12, y: 2.60, z:  0.22, front: true  },
-  'abdomen-l':     { label: 'Abdomen L',     hue: 315, x: -0.12, y: 2.12, z:  0.20, front: true  },
-  'abdomen-r':     { label: 'Abdomen R',     hue: 175, x:  0.12, y: 2.12, z:  0.20, front: true  },
-  'upper-arm-l':   { label: 'Upper Arm L',   hue:  35, x: -0.75, y: 2.28, z:  0.00, front: true  },
-  'upper-arm-r':   { label: 'Upper Arm R',   hue: 300, x:  0.75, y: 2.28, z:  0.00, front: true  },
-  'forearm-l':     { label: 'Forearm L',     hue: 170, x: -0.88, y: 2.09, z:  0.00, front: true  },
-  'forearm-r':     { label: 'Forearm R',     hue:  95, x:  0.88, y: 2.09, z:  0.00, front: true  },
-  'hand-l':        { label: 'Hand L',        hue: 330, x: -1.01, y: 1.90, z:  0.00, front: true  },
-  'hand-r':        { label: 'Hand R',        hue: 250, x:  1.01, y: 1.90, z:  0.00, front: true  },
-  'spine':         { label: 'Spine',         hue:  50, x:  0.00, y: 2.60, z: -0.22, front: false },
-  'back-l':        { label: 'Back L',        hue: 185, x: -0.16, y: 2.60, z: -0.22, front: false },
-  'back-r':        { label: 'Back R',        hue: 285, x:  0.16, y: 2.60, z: -0.22, front: false },
-  'lowerback-l':   { label: 'Low Back L',    hue:  95, x: -0.16, y: 2.12, z: -0.22, front: false },
-  'lowerback-r':   { label: 'Low Back R',    hue:  25, x:  0.16, y: 2.12, z: -0.22, front: false },
-  'hip-l':         { label: 'Hip L',         hue: 110, x: -0.14, y: 1.76, z:  0.18, front: true  },
-  'hip-r':         { label: 'Hip R',         hue:  20, x:  0.14, y: 1.76, z:  0.18, front: true  },
-  'upper-leg-l':   { label: 'Upper Leg L',   hue: 280, x: -0.12, y: 1.28, z:  0.14, front: true  },
-  'upper-leg-r':   { label: 'Upper Leg R',   hue: 160, x:  0.12, y: 1.28, z:  0.14, front: true  },
-  'lower-leg-l':   { label: 'Lower Leg L',   hue:  45, x: -0.10, y: 0.68, z:  0.12, front: true  },
-  'lower-leg-r':   { label: 'Lower Leg R',   hue: 240, x:  0.10, y: 0.68, z:  0.12, front: true  },
-  'foot-l':        { label: 'Foot L',        hue: 150, x: -0.10, y: 0.04, z:  0.10, front: true  },
-  'foot-r':        { label: 'Foot R',        hue: 320, x:  0.10, y: 0.04, z:  0.10, front: true  },
+  'chest-center':   { label: 'Chest Centre',   hue:   8, x:  0.00, y: 2.50, z:  0.24, front: true  },
+  'chest-l':        { label: 'Chest Upper L',  hue: 330, x: -0.28, y: 2.76, z:  0.16, front: true  },
+  'chest-r':        { label: 'Chest Upper R',  hue: 175, x:  0.28, y: 2.76, z:  0.16, front: true  },
+  'shoulder-l':     { label: 'Shoulder L',     hue: 200, x: -0.61, y: 2.48, z:  0.05, front: true  },
+  'shoulder-r':     { label: 'Shoulder R',     hue: 140, x:  0.61, y: 2.48, z:  0.05, front: true  },
+  'sleeve-l':       { label: 'Sleeve L',       hue:  35, x: -0.75, y: 2.28, z:  0.00, front: true  },
+  'sleeve-r':       { label: 'Sleeve R',       hue: 300, x:  0.75, y: 2.28, z:  0.00, front: true  },
+  'abdomen':        { label: 'Abdomen',        hue: 265, x:  0.00, y: 2.08, z:  0.20, front: true  },
+  'back-top':       { label: 'Back Top',       hue:  50, x:  0.00, y: 2.80, z: -0.22, front: false },
+  'back-center':    { label: 'Back Centre',    hue: 285, x:  0.00, y: 2.50, z: -0.22, front: false },
+  'back-lower':     { label: 'Back Lower',     hue:  95, x:  0.00, y: 2.08, z: -0.22, front: false },
+  'shorts-front-l': { label: 'Shorts Front L', hue: 110, x: -0.15, y: 1.50, z:  0.18, front: true  },
+  'shorts-front-r': { label: 'Shorts Front R', hue:  20, x:  0.15, y: 1.50, z:  0.18, front: true  },
+  'shorts-back':    { label: 'Shorts Back',    hue: 250, x:  0.00, y: 1.66, z: -0.20, front: false },
+  'shorts-leg-l':   { label: 'Shorts Leg L',   hue:  60, x: -0.15, y: 1.28, z: -0.16, front: false },
+  'shorts-leg-r':   { label: 'Shorts Leg R',   hue: 160, x:  0.15, y: 1.28, z: -0.16, front: false },
+  'sock-l':         { label: 'Sock L',         hue: 190, x: -0.10, y: 0.50, z:  0.12, front: true  },
+  'sock-r':         { label: 'Sock R',         hue: 320, x:  0.10, y: 0.50, z:  0.12, front: true  },
 }
 
 // Colour for UI elements (CSS string) — hue from zone config, brightness from %
@@ -91,10 +87,10 @@ function zoneBodyHex(hue: number): number {
 //
 // zoneHue() / zhsl() below are GLSL ports of assignZoneId() + zoneBodyHex().
 const ZONE_GLSL = /* glsl */`
+// Returns the zone hue, or -1.0 for non-kit skin (head, hands, knee, boots).
 float zoneHue(float nx, float ny, float nz){
   float ax = abs(nx);
-  if(ny>0.88) return 270.0;
-  if(ny>0.82) return 35.0;
+  if(ny>0.82) return -1.0;                       // head + neck = skin
   // Arm cylinder (world-aspect): along = band coord, perp = distance from axis
   float px = 1.167*ax - 0.292;
   float py = 1.945*ny - 1.400;
@@ -103,24 +99,27 @@ float zoneHue(float nx, float ny, float nz){
   float perpy = py - along*(-0.829);
   float perp  = sqrt(perpx*perpx + perpy*perpy);
   if(along>-0.04 && along<0.70 && perp<0.12){
-    if(along<0.11) return nx<0.0?200.0:140.0;   // shoulder
-    if(along<0.27) return nx<0.0?35.0:300.0;     // upper-arm
-    if(along<0.41) return nx<0.0?170.0:95.0;     // forearm
-    return nx<0.0?330.0:250.0;                    // hand
+    if(along<0.11) return nx<0.0?200.0:140.0;    // shoulder
+    if(along<0.30) return nx<0.0?35.0:300.0;     // sleeve (to the cuff)
+    return -1.0;                                  // bare forearm + hand
   }
   if(ny>0.65){
-    if(nz>=0.0) return nx<0.0?220.0:8.0;
-    if(ax<0.10) return 50.0;
-    return nx<0.0?185.0:285.0;
+    if(nz>=0.0){
+      if(ny>0.745) return nx<0.0?330.0:175.0;    // upper chest panels
+      if(ax<0.22)  return 8.0;                   // chest centre (main slot)
+      return nx<0.0?330.0:175.0;
+    }
+    return ny>0.745 ? 50.0 : 285.0;              // back top / back centre
   }
-  if(ny>0.50){
-    if(nz>=0.0) return nx<0.0?315.0:175.0;
-    return nx<0.0?95.0:25.0;
+  if(ny>0.50) return nz>=0.0 ? 265.0 : 95.0;     // abdomen / back lower
+  if(ny>0.30){
+    if(nz>=0.0) return nx<0.0?110.0:20.0;        // shorts front panels
+    if(ny>0.42) return 250.0;                    // shorts back (seat)
+    return nx<0.0?60.0:160.0;                    // shorts legs (back)
   }
-  if(ny>0.38) return nx<0.0?110.0:20.0;
-  if(ny>0.22) return nx<0.0?280.0:160.0;
-  if(ny>0.07) return nx<0.0?45.0:240.0;
-  return nx<0.0?150.0:320.0;
+  if(ny>0.24) return -1.0;                       // bare knee gap
+  if(ny>0.04) return nx<0.0?190.0:320.0;         // socks
+  return -1.0;                                    // boots
 }
 float zchan(float n, float h, float a, float l){
   float k = mod(n + h*12.0, 12.0);
@@ -146,8 +145,8 @@ function makeZoneMaterial(): any {
         '#include <color_fragment>',
         `#include <color_fragment>
         {
-          float h = zoneHue(vBodyCoord.x, vBodyCoord.y, vBodyCoord.z) / 360.0;
-          vec3 srgb = zhsl(h, 0.82, 0.54);
+          float h = zoneHue(vBodyCoord.x, vBodyCoord.y, vBodyCoord.z);
+          vec3 srgb = h < 0.0 ? vec3(0.34) : zhsl(h / 360.0, 0.82, 0.54);
           diffuseColor.rgb = pow(srgb, vec3(2.2));   // sRGB → linear
         }`
       )
@@ -163,7 +162,8 @@ const LOOK_AT_Y     = TARGET_HEIGHT * 0.52  // camera focal point (slightly abov
 // Iterable array derived from ZONE_CONFIG — used by the label overlay loop
 const ZONE_ANCHORS = Object.entries(ZONE_CONFIG).map(([id, cfg]) => ({ id, ...cfg }))
 
-// Map a normalized body coordinate to one of the body zone ids.
+// Map a normalized body coordinate to a kit-slot zone id, or null when the
+// point is skin/boots (not part of the saleable kit).
 //   normY: 0 (feet) → 1 (head top);  normX: -0.5 (left) → +0.5 (right);  normZ: world z relative to centre (>0 front)
 //
 // The arm is modelled as a CYLINDER around its axis (computed in WORLD-aspect
@@ -175,10 +175,9 @@ const ZONE_ANCHORS = Object.entries(ZONE_CONFIG).map(([id, cfg]) => ({ id, ...cf
 //   perp  = perpendicular distance from the axis (< ARM_R ⇒ inside the arm)
 // Using perp (not a vertical |x| plane) keeps the torso-side strip out of the
 // arm and makes the shoulder a clean rounded cap. Keep ZONE_GLSL in sync.
-function assignZoneId(normX: number, normY: number, normZ: number): string {
+function assignZoneId(normX: number, normY: number, normZ: number): string | null {
   const absX = Math.abs(normX)
-  if (normY > 0.88) return 'head'
-  if (normY > 0.82) return 'neck'
+  if (normY > 0.82) return null            // head + neck = skin, not saleable
 
   // Arm cylinder test (world-aspect)
   const px = 1.167 * absX - 0.292
@@ -192,24 +191,29 @@ function assignZoneId(normX: number, normY: number, normZ: number): string {
   if (along > -0.04 && along < 0.70 && perp < 0.12) {
     const side = normX < 0 ? 'l' : 'r'
     if (along < 0.11) return `shoulder-${side}`
-    if (along < 0.27) return `upper-arm-${side}`
-    if (along < 0.41) return `forearm-${side}`
-    return `hand-${side}`
+    if (along < 0.30) return `sleeve-${side}`
+    return null                            // bare forearm + hand
   }
-  // Upper torso: chest (front) / shoulder-blade back (back)
+  // Jersey front: upper-chest panels / main centre slot — back: top / centre
   if (normY > 0.65) {
-    if (normZ >= 0) return normX < 0 ? 'chest-l' : 'chest-r'
-    return absX < 0.10 ? 'spine' : (normX < 0 ? 'back-l' : 'back-r')
+    if (normZ >= 0) {
+      if (normY > 0.745) return normX < 0 ? 'chest-l' : 'chest-r'
+      if (absX < 0.22) return 'chest-center'
+      return normX < 0 ? 'chest-l' : 'chest-r'
+    }
+    return normY > 0.745 ? 'back-top' : 'back-center'
   }
-  // Lower torso: abdomen (front) / lower back (back)
-  if (normY > 0.50) {
-    if (normZ >= 0) return normX < 0 ? 'abdomen-l' : 'abdomen-r'
-    return normX < 0 ? 'lowerback-l' : 'lowerback-r'
+  // Jersey hem: abdomen (front) / back lower (back)
+  if (normY > 0.50) return normZ >= 0 ? 'abdomen' : 'back-lower'
+  // Shorts: front panels / seat (KLG) / back of legs (Paints & Lacquers, AON)
+  if (normY > 0.30) {
+    if (normZ >= 0) return normX < 0 ? 'shorts-front-l' : 'shorts-front-r'
+    if (normY > 0.42) return 'shorts-back'
+    return normX < 0 ? 'shorts-leg-l' : 'shorts-leg-r'
   }
-  if (normY > 0.38) return normX < 0 ? 'hip-l' : 'hip-r'
-  if (normY > 0.22) return normX < 0 ? 'upper-leg-l' : 'upper-leg-r'
-  if (normY > 0.07) return normX < 0 ? 'lower-leg-l' : 'lower-leg-r'
-  return normX < 0 ? 'foot-l' : 'foot-r'
+  if (normY > 0.24) return null            // bare knee gap
+  if (normY > 0.04) return normX < 0 ? 'sock-l' : 'sock-r'
+  return null                              // boots
 }
 
 function buildBodyModel(
@@ -316,30 +320,21 @@ function Body2DFallback({ zones }: { zones: BodyZone[] }) {
   const [hovered, setHovered] = useState<string | null>(null)
 
   // SVG front-view (300×400): -l zones on LEFT, -r on RIGHT.
-  // Back zones (spine, back-l, back-r) have no position → skipped in front view.
+  // Back slots (back-top/center/lower, shorts-back, shorts-leg) have no
+  // position → skipped in front view.
   const zonePositions: Record<string, { x: number; y: number; w: number; h: number }> = {
-    'head':         { x: 130, y:   8, w:  40, h: 44 },
-    'neck':         { x: 141, y:  54, w:  18, h: 20 },
-    'chest-l':      { x: 115, y:  78, w:  35, h: 52 },
-    'chest-r':      { x: 150, y:  78, w:  35, h: 52 },
-    'abdomen-l':    { x: 115, y: 130, w:  35, h: 38 },
-    'abdomen-r':    { x: 150, y: 130, w:  35, h: 38 },
-    'shoulder-l':   { x:  68, y:  80, w:  42, h: 24 },
-    'shoulder-r':   { x: 190, y:  80, w:  42, h: 24 },
-    'upper-arm-l':  { x:  68, y: 104, w:  40, h: 26 },
-    'upper-arm-r':  { x: 192, y: 104, w:  40, h: 26 },
-    'forearm-l':    { x:  70, y: 130, w:  38, h: 26 },
-    'forearm-r':    { x: 192, y: 130, w:  38, h: 26 },
-    'hand-l':       { x:  72, y: 156, w:  35, h: 16 },
-    'hand-r':       { x: 193, y: 156, w:  35, h: 16 },
-    'hip-l':        { x: 115, y: 170, w:  35, h: 52 },
-    'hip-r':        { x: 150, y: 170, w:  35, h: 52 },
-    'upper-leg-l':  { x: 119, y: 224, w:  26, h: 88 },
-    'upper-leg-r':  { x: 155, y: 224, w:  26, h: 88 },
-    'lower-leg-l':  { x: 121, y: 314, w:  23, h: 65 },
-    'lower-leg-r':  { x: 156, y: 314, w:  23, h: 65 },
-    'foot-l':       { x: 115, y: 381, w:  28, h: 12 },
-    'foot-r':       { x: 156, y: 381, w:  28, h: 12 },
+    'chest-l':        { x: 115, y:  78, w:  33, h: 26 },
+    'chest-r':        { x: 152, y:  78, w:  33, h: 26 },
+    'chest-center':   { x: 122, y: 106, w:  56, h: 30 },
+    'abdomen':        { x: 122, y: 138, w:  56, h: 30 },
+    'shoulder-l':     { x:  68, y:  80, w:  42, h: 24 },
+    'shoulder-r':     { x: 190, y:  80, w:  42, h: 24 },
+    'sleeve-l':       { x:  68, y: 106, w:  40, h: 34 },
+    'sleeve-r':       { x: 192, y: 106, w:  40, h: 34 },
+    'shorts-front-l': { x: 115, y: 170, w:  35, h: 80 },
+    'shorts-front-r': { x: 150, y: 170, w:  35, h: 80 },
+    'sock-l':         { x: 121, y: 310, w:  23, h: 68 },
+    'sock-r':         { x: 156, y: 310, w:  23, h: 68 },
   }
 
   return (

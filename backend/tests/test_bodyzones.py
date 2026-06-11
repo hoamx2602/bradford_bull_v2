@@ -40,8 +40,10 @@ def _logo_at(cx, cy) -> Detection:
 def test_anchors_include_front_torso_not_back():
     anchors = bodyzones.build_anchors(_front_person())
     assert "chest-l" in anchors and "chest-r" in anchors
-    assert "head" in anchors and "neck" in anchors
-    assert "spine" not in anchors  # face visible -> front view
+    assert "chest-center" in anchors and "abdomen" in anchors
+    assert "back-top" not in anchors  # face visible -> front view
+    # Skin regions are not saleable slots -> never anchored.
+    assert "head" not in anchors and "hand-l" not in anchors
 
 
 def test_chest_logo_attributed_to_chest():
@@ -52,17 +54,25 @@ def test_chest_logo_attributed_to_chest():
     assert result["chest-l"] == 100.0  # all weight on one zone
 
 
+def test_centre_chest_logo_attributed_to_main_slot():
+    # Logo dead-centre mid-chest (the Floor Tonic position).
+    acc = BodyZoneAccumulator()
+    acc.add_frame([_logo_at(500, 310)], [_front_person()])
+    result = {z["id"]: z["percentage"] for z in acc.result()}
+    assert result["chest-center"] == 100.0
+
+
 def test_back_view_uses_back_zones():
     p = _front_person()
     # Blank out face keypoints -> back view.
     for i in (bodyzones.NOSE, bodyzones.L_EYE, bodyzones.R_EYE):
         p.keypoints[i] = (0.0, 0.0, 0.0)
     anchors = bodyzones.build_anchors(p)
-    assert "spine" in anchors
-    assert "back-l" in anchors and "back-r" in anchors
-    assert "chest-l" not in anchors
+    assert "back-top" in anchors and "back-center" in anchors
+    assert "shorts-back" in anchors and "shorts-leg-l" in anchors
+    assert "chest-l" not in anchors and "chest-center" not in anchors
 
 
-def test_result_has_27_zones():
+def test_result_has_18_zones():
     acc = BodyZoneAccumulator()
-    assert len(acc.result()) == 27
+    assert len(acc.result()) == 18

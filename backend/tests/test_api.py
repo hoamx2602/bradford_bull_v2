@@ -67,7 +67,7 @@ def test_upload_poll_fetch(client, synthetic_video):
         assert key in a, f"missing {key}"
     assert a["eventName"] == "Smoke Test"
     assert isinstance(a["logos"], list)
-    assert len(a["bodyZones"]) == 27
+    assert len(a["bodyZones"]) == 18
     assert a["metadata"]["placementMultiplier"] == 1.0
 
     # List + CSV export.
