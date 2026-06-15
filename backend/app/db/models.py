@@ -76,6 +76,8 @@ class Analysis(Base):
     preview_key: Mapped[str | None] = mapped_column(String(512), nullable=True)
     # Storage key of the body-part segmentation overlay video (DensePose).
     bodyseg_key: Mapped[str | None] = mapped_column(String(512), nullable=True)
+    # Storage key of the team-detection overlay video (TARGET vs OTHER boxes).
+    teamdet_key: Mapped[str | None] = mapped_column(String(512), nullable=True)
 
     # Full AnalysisResult payload (already camelCase, ready for the frontend).
     result_json: Mapped[dict] = mapped_column(JSON, default=dict)

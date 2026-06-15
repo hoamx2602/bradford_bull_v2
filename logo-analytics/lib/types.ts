@@ -51,6 +51,10 @@ export interface AnalysisResult {
   bodysegAvailable?: boolean
   // Body-part group → % of person pixels (from DensePose), if available.
   bodysegGroups?: Record<string, number>
+  // True when the team-detection overlay video (TARGET vs OTHER boxes) exists.
+  teamdetAvailable?: boolean
+  // Team-detection render stats: frames, targetTracks, otherTracks.
+  teamdetStats?: Record<string, number>
   // Raw on-screen intervals per brand — matches the boxes drawn on the preview
   // video (NOT the EMV-filtered segments). Drives the player timeline.
   detectionTimeline?: DetectionTimelineBrand[]

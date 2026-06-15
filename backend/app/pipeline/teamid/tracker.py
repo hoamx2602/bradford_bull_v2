@@ -27,7 +27,9 @@ from app.models_zoo import registry
 from app.pipeline.datatypes import Detection
 from app.pipeline.teamid.classifier import OTHER, TARGET, TeamClassifier, VoteTracker
 from app.pipeline.teamid.features import color_feature, encode_crops_masked
-from app.pipeline.teamid.jersey import get_jersey_region, jersey_quality
+from app.pipeline.teamid.jersey import (
+    box_trustworthy, boxes_contested, get_jersey_region, jersey_quality,
+)
 
 log = logging.getLogger("app.teamid")
 
@@ -123,18 +125,28 @@ class TeamTracker:
         xyxys = boxes.xyxy.cpu().numpy()
         tids = ids.int().cpu().tolist() if ids is not None else [-1] * len(xyxys)
 
-        # Jersey features for every tracked person.
+        # Jersey features for every tracked person. Two kinds of box get zero
+        # vote weight (label still shown from accumulated votes):
+        #   - untrustworthy: clipped at the frame top / squat partial bodies —
+        #     their "shirt band" is some other body part (a touchline
+        #     official's trousers mislabelled a whole track this way);
+        #   - contested: heavily overlapped by another person box (tackles,
+        #     mauls) — the band mixes both players' kits, so votes there are
+        #     noise either way. Labels rely on clean, separated views.
+        frame_h = frame.shape[0]
+        contested = boxes_contested(xyxys)
         regions, masks, quals = [], [], []
-        for box in xyxys:
+        for i, box in enumerate(xyxys):
             region, mask = get_jersey_region(frame, box)
             regions.append(region)
             masks.append(mask)
-            quals.append(jersey_quality(region, mask))
+            ok = box_trustworthy(box, frame_h) and not contested[i]
+            quals.append(jersey_quality(region, mask) if ok else 0.0)
 
         # SigLIP — only tracks whose cached embedding is stale (or new).
         need_idx = [
             i for i, tid in enumerate(tids)
-            if regions[i] is not None and tid >= 0 and (
+            if regions[i] is not None and quals[i] > 0 and tid >= 0 and (
                 tid not in self._emb_cache
                 or self._frame_idx - self._emb_cache[tid][0] >= s.team_siglip_every
             )

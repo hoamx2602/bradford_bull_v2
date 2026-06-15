@@ -69,6 +69,18 @@ def get_bodyseg_video(analysis_id: str, session: Session = Depends(get_session))
     return FileResponse(path, media_type="video/mp4")
 
 
+@router.get("/{analysis_id}/teamdet-video")
+def get_teamdet_video(analysis_id: str, session: Session = Depends(get_session)):
+    """Team-detection overlay MP4 (tracked persons boxed TARGET vs OTHER)."""
+    a: Analysis | None = AnalysisRepository(session).get(analysis_id)
+    if a is None or not getattr(a, "teamdet_key", None):
+        raise HTTPException(status_code=404, detail="No team-detection video for this analysis")
+    path = get_storage().local_path(a.teamdet_key)
+    if not path.exists():
+        raise HTTPException(status_code=404, detail="Team-detection file missing")
+    return FileResponse(path, media_type="video/mp4")
+
+
 @router.get("/{analysis_id}/export.csv")
 def export_csv(analysis_id: str, session: Session = Depends(get_session)):
     a = AnalysisRepository(session).get(analysis_id)

@@ -78,3 +78,69 @@ export function videoUrl(id: string): string {
 export function bodysegVideoUrl(id: string): string {
   return `${API_BASE}/api/analyses/${id}/bodyseg-video`
 }
+
+/** Team-detection overlay video (tracked persons boxed TARGET vs OTHER). */
+export function teamdetVideoUrl(id: string): string {
+  return `${API_BASE}/api/analyses/${id}/teamdet-video`
+}
+
+// ── Team refs (manual team selection) ──────────────────────────────────────
+
+export interface TeamRefsStatus {
+  exists: boolean
+  builtAt?: string
+  mode?: string
+  kit?: string | null
+  nTarget?: number | null
+  nOther?: number | null
+  wColor?: number | null
+}
+
+export interface RefVideo {
+  storageKey: string
+  eventName: string
+  videoName: string
+  kit: string
+  createdAt: string
+}
+
+export interface RefCrop {
+  thumb: string // data URL
+  suggested: 'target' | 'other'
+}
+
+export async function getTeamRefsStatus(): Promise<TeamRefsStatus> {
+  return asJson(await fetch(`${API_BASE}/api/team-refs/status`))
+}
+
+export async function deleteTeamRefs(): Promise<{ deleted: boolean }> {
+  return asJson(await fetch(`${API_BASE}/api/team-refs`, { method: 'DELETE' }))
+}
+
+export async function listRefVideos(): Promise<RefVideo[]> {
+  return asJson(await fetch(`${API_BASE}/api/team-refs/videos`))
+}
+
+export async function extractRefCrops(
+  storageKey: string,
+  kit: string,
+): Promise<{ extractId: string; crops: RefCrop[]; tookSeconds: number }> {
+  const res = await fetch(`${API_BASE}/api/team-refs/extract`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ storageKey, kit }),
+  })
+  return asJson(res)
+}
+
+export async function saveTeamRefs(
+  extractId: string,
+  assignments: (string | null)[],
+): Promise<{ saved: boolean; nTarget: number; nOther: number; wColor: number }> {
+  const res = await fetch(`${API_BASE}/api/team-refs/save`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ extractId, assignments }),
+  })
+  return asJson(res)
+}

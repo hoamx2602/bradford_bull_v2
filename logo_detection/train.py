@@ -43,6 +43,47 @@ from ultralytics import YOLO
 HERE = Path(__file__).resolve().parent
 
 
+def patch_motion_blur(mb_p=0.30, blur_limit=(3, 15)):
+    """Inject MotionBlur into Ultralytics' Albumentations pipeline.
+
+    Ultralytics only runs Albumentations if the package is installed, and its
+    built-in set (Blur/MedianBlur/ToGray/CLAHE at p=0.01) has NO motion blur. Our
+    frames are broadcast sampled at ~2 fps -> heavy motion blur on moving players,
+    and recall on blurred logos is the weak point. MotionBlur is a PIXEL-level
+    transform (it does not move boxes), so we add it without touching bbox_params.
+    blur_limit is kept moderate so the ~10% of boxes that are tiny (<32 px) are not
+    smeared into nothing — they must stay learnable. p<1 keeps sharp examples too.
+    Returns True if the patch was applied.
+    """
+    if mb_p <= 0:
+        print("[aug] motion blur OFF (mb_p=0)")
+        return False
+    try:
+        import albumentations as A
+        from ultralytics.data import augment as aug
+    except ImportError:
+        print("[aug] albumentations not installed — motion blur OFF "
+              "(pip install albumentations)")
+        return False
+
+    _orig_init = aug.Albumentations.__init__
+
+    def __init__(self, p=1.0, transforms=None):
+        if transforms is None:  # mirror Ultralytics' defaults + MotionBlur
+            transforms = [
+                A.Blur(p=0.01),
+                A.MedianBlur(p=0.01),
+                A.ToGray(p=0.01),
+                A.CLAHE(p=0.01),
+                A.MotionBlur(blur_limit=blur_limit, p=mb_p),
+            ]
+        _orig_init(self, p, transforms)
+
+    aug.Albumentations.__init__ = __init__
+    print(f"[aug] MotionBlur injected (blur_limit={blur_limit}, p={mb_p})")
+    return True
+
+
 def init_wandb(args):
     """Pre-init wandb with a clean project name.
 
@@ -74,6 +115,7 @@ def main(args):
         raise SystemExit(f"{data} not found — run resplit_data.py / prepare first.")
 
     init_wandb(args)
+    patch_motion_blur(args.mb_p)        # 2 fps broadcast -> simulate motion blur
     model = YOLO(args.model)
     model.train(
         # ---- data / model ----
@@ -146,5 +188,7 @@ if __name__ == "__main__":
     p.add_argument("--device", default="0")
     p.add_argument("--cache", default=False,
                    help="False | 'ram' | 'disk' — 'ram' speeds I/O if you have spare RAM")
+    p.add_argument("--mb_p", type=float, default=0.30,
+                   help="MotionBlur probability (0 disables). Matches 2 fps broadcast blur.")
     p.add_argument("--name", default="logo_yolo26m_17cls")
     main(p.parse_args())

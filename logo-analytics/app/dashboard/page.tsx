@@ -12,7 +12,7 @@ import DetectionPlayer from '@/components/dashboard/detection-player'
 import LogoTable from '@/components/dashboard/logo-table'
 import { DonutChart, TrendChart, HeatmapGrid, RadarChart, ScatterChart, colorAt } from '@/components/dashboard/charts'
 import { MOCK_RESULT, MOCK_MATCHES, getBrandColor } from '@/lib/mock-data'
-import { listAnalyses, bodysegVideoUrl } from '@/lib/api'
+import { listAnalyses, bodysegVideoUrl, teamdetVideoUrl } from '@/lib/api'
 import {
   formatCurrency, formatDate, formatNumber, formatSeconds,
   exportCSV, exportPDF, aggregateBrands, filterMatches,
@@ -596,6 +596,41 @@ export default function DashboardPage() {
                       </div>
                     )}
                   </Section>
+
+                  {result.teamdetAvailable && (
+                    <Section title="Team Detection — Target vs Other">
+                      <div style={{ background: 'var(--c-panel)', border: '1px solid var(--c-wire)', borderRadius: 10, padding: 12 }}>
+                        <video
+                          key={`teamdet-${result.id}`}
+                          src={teamdetVideoUrl(result.id)}
+                          controls
+                          playsInline
+                          style={{ width: '100%', borderRadius: 8, display: 'block', background: '#000' }}
+                        />
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px 14px', marginTop: 12 }}>
+                          {[
+                            ['Target team', '#FFBE0A'], ['Other / refs', '#AAAAAA'], ['Undecided', '#3CA0D2'],
+                          ].map(([name, color]) => (
+                            <div key={name} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                              <span style={{ width: 11, height: 11, borderRadius: 3, background: color }} />
+                              <span style={{ fontSize: 12, color: 'var(--c-dim)' }}>{name}</span>
+                            </div>
+                          ))}
+                          {result.teamdetStats?.targetTracks != null && (
+                            <span style={{ fontSize: 12, color: 'var(--c-ghost)', marginLeft: 'auto' }}>
+                              <span className="num">{result.teamdetStats.targetTracks}</span> target ·{' '}
+                              <span className="num">{result.teamdetStats.otherTracks}</span> other tracks
+                            </span>
+                          )}
+                        </div>
+                        <div style={{ fontSize: 12, color: 'var(--c-ghost)', marginTop: 8 }}>
+                          This is the team filter&apos;s own view: each tracked person is boxed by their voted
+                          team. Only logos on <strong style={{ color: 'var(--c-dim)' }}>target-team</strong> players
+                          count toward exposure / EMV.
+                        </div>
+                      </div>
+                    </Section>
+                  )}
 
                   <Section title="Brand Breakdown">
                     <div style={{ background: 'var(--c-panel)', border: '1px solid var(--c-wire)', borderRadius: 10, overflow: 'hidden' }}>

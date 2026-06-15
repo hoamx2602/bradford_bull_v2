@@ -14,7 +14,10 @@ from __future__ import annotations
 import cv2
 import numpy as np
 
-# Upper-body band of the bbox (skip head, stop before shorts).
+# Upper-body band of the bbox (skip head, stop before shorts). The FULL bbox
+# width is intentional: rugby shirts carry big white numbers in the centre of
+# the back, so centre-only sampling skews dark kits bright — sleeves and sides
+# balance it out.
 SHIRT_TOP = 0.15
 SHIRT_BOTTOM = 0.45
 
@@ -34,6 +37,47 @@ def _skin_mask(region_bgr: np.ndarray) -> np.ndarray:
     ycrcb = cv2.cvtColor(region_bgr, cv2.COLOR_BGR2YCrCb)
     cr, cb = ycrcb[:, :, 1], ycrcb[:, :, 2]
     return (cr >= 133) & (cr <= 173) & (cb >= 77) & (cb <= 127)
+
+
+def box_iou(b1, b2) -> float:
+    xa, ya = max(b1[0], b2[0]), max(b1[1], b2[1])
+    xb, yb = min(b1[2], b2[2]), min(b1[3], b2[3])
+    inter = max(0.0, xb - xa) * max(0.0, yb - ya)
+    if inter <= 0:
+        return 0.0
+    a1 = (b1[2] - b1[0]) * (b1[3] - b1[1])
+    a2 = (b2[2] - b2[0]) * (b2[3] - b2[1])
+    return float(inter / (a1 + a2 - inter + 1e-6))
+
+
+def boxes_contested(boxes, iou_thr: float = 0.40) -> list[bool]:
+    """Per-box flag: True when another person box overlaps it heavily — the
+    jersey band there mixes two players' kits (tackles, mauls)."""
+    n = len(boxes)
+    out = [False] * n
+    for i in range(n):
+        for j in range(i + 1, n):
+            if box_iou(boxes[i], boxes[j]) > iou_thr:
+                out[i] = out[j] = True
+    return out
+
+
+def box_trustworthy(box, frame_h: int) -> bool:
+    """False when the bbox cannot contain a readable jersey band.
+
+    A box clipped at the TOP of the frame has lost head+shoulders, so the
+    "shirt band" of what remains is some other body part (a touchline
+    official's trousers classified an entire track wrong this way). Squat
+    boxes (h/w too low) are partial bodies or merged players. Bottom/side
+    clipping is fine — the band sits in the upper-centre of the box.
+    """
+    x1, y1, x2, y2 = (float(v) for v in box)
+    w, h = x2 - x1, y2 - y1
+    if y1 <= 2:                      # clipped at frame top
+        return False
+    if h < 28 or w < 8:              # too small to read a kit colour
+        return False
+    return h / max(w, 1.0) >= 1.15   # upright-person aspect
 
 
 def get_jersey_region(frame_bgr: np.ndarray, box) -> tuple[np.ndarray | None, np.ndarray | None]:

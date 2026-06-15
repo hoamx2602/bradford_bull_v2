@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation'
 const LINKS = [
   { href: '/dashboard', label: 'Dashboard' },
   { href: '/', label: 'New Analysis' },
+  { href: '/team-refs', label: 'Team Refs' },
 ]
 
 export default function Nav({ right }: { right?: React.ReactNode }) {

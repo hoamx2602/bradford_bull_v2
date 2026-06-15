@@ -44,3 +44,4 @@ team_detection/output
 /logo_detection/runs
 /runs
 /wandb
+/logo_detection/wandb

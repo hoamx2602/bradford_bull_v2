@@ -111,7 +111,10 @@ class Settings(BaseSettings):
     # any failure disables the stage gracefully (analysis runs unfiltered).
     team_filter_enabled: bool = True
     team_auto_refs: bool = True           # bootstrap refs from the video itself
-    team_bootstrap_frames: int = 32       # frames sampled for the bootstrap
+    # Frames sampled for the bootstrap. Generous because crops that are
+    # overlapped (tackles), clipped at the frame edge, or blurry are discarded
+    # — busy clips can yield only a handful of usable crops per frame.
+    team_bootstrap_frames: int = 96
     # Kits considered dark for the luminance pick (csv). Bradford away = black.
     team_dark_kits: str = "away"
     team_refs_path: str = ""              # default: data/team_refs.pkl
@@ -123,6 +126,14 @@ class Settings(BaseSettings):
     team_min_votes: float = 2.0           # vote mass before an OTHER label may drop logos
     team_keep_unknown: bool = True        # keep logos on not-yet-confident tracks
     team_keep_unassigned: bool = False    # keep logos not attached to any person
+
+    # ── Team-detection overlay video ─────────────────────────────────────
+    # Standalone video showing the team filter's view: tracked persons boxed
+    # by voted team (TARGET vs OTHER). Runs a fresh tracking pass at native
+    # fps, capped like the preview so long matches stay cheap.
+    teamdet_video_enabled: bool = True
+    teamdet_max_frames: int = 900         # native output frames (~30s @30fps)
+    teamdet_width: int = 960              # downscale output width
 
     # ── Upload limits ────────────────────────────────────────────────────
     max_upload_mb: int = 2048

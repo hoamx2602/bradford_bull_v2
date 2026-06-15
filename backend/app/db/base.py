@@ -39,12 +39,15 @@ def init_db() -> None:
     # Lightweight dev migration: create_all never alters existing tables, so
     # add columns introduced after a DB was first created. No-op when present.
     with engine.connect() as conn:
-        try:
-            conn.exec_driver_sql(
-                "ALTER TABLE jobs ADD COLUMN kit VARCHAR(16) DEFAULT 'away'")
-            conn.commit()
-        except Exception:
-            pass
+        for ddl in (
+            "ALTER TABLE jobs ADD COLUMN kit VARCHAR(16) DEFAULT 'away'",
+            "ALTER TABLE analyses ADD COLUMN teamdet_key VARCHAR(512)",
+        ):
+            try:
+                conn.exec_driver_sql(ddl)
+                conn.commit()
+            except Exception:
+                pass
 
 
 @contextmanager

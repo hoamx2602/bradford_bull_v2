@@ -91,7 +91,11 @@ class AnalysisRepository:
         self.s = session
 
     def create(
-        self, result: dict, preview_key: str | None = None, bodyseg_key: str | None = None
+        self,
+        result: dict,
+        preview_key: str | None = None,
+        bodyseg_key: str | None = None,
+        teamdet_key: str | None = None,
     ) -> Analysis:
         analysis = Analysis(
             id=result["id"],
@@ -102,6 +106,7 @@ class AnalysisRepository:
             logo_count=len(result.get("logos", [])),
             preview_key=preview_key,
             bodyseg_key=bodyseg_key,
+            teamdet_key=teamdet_key,
             result_json=result,
         )
         self.s.add(analysis)

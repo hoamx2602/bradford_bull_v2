@@ -73,6 +73,7 @@ def run_analysis(job_id: str) -> None:
         # before the vote stabilises (team_keep_unknown policy). Any failure
         # logs + leaves the analysis unfiltered rather than breaking the job.
         team_tracker = None
+        team_refs = None  # kept for the team-detection video's fresh pass
         if settings.team_filter_enabled:
             try:
                 from pathlib import Path as _Path
@@ -88,6 +89,7 @@ def run_analysis(job_id: str) -> None:
                     refs = build_refs_from_video(video_path, ctx["kit"])
                     if refs is None:
                         raise RuntimeError("kit reference bootstrap failed")
+                team_refs = refs
                 team_tracker = TeamTracker(refs=refs)
             except Exception as exc:
                 log.warning("team filter disabled: %s", exc)
@@ -211,6 +213,38 @@ def run_analysis(job_id: str) -> None:
                 if seg_muxed != seg_path:
                     seg_muxed.unlink(missing_ok=True)
 
+        # 6c. Team-detection overlay video — the team filter's own view
+        #     (tracked persons boxed TARGET vs OTHER). Fresh tracker over the
+        #     same refs so votes/track-state don't leak from the sampled pass.
+        teamdet_key = None
+        teamdet_stats: dict = {}
+        if settings.teamdet_video_enabled and team_tracker is not None:
+            try:
+                _update(job_id, P_PRICING, "teamdet", "Rendering team-detection video")
+                from app.pipeline.av import mux_audio
+                from app.pipeline.teamdet_video import render_teamdet_video
+                from app.pipeline.teamid.tracker import TeamTracker
+
+                td_tmp = video_path.parent / f"{video_path.stem}_teamdet.mp4"
+                td_path, teamdet_stats = render_teamdet_video(
+                    video_path, TeamTracker(refs=team_refs), meta.fps,
+                    meta.width, meta.height, td_tmp,
+                    max_frames=settings.teamdet_max_frames,
+                    max_width=settings.teamdet_width,
+                )
+                if td_path is not None:
+                    td_muxed = mux_audio(
+                        td_path, video_path,
+                        td_path.with_name(f"{td_path.stem}_audio.mp4"),
+                    )
+                    with td_muxed.open("rb") as fh:
+                        teamdet_key = storage.save(fh, td_path.name)
+                    td_path.unlink(missing_ok=True)
+                    if td_muxed != td_path:
+                        td_muxed.unlink(missing_ok=True)
+            except Exception as exc:
+                log.warning("teamdet video skipped: %s", exc)
+
         # 7. Assemble + persist.
         analysis_id = AnalysisRepository.new_id()
         result = aggregate.build_analysis_result(
@@ -229,6 +263,8 @@ def run_analysis(job_id: str) -> None:
         result["previewAvailable"] = preview_key is not None
         result["bodysegAvailable"] = bodyseg_key is not None
         result["bodysegGroups"] = bodyseg_groups
+        result["teamdetAvailable"] = teamdet_key is not None
+        result["teamdetStats"] = teamdet_stats
         if team_tracker is not None:
             total_seen = team_kept + team_dropped
             result["teamFilter"] = {
@@ -240,7 +276,10 @@ def run_analysis(job_id: str) -> None:
             log.info("team filter: kept %d, dropped %d logo detections", team_kept, team_dropped)
 
         with session_scope() as s:
-            AnalysisRepository(s).create(result, preview_key=preview_key, bodyseg_key=bodyseg_key)
+            AnalysisRepository(s).create(
+                result, preview_key=preview_key, bodyseg_key=bodyseg_key,
+                teamdet_key=teamdet_key,
+            )
             JobRepository(s).mark_done(job_id, analysis_id)
         log.info("job %s done -> analysis %s (%d brands)", job_id, analysis_id, len(logos))
 

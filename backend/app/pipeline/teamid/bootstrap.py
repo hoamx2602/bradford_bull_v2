@@ -29,7 +29,9 @@ from app.config import BACKEND_DIR, get_settings
 from app.models_zoo import registry
 from app.pipeline.teamid.classifier import OTHER, TARGET, learn_weights
 from app.pipeline.teamid.features import N_L, color_feature, color_sim, encode_crops_masked
-from app.pipeline.teamid.jersey import get_jersey_region, jersey_quality
+from app.pipeline.teamid.jersey import (
+    box_trustworthy, boxes_contested, get_jersey_region, jersey_quality,
+)
 
 log = logging.getLogger("app.teamid")
 
@@ -63,6 +65,29 @@ def _kmeans(X: np.ndarray, k: int, iters: int = 30, seed: int = 0):
     return labels, C
 
 
+def _otsu_threshold(vals: np.ndarray, bins: int = 64) -> float:
+    """Classic Otsu split of a 1-D sample in [0,1] — threshold that maximises
+    inter-class variance between the two sides."""
+    hist, edges = np.histogram(np.clip(vals, 0.0, 1.0), bins=bins, range=(0.0, 1.0))
+    hist = hist.astype(np.float64)
+    centers = (edges[:-1] + edges[1:]) / 2
+    total = hist.sum()
+    best_thr, best_var = 0.5, -1.0
+    w0 = cum0 = 0.0
+    mean_all = float((hist * centers).sum() / (total + 1e-12))
+    for i in range(bins - 1):
+        w0 += hist[i]
+        cum0 += hist[i] * centers[i]
+        w1 = total - w0
+        if w0 <= 0 or w1 <= 0:
+            continue
+        m0, m1 = cum0 / w0, (mean_all * total - cum0) / w1
+        var = w0 * w1 * (m0 - m1) ** 2
+        if var > best_var:
+            best_var, best_thr = var, float(edges[i + 1])
+    return best_thr
+
+
 def _luminance(color_feat: np.ndarray) -> float:
     """Expected luminance in [0,1] from the L-histogram block."""
     L = color_feat[:N_L]
@@ -81,7 +106,10 @@ def _collect_crops(video_path: Path, n_frames: int, device: str):
 
     model = registry.get_person_model()
     regions, masks = [], []
+    enough = 150  # plenty for a stable Otsu split / centroids
     for fi in idxs:
+        if len(regions) >= enough:
+            break
         cap.set(cv2.CAP_PROP_POS_FRAMES, int(fi))
         ok, frame = cap.read()
         if not ok:
@@ -90,7 +118,11 @@ def _collect_crops(video_path: Path, n_frames: int, device: str):
                             imgsz=s.team_person_imgsz, device=device, verbose=False)
         if not res or res[0].boxes is None:
             continue
-        for box in res[0].boxes.xyxy.cpu().numpy():
+        boxes = res[0].boxes.xyxy.cpu().numpy()
+        contested = boxes_contested(boxes)
+        for bi, box in enumerate(boxes):
+            if contested[bi] or not box_trustworthy(box, frame.shape[0]):
+                continue
             region, mask = get_jersey_region(frame, box)
             if region is None or jersey_quality(region, mask) < MIN_QUALITY:
                 continue
@@ -142,30 +174,30 @@ def build_refs_from_video(video_path: Path, kit: str) -> dict | None:
 
     color_feats = [color_feature(r, m) for r, m in zip(regions, masks)]
     embeddings = encode_crops_masked(regions, masks, device)
-
-    # Cluster on the best feature space we have.
-    if embeddings is not None:
-        feats = embeddings
-    else:
-        keep = [i for i, c in enumerate(color_feats) if c is not None]
-        if len(keep) < MIN_CROPS:
-            return None
-        regions = [regions[i] for i in keep]
-        color_feats = [color_feats[i] for i in keep]
-        feats = np.stack(color_feats)
-
-    k = 3 if len(feats) >= 3 * 8 else 2   # 2 teams + officials when enough data
-    labels, _ = _kmeans(feats, k)
-
-    # ── Pick the target cluster ──────────────────────────────────────────
     a_emb, a_cf = _anchor_features(kit, device)
-    scores = []
-    for j in range(k):
-        ix = np.where(labels == j)[0]
-        if len(ix) == 0:
-            scores.append(-1e9)
-            continue
-        if a_emb is not None or a_cf is not None:
+
+    # Both pick rules need colour features, so drop crops without one.
+    keep = [i for i, c in enumerate(color_feats) if c is not None]
+    if len(keep) < MIN_CROPS:
+        return None
+    regions = [regions[i] for i in keep]
+    color_feats = [color_feats[i] for i in keep]
+    if embeddings is not None:
+        embeddings = embeddings[keep]
+
+    if a_emb is not None or a_cf is not None:
+        # ── Anchor mode: cluster, pick the cluster most similar to anchors ─
+        feats = embeddings if embeddings is not None else np.stack(color_feats)
+        k = 3 if len(feats) >= 3 * 8 else 2   # 2 teams + officials
+        labels, _ = _kmeans(feats, k)
+        scores = []
+        for j in range(k):
+            ix = np.where(labels == j)[0]
+            # A real team holds a sizeable share of crops; tiny clusters are
+            # outliers (shadowed crops, officials) and must not win the pick.
+            if len(ix) < MIN_TARGET_FRAC * len(labels):
+                scores.append(-1e9)
+                continue
             sim = 0.0
             n_terms = 0
             if a_emb is not None and embeddings is not None:
@@ -174,33 +206,43 @@ def build_refs_from_video(video_path: Path, kit: str) -> dict | None:
                 sim += float(c @ a_emb)
                 n_terms += 1
             if a_cf is not None:
-                cfs = [color_feats[i] for i in ix if color_feats[i] is not None]
-                if cfs:
-                    sim += color_sim(np.mean(cfs, axis=0), a_cf)
-                    n_terms += 1
+                sim += color_sim(np.mean([color_feats[i] for i in ix], axis=0), a_cf)
+                n_terms += 1
             scores.append(sim / max(1, n_terms))
-        else:
-            # Luminance rule: dark kits -> darkest cluster wins (negated lum).
-            cfs = [color_feats[i] for i in ix if color_feats[i] is not None]
-            if not cfs:
-                scores.append(-1e9)
-                continue
-            lum = _luminance(np.mean(cfs, axis=0))
-            dark = kit in {x.strip() for x in s.team_dark_kits.split(",")}
-            scores.append(-lum if dark else lum)
+        pick = int(np.argmax(scores))
+        assignments = [TARGET if l == pick else OTHER for l in labels]
+        mode = "anchors"
+    else:
+        # ── Luminance mode: 1-D Otsu split on shirt luminance ─────────────
+        # No kmeans here: with one team dominating the crops (e.g. a try
+        # celebration) kmeans splits the dominant kit into two clusters and
+        # blends the real opponent into "other", dragging both centroids to
+        # the middle and flipping half the squad. The luminance assumption
+        # is one-dimensional, so split it one-dimensionally.
+        lums = np.array([_luminance(c) for c in color_feats])
+        thr = _otsu_threshold(lums)
+        dark_mean = float(lums[lums <= thr].mean())
+        light_mean = float(lums[lums > thr].mean())
+        if light_mean - dark_mean < 0.10:
+            log.warning("team bootstrap: kits not separable by luminance "
+                        "(dark %.2f vs light %.2f) — add kit anchors. Skipping",
+                        dark_mean, light_mean)
+            return None
+        dark = kit in {x.strip() for x in s.team_dark_kits.split(",")}
+        is_target = (lums <= thr) if dark else (lums > thr)
+        assignments = [TARGET if t else OTHER for t in is_target]
+        mode = "luminance"
 
-    pick = int(np.argmax(scores))
-    n_pick = int((labels == pick).sum())
-    if n_pick < MIN_TARGET_FRAC * len(labels):
-        log.warning("team bootstrap: target cluster too small (%d/%d) — skipping",
-                    n_pick, len(labels))
+    n_pick = sum(1 for a in assignments if a == TARGET)
+    if not (MIN_TARGET_FRAC * len(assignments)
+            <= n_pick
+            <= (1 - MIN_TARGET_FRAC) * len(assignments)):
+        log.warning("team bootstrap: implausible target share (%d/%d) — skipping",
+                    n_pick, len(assignments))
         return None
 
-    mode = "anchors" if (a_emb is not None or a_cf is not None) else "luminance"
-    log.info("team bootstrap: %d crops, k=%d, target=cluster %d (%d crops, by %s)",
-             len(labels), k, pick, n_pick, mode)
-
-    assignments = [TARGET if l == pick else OTHER for l in labels]
+    log.info("team bootstrap: %d crops, target=%d crops (by %s)",
+             len(assignments), n_pick, mode)
     w_color, w_siglip, centroids, colors = learn_weights(
         [TARGET, OTHER], assignments, embeddings, color_feats)
 
