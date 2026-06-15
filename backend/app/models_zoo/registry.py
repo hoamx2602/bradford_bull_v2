@@ -40,6 +40,49 @@ def get_logo_model():
     return YOLO(path)
 
 
+# RF-DETR variant name -> class. Loaded lazily so the rfdetr package is only
+# required when LOGO_BACKEND=rfdetr.
+def _rfdetr_class(variant: str):
+    import rfdetr
+
+    table = {
+        "nano": "RFDETRNano",
+        "small": "RFDETRSmall",
+        "medium": "RFDETRMedium",
+        "base": "RFDETRBase",
+        "large": "RFDETRLarge",
+        "2xlarge": "RFDETR2XLarge",
+    }
+    name = table.get(variant.lower())
+    if name is None or not hasattr(rfdetr, name):
+        raise ValueError(
+            f"unknown rfdetr_variant {variant!r}; expected one of {sorted(table)}"
+        )
+    return getattr(rfdetr, name)
+
+
+@lru_cache
+def get_rfdetr_logo_model():
+    """Load the fine-tuned RF-DETR logo detector from its .pth checkpoint.
+
+    RF-DETR auto-selects CUDA when available. We optimise for inference once
+    (best-effort) to speed up the per-frame predict calls.
+    """
+    settings = get_settings()
+    path = settings.resolved_rfdetr_model_path()
+    cls = _rfdetr_class(settings.rfdetr_variant)
+    kwargs = {"pretrain_weights": path}
+    if settings.rfdetr_resolution:
+        kwargs["resolution"] = settings.rfdetr_resolution
+    log.info("loading RF-DETR logo model (%s): %s", settings.rfdetr_variant, path)
+    model = cls(**kwargs)
+    try:
+        model.optimize_for_inference()
+    except Exception as exc:  # pragma: no cover - optional fast path
+        log.warning("rfdetr optimize_for_inference skipped: %s", exc)
+    return model
+
+
 @lru_cache
 def get_pose_model():
     from ultralytics import YOLO

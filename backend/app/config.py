@@ -30,6 +30,16 @@ def _default_logo_model() -> str:
     return str(runs / "logo_yolo26m" / "weights" / "best.pt")
 
 
+def _default_rfdetr_model() -> str:
+    """RF-DETR checkpoint (.pth). Picks the newest checkpoint_best_ema.pth under
+    logo_detection/runs/*; overridable via RFDETR_MODEL_PATH."""
+    runs = REPO_ROOT / "logo_detection" / "runs"
+    cands = sorted(runs.glob("*/weights/checkpoint_best*.pth"), key=lambda p: p.stat().st_mtime)
+    if cands:
+        return str(cands[-1])
+    return str(runs / "rfdetr_large" / "weights" / "checkpoint_best_ema.pth")
+
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_file=str(BACKEND_DIR / ".env"),
@@ -53,7 +63,27 @@ class Settings(BaseSettings):
     worker_concurrency: int = 1
 
     # ── Models ───────────────────────────────────────────────────────────
+    # Logo detector backend: "yolo" = fine-tuned YOLO26m (ultralytics, built-in
+    # ByteTrack), "rfdetr" = RF-DETR .pth checkpoint (no NMS; tracking added via
+    # supervision.ByteTrack). Swap with LOGO_BACKEND=rfdetr.
+    logo_backend: str = "yolo"
     model_path: str = ""            # filled by _default_logo_model() if empty
+    # RF-DETR weights + variant (only used when logo_backend=rfdetr). The .pth
+    # has no class names baked in, so brands come from RFDETR_CLASS_NAMES below
+    # (must match the training class order). resolution=0 -> use the variant's
+    # native size (don't override; RF-DETR has an interpolation bug otherwise).
+    rfdetr_model_path: str = ""     # filled by _default_rfdetr_model() if empty
+    rfdetr_variant: str = "large"   # large | 2xlarge | base | nano | small | medium
+    rfdetr_resolution: int = 0      # 0 = model default (Large 704 / 2XLarge 880)
+    # RF-DETR confidence floor — SEPARATE from `conf` (which is tuned for YOLO).
+    # DETR sigmoid-focal scores run much lower than YOLO's; real logos score
+    # ~0.1-0.3, so the YOLO 0.25 floor drops almost everything. 0.1 keeps them.
+    rfdetr_conf: float = 0.10
+    # category_id of the FIRST brand in the model's output. The training COCO had
+    # id 0 = 'logos' placeholder and brands at 1..17, so predicted class_id is
+    # 1-indexed into RFDETR_CLASS_NAMES. Set to 0 if your brand names come out
+    # shifted by one.
+    rfdetr_class_offset: int = 1
     # Pose model is a SEPARATE stock checkpoint used only for body-zone
     # attribution — the fine-tuned logo model is detect-only and can't produce
     # human keypoints. YOLO26 has no pose variant yet, so we use YOLO11-pose
@@ -151,6 +181,9 @@ class Settings(BaseSettings):
     def resolved_model_path(self) -> str:
         return self.model_path or _default_logo_model()
 
+    def resolved_rfdetr_model_path(self) -> str:
+        return self.rfdetr_model_path or _default_rfdetr_model()
+
     def resolved_team_refs(self) -> str:
         return self.team_refs_path or str(BACKEND_DIR / "data" / "team_refs.pkl")
 
@@ -211,3 +244,28 @@ def display_name(raw_name: str) -> str:
         return BRAND_DISPLAY[key]
     # Fallback: prettify "some_brand" -> "Some Brand"
     return key.replace("-", " ").replace("_", " ").title()
+
+
+# ── RF-DETR class order ──────────────────────────────────────────────────
+# Unlike the YOLO weights, an RF-DETR .pth has no class names embedded. This is
+# the 17-brand order used when the COCO dataset was built (train_colab_rfdetr.ipynb,
+# BRAND_ORDER); the model emits a numeric class_id that indexes into this list
+# (offset by Settings.rfdetr_class_offset). Keep in sync with the training recipe.
+RFDETR_CLASS_NAMES: list[str] = [
+    "acs_group", "aon", "atm", "bartercard", "cch", "chadlaw", "ellgren",
+    "em_workwear", "fairway", "floor_tonic", "klg", "mcp", "mna_cladding",
+    "mna_support_service", "paints_lacquers", "romantica", "top_notch",
+]
+
+
+def rfdetr_class_name(class_id: int, offset: int = 1) -> str:
+    """Map an RF-DETR predicted class_id to its raw brand name.
+
+    `offset` is the category_id of the first brand (1 when a placeholder class 0
+    exists, as in the training COCO). Out-of-range ids fall back to the numeric
+    id so an unexpected class never crashes the pipeline.
+    """
+    idx = class_id - offset
+    if 0 <= idx < len(RFDETR_CLASS_NAMES):
+        return RFDETR_CLASS_NAMES[idx]
+    return str(class_id)
