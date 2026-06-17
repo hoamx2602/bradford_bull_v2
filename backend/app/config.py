@@ -30,6 +30,29 @@ def _default_logo_model() -> str:
     return str(runs / "logo_yolo26m" / "weights" / "best.pt")
 
 
+def _default_rfdetr_model() -> str:
+    """Resolve the newest RF-DETR checkpoint under logo_detection/runs/*.
+
+    Training (train_colab_rfdetr.ipynb) writes `checkpoint_best_ema.pth` /
+    `checkpoint_best_total.pth`. Overridable via RFDETR_MODEL_PATH.
+    """
+    runs = REPO_ROOT / "logo_detection" / "runs"
+    candidates = sorted(runs.glob("**/*.pth"), key=lambda p: p.stat().st_mtime)
+    if candidates:
+        return str(candidates[-1])
+    return str(runs / "rfdetr_large" / "checkpoint_best_ema.pth")
+
+
+# 17 merged brands, in the COCO category order used to train RF-DETR
+# (train_colab_rfdetr.ipynb). RF-DETR emits the category id, so this list maps a
+# predicted class id back to a brand (see RFDETR_CLASS_OFFSET).
+RFDETR_BRAND_ORDER: list[str] = [
+    "acs_group", "aon", "atm", "bartercard", "cch", "chadlaw", "ellgren",
+    "em_workwear", "fairway", "floor_tonic", "klg", "mcp", "mna_cladding",
+    "mna_support_service", "paints_lacquers", "romantica", "top_notch",
+]
+
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_file=str(BACKEND_DIR / ".env"),
@@ -51,6 +74,19 @@ class Settings(BaseSettings):
     # ── Queue (swap QUEUE_BACKEND=celery + add jobs/celery_app.py later) ─
     queue_backend: str = "inprocess"
     worker_concurrency: int = 1
+
+    # ── Logo detector backend ───────────────────────────────────────────
+    # "yolo"   = fine-tuned YOLO26m (.pt) via ultralytics (default).
+    # "rfdetr" = fine-tuned RF-DETR (.pth) via the `rfdetr` package +
+    #            supervision ByteTrack. Set DETECTOR_BACKEND=rfdetr and (opt.)
+    #            RFDETR_MODEL_PATH. Install deps: pip install -e ".[rfdetr]"
+    detector_backend: str = "yolo"
+    rfdetr_model_path: str = ""      # path to checkpoint_best_ema.pth (auto if empty)
+    rfdetr_variant: str = "large"    # nano|small|medium|base|large|2xlarge
+    rfdetr_resolution: int = 0       # 0 = variant default (recommended; override has bugs)
+    # Predicted class_id - offset indexes RFDETR_BRAND_ORDER. The training COCO
+    # had a placeholder category at id 0 with brands at 1..17, so offset = 1.
+    rfdetr_class_offset: int = 1
 
     # ── Models ───────────────────────────────────────────────────────────
     model_path: str = ""            # filled by _default_logo_model() if empty
@@ -150,6 +186,13 @@ class Settings(BaseSettings):
 
     def resolved_model_path(self) -> str:
         return self.model_path or _default_logo_model()
+
+    def resolved_rfdetr_path(self) -> str:
+        return self.rfdetr_model_path or _default_rfdetr_model()
+
+    @property
+    def rfdetr_brand_order(self) -> list[str]:
+        return RFDETR_BRAND_ORDER
 
     def resolved_team_refs(self) -> str:
         return self.team_refs_path or str(BACKEND_DIR / "data" / "team_refs.pkl")

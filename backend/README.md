@@ -36,6 +36,36 @@ verified on both 8.4.33 and 8.4.62. Keep this env on 8.3.40 until the logo model
 is retrained on 8.4.x. (Retraining on 8.4.x is also the prerequisite for using
 `yolo26*-pose.pt`; see the pose note above.)
 
+## Logo detector backend — YOLO (.pt) or RF-DETR (.pth)
+
+Stage 3 is pluggable via `DETECTOR_BACKEND`:
+
+- `yolo` (default) — fine-tuned YOLO26m `best.pt` via ultralytics ByteTrack.
+- `rfdetr` — fine-tuned RF-DETR `checkpoint_best_ema.pth` (from
+  `logo_detection/train_colab_rfdetr.ipynb`) via the `rfdetr` package, with
+  `supervision.ByteTrack` for track persistence.
+
+Switch by adding to `.env`:
+
+```env
+DETECTOR_BACKEND=rfdetr
+RFDETR_MODEL_PATH=/path/to/checkpoint_best_ema.pth   # optional; auto-detects newest *.pth under logo_detection/runs
+RFDETR_VARIANT=large                                 # must match how it was trained: nano|small|medium|base|large|2xlarge
+```
+
+Then install the extra deps (the YOLO path needs none of these):
+
+```bash
+pip install -e ".[rfdetr]"
+```
+
+Notes: RF-DETR resizes internally to the variant's default resolution, so
+`IMGSZ` / `PREVIEW_IMGSZ` don't apply to it (leave `RFDETR_RESOLUTION=0`). The
+class id → brand mapping comes from `RFDETR_BRAND_ORDER` in `config.py` (the
+COCO category order used at train time); `RFDETR_CLASS_OFFSET=1` because the
+training COCO had a placeholder category at id 0. The DINOv2 backbone has no MPS
+path — on Apple Silicon RF-DETR runs on CPU.
+
 ## Run locally
 
 The project uses a dedicated conda env `bradford_bulls_logo` (a clone of

@@ -12,10 +12,17 @@ router = APIRouter(prefix="/api", tags=["health"])
 @router.get("/health")
 def health() -> dict:
     settings = get_settings()
+    backend = (settings.detector_backend or "yolo").lower()
+    model_path = (
+        settings.resolved_rfdetr_path()
+        if backend == "rfdetr"
+        else settings.resolved_model_path()
+    )
     return {
         "status": "ok",
         "device": registry.device(),
-        "modelPath": settings.resolved_model_path(),
+        "detectorBackend": backend,
+        "modelPath": model_path,
         "sampleFps": settings.sample_fps,
         "poseEnabled": settings.enable_pose,
     }

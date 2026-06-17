@@ -31,6 +31,10 @@ dev = ["pytest", "pytest-cov", "httpx"]
 # works without these; install for full accuracy:
 #   pip install -e ".[team]"
 team = ["transformers>=4.40", "scikit-learn>=1.3"]
+# RF-DETR logo detector (.pth). Selected with DETECTOR_BACKEND=rfdetr; the YOLO
+# path needs none of this. ByteTrack persistence comes from supervision.
+#   pip install -e ".[rfdetr]"
+rfdetr = ["rfdetr>=1.1", "supervision>=0.23"]
 # Body-part segmentation (DensePose) is NOT a normal pip dep — it builds
 # detectron2 + the DensePose project from source. See README "Body-part
 # segmentation" for the install (incl. the macOS clang build workaround). The
