@@ -9,6 +9,7 @@ import { Ticks } from "../components/Sfx";
 const FADE_IN = 24; // group photo + title fade-in
 const HOLD = 90; // ~3s plain view of the full photo before highlighting starts
 const PER = 56; // frames spent spotlighting each member — slow enough to read
+const TAIL = 60; // ~2s plain view after the last highlight (overlay removed)
 const GAP = 26; // crossfade between the two group photos
 
 // Centered horizontally: photo(760) + gap(64) + list(560) = 1384 wide on a
@@ -29,7 +30,7 @@ const buildSchedule = () => {
   return TEAM_GROUPS.map((group) => {
     const start = cursor;
     const introEnd = start + HOLD;
-    const end = introEnd + group.members.length * PER;
+    const end = introEnd + group.members.length * PER + TAIL;
     cursor = end + GAP;
     return { group, start, introEnd, end };
   });
@@ -60,7 +61,13 @@ export const Team: React.FC = () => {
 
           const localFrame = Math.max(0, f - s.introEnd);
           const memberIdx = Math.min(s.group.members.length - 1, Math.floor(localFrame / PER));
-          const maskOpacity = seg(f - s.start, HOLD - 14, 16) * photoOpacity;
+          // overlay fades in before the first highlight and fades back out after
+          // the last one, leaving ~2s (TAIL) of plain photo before the cut.
+          const highlightsEnd = HOLD + s.group.members.length * PER;
+          const maskOpacity =
+            seg(f - s.start, HOLD - 14, 16) *
+            (1 - seg(f - s.start, highlightsEnd, 14)) *
+            photoOpacity;
           const pts = s.group.members[memberIdx].points;
 
           // accumulating reveal list, to the right of the photo
