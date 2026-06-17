@@ -77,8 +77,10 @@ class Settings(BaseSettings):
     rfdetr_resolution: int = 0      # 0 = model default (Large 704 / 2XLarge 880)
     # RF-DETR confidence floor — SEPARATE from `conf` (which is tuned for YOLO).
     # DETR sigmoid-focal scores run much lower than YOLO's; real logos score
-    # ~0.1-0.3, so the YOLO 0.25 floor drops almost everything. 0.1 keeps them.
-    rfdetr_conf: float = 0.10
+    # ~0.1-0.3. 0.10 maximises recall but lets weak, flickery boxes through
+    # (false hits on opponent kit + rapid brand-flipping); 0.20 is a calmer
+    # precision/recall balance. Lower toward 0.10 if real logos get missed.
+    rfdetr_conf: float = 0.20
     # category_id of the FIRST brand in the model's output. The training COCO had
     # id 0 = 'logos' placeholder and brands at 1..17, so predicted class_id is
     # 1-indexed into RFDETR_CLASS_NAMES. Set to 0 if your brand names come out

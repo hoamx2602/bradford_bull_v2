@@ -54,14 +54,23 @@ class _IoUTracker:
     """
 
     def __init__(self, iou_thr: float = 0.2, max_age: int = 3):
+        from collections import Counter
+
+        self._Counter = Counter
         self.iou_thr = iou_thr
         self.max_age = max_age
-        self._tracks: list[dict] = []  # {id, box, missed}
+        self._tracks: list[dict] = []  # {id, box, missed, votes:Counter}
         self._next_id = 1
 
-    def update(self, boxes: list[tuple]) -> list[int]:
-        """boxes: list of xyxy tuples (detection order). Returns a track_id per box."""
-        ids = [-1] * len(boxes)
+    def update(self, dets: list[tuple]) -> list[tuple[int, int]]:
+        """dets: list of (xyxy, class_id) in detection order.
+
+        Returns (track_id, voted_class_id) per detection. The voted class is the
+        majority brand over the track's life, so a single off-frame misread (DETR
+        flipping e.g. klg<->mcp) doesn't change the reported brand.
+        """
+        boxes = [d[0] for d in dets]
+        out: list[tuple[int, int]] = [(-1, dets[i][1]) for i in range(len(dets))]
         # Greedy: resolve the highest-IoU (detection, track) pairs first.
         pairs = []
         for di, box in enumerate(boxes):
@@ -75,9 +84,11 @@ class _IoUTracker:
         for _, di, ti in pairs:
             if di in matched_det or ti in matched_trk:
                 continue
-            ids[di] = self._tracks[ti]["id"]
-            self._tracks[ti]["box"] = boxes[di]
-            self._tracks[ti]["missed"] = 0
+            tr = self._tracks[ti]
+            tr["box"] = boxes[di]
+            tr["missed"] = 0
+            tr["votes"][dets[di][1]] += 1
+            out[di] = (tr["id"], tr["votes"].most_common(1)[0][0])
             matched_det.add(di)
             matched_trk.add(ti)
         # Age / evict tracks that went unmatched this frame.
@@ -93,10 +104,12 @@ class _IoUTracker:
         # Spawn new tracks for unmatched detections.
         for di, box in enumerate(boxes):
             if di not in matched_det:
-                ids[di] = self._next_id
-                self._tracks.append({"id": self._next_id, "box": box, "missed": 0})
+                cls = dets[di][1]
+                self._tracks.append({"id": self._next_id, "box": box, "missed": 0,
+                                     "votes": self._Counter({cls: 1})})
+                out[di] = (self._next_id, cls)
                 self._next_id += 1
-        return ids
+        return out
 
 
 class _YoloBackend:
@@ -174,13 +187,17 @@ class _RFDETRBackend:
     def _rows(self, dets, track: bool) -> list[RawBox]:
         n = len(dets.xyxy) if dets.xyxy is not None else 0
         boxes = [tuple(float(v) for v in dets.xyxy[i].tolist()) for i in range(n)]
-        tids = self._tracker.update(boxes) if track else [-1] * n
+        raw_cls = [int(dets.class_id[i]) if dets.class_id is not None else -1 for i in range(n)]
+        if track:
+            tracked = self._tracker.update(list(zip(boxes, raw_cls)))
+        else:
+            tracked = [(-1, raw_cls[i]) for i in range(n)]
         rows: list[RawBox] = []
         for i in range(n):
-            cls_id = int(dets.class_id[i]) if dets.class_id is not None else -1
+            track_id, cls_id = tracked[i]            # cls_id = voted brand on the tracked path
             raw = rfdetr_class_name(cls_id, self.offset)
             conf = float(dets.confidence[i]) if dets.confidence is not None else 0.0
-            rows.append((cls_id, raw, boxes[i], conf, tids[i]))
+            rows.append((cls_id, raw, boxes[i], conf, track_id))
         return rows
 
     def track(self, frame) -> list[RawBox]:
