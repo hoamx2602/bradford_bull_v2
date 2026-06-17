@@ -32,6 +32,7 @@ class JobRepository:
         placement_type: str,
         cpm_base: float,
         kit: str = "away",
+        team_refs_key: str | None = None,
     ) -> Job:
         job = Job(
             id=_new_id(),
@@ -44,6 +45,7 @@ class JobRepository:
             placement_type=placement_type,
             cpm_base=cpm_base,
             kit=kit,
+            team_refs_key=team_refs_key,
         )
         self.s.add(job)
         self.s.commit()

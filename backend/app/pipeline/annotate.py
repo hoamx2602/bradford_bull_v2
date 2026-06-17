@@ -16,11 +16,14 @@ precision.
 from __future__ import annotations
 
 import logging
+from collections import Counter
 from collections.abc import Callable
+from dataclasses import replace
 from pathlib import Path
 
 import cv2
 
+from app.config import display_name
 from app.pipeline.colors import brand_bgr
 from app.pipeline.datatypes import Detection
 
@@ -28,6 +31,91 @@ log = logging.getLogger("app.pipeline")
 
 # detect_fn(frame, t, imgsz) -> detections in that frame
 DetectFn = Callable[[object, float, int], list[Detection]]
+
+
+def _iou(a, b) -> float:
+    ax1, ay1, ax2, ay2 = a
+    bx1, by1, bx2, by2 = b
+    ix1, iy1 = max(ax1, bx1), max(ay1, by1)
+    ix2, iy2 = min(ax2, bx2), min(ay2, by2)
+    iw, ih = max(0.0, ix2 - ix1), max(0.0, iy2 - iy1)
+    inter = iw * ih
+    if inter <= 0:
+        return 0.0
+    aa = max(0.0, ax2 - ax1) * max(0.0, ay2 - ay1)
+    ab = max(0.0, bx2 - bx1) * max(0.0, by2 - by1)
+    return inter / (aa + ab - inter + 1e-9)
+
+
+class _PreviewStabilizer:
+    """Temporal smoother for the full-fps preview.
+
+    The preview detects per frame, so RF-DETR's low-confidence boxes blink on/off
+    and occasionally flip brand between frames. This tracks boxes by IoU across
+    frames and:
+      * votes each box's brand over its life (stops label flipping),
+      * holds ("coasts") a box for `coast` frames after its detection drops
+        (stops blinking), and
+      * waits `min_hits` frames before drawing a new box (suppresses 1-frame
+        false positives).
+    Backend-agnostic: operates on the Detection list, so YOLO and RF-DETR
+    previews both get the same smoothing.
+    """
+
+    def __init__(self, iou_thr: float = 0.3, coast: int = 4, min_hits: int = 2):
+        self.iou_thr = iou_thr
+        self.coast = coast
+        self.min_hits = min_hits
+        self._tracks: list[dict] = []
+        self._next_id = 1
+
+    def step(self, dets: list[Detection], t: float) -> list[Detection]:
+        # Greedy IoU match: highest-overlap (detection, track) pairs first.
+        pairs = []
+        for di, d in enumerate(dets):
+            for ti, tr in enumerate(self._tracks):
+                iou = _iou(d.xyxy, tr["box"])
+                if iou >= self.iou_thr:
+                    pairs.append((iou, di, ti))
+        pairs.sort(reverse=True)
+        md: set[int] = set()
+        mt: set[int] = set()
+        for _, di, ti in pairs:
+            if di in md or ti in mt:
+                continue
+            d, tr = dets[di], self._tracks[ti]
+            tr["box"] = d.xyxy
+            tr["missed"] = 0
+            tr["hits"] += 1
+            tr["votes"][d.brand_key] += 1
+            tr["last"] = d
+            md.add(di)
+            mt.add(ti)
+        # Age unmatched tracks; evict once past the coast window.
+        survivors = []
+        for ti, tr in enumerate(self._tracks):
+            if ti not in mt:
+                tr["missed"] += 1
+                if tr["missed"] > self.coast:
+                    continue
+            survivors.append(tr)
+        self._tracks = survivors
+        # New tracks for unmatched detections.
+        for di, d in enumerate(dets):
+            if di not in md:
+                self._tracks.append({"id": self._next_id, "box": d.xyxy, "missed": 0,
+                                     "hits": 1, "votes": Counter({d.brand_key: 1}), "last": d})
+                self._next_id += 1
+        # Emit confirmed tracks (incl. coasted ones) with the voted brand.
+        out: list[Detection] = []
+        for tr in self._tracks:
+            if tr["hits"] < self.min_hits:
+                continue
+            brand = tr["votes"].most_common(1)[0][0]
+            out.append(replace(tr["last"], t=t, xyxy=tr["box"],
+                               brand_key=brand, brand_name=display_name(brand),
+                               track_id=tr["id"]))
+        return out
 
 
 def _open_writer(path: Path, fps: float, size: tuple[int, int]) -> cv2.VideoWriter | None:
@@ -64,14 +152,20 @@ def render_preview(
     max_width: int,
     max_frames: int,
     detect_imgsz: int,
+    stabilize: bool = False,
+    coast: int = 4,
+    min_hits: int = 2,
 ) -> tuple[Path | None, list[Detection]]:
     """Detect + draw on every frame at native fps. Returns (path, all detections).
 
     The returned detections (with timestamps) drive the per-brand timeline so it
-    matches the boxes exactly.
+    matches the boxes exactly. When `stabilize` is set, boxes are temporally
+    smoothed (tracked + brand-voted + coasted) so they don't flicker.
     """
     if fps <= 0 or width <= 0 or height <= 0:
         return None, []
+
+    stab = _PreviewStabilizer(coast=coast, min_hits=min_hits) if stabilize else None
 
     scale = min(1.0, max_width / width)
     ow, oh = int(round(width * scale)), int(round(height * scale))
@@ -100,6 +194,8 @@ def render_preview(
             i += 1
 
             dets = detect_fn(frame, t, detect_imgsz)
+            if stab is not None:
+                dets = stab.step(dets, t)
             all_dets.extend(dets)
 
             img = cv2.resize(frame, size) if scale != 1.0 else frame

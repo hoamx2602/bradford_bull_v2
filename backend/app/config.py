@@ -103,6 +103,13 @@ class Settings(BaseSettings):
 
     # ── Annotated preview video ──────────────────────────────────────────
     preview_enabled: bool = True
+    # Temporal smoothing of the preview: track boxes across frames, vote each
+    # box's brand, and "coast" (hold) a box for a few frames when detection
+    # drops — kills the per-frame flicker / brand-flipping that RF-DETR's
+    # low-confidence boxes produce. Applies to both backends.
+    preview_stabilize: bool = True
+    preview_stab_coast: int = 4     # frames to keep drawing a box after it drops
+    preview_stab_min_hits: int = 2  # frames a box must persist before it's drawn
     preview_width: int = 960        # downscale preview frames to this width
     preview_imgsz: int = 960        # detection size for the preview pass (speed)
     # Preview runs detection on EVERY frame at native fps (smooth, like the YOLO

@@ -47,6 +47,7 @@ def run_analysis(job_id: str) -> None:
             "placement_type": job.placement_type,
             "cpm_base": job.cpm_base,
             "kit": getattr(job, "kit", None) or "away",
+            "team_refs_key": getattr(job, "team_refs_key", None),
         }
 
     try:
@@ -81,7 +82,15 @@ def run_analysis(job_id: str) -> None:
                 from app.pipeline.teamid.tracker import TeamTracker
 
                 refs = None
-                if not _Path(settings.resolved_team_refs()).exists() and settings.team_auto_refs:
+                if ctx["team_refs_key"]:
+                    # Teams picked manually for this upload (inline team step) —
+                    # highest priority, overrides global file and auto guess.
+                    import pickle as _pickle
+
+                    _update(job_id, P_TEAM, "team", "Using manually selected teams")
+                    with storage.local_path(ctx["team_refs_key"]).open("rb") as _f:
+                        refs = _pickle.load(_f)
+                elif not _Path(settings.resolved_team_refs()).exists() and settings.team_auto_refs:
                     _update(job_id, P_TEAM, "team",
                             f"Identifying target-team kit ({ctx['kit']})")
                     from app.pipeline.teamid.bootstrap import build_refs_from_video
@@ -150,6 +159,9 @@ def run_analysis(job_id: str) -> None:
                 video_path, meta.fps, meta.width, meta.height, detector.detect_boxes,
                 preview_tmp, max_width=settings.preview_width,
                 max_frames=settings.preview_max_frames, detect_imgsz=settings.preview_imgsz,
+                stabilize=settings.preview_stabilize,
+                coast=settings.preview_stab_coast,
+                min_hits=settings.preview_stab_min_hits,
             )
             if preview_path is not None:
                 # Restore the original upload's audio (OpenCV writes video-only).
