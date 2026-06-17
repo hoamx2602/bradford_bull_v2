@@ -9,7 +9,7 @@ export const inter = loadInter().fontFamily;
 // Kept as an alias so older references don't break; points at mono now.
 export const space = mono;
 
-// LogoLense brand (logo Group_34.svg): red #BA0201 + near-black #090A0E,
+// LogoLens brand (logo Group_34.svg): red #BA0201 + near-black #090A0E,
 // dressed up in a VVTerm / terminal keynote palette.
 export const C = {
   red: "#FF3B30", // brighter, screen-friendly brand red (accent, prompt)

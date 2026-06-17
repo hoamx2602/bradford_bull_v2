@@ -9,7 +9,7 @@ import { DASHBOARD } from "../assets";
 import { PAD } from "../theme";
 
 const KPIS = [
-  { v: "9", l: "Brands tracked" },
+  { v: "17", l: "Brands tracked" },
   { v: "146s", l: "Total logo exposure" },
   { v: "37%", l: "Avg. visibility score" },
 ];
@@ -94,7 +94,7 @@ export const Dashboard: React.FC = () => {
       <Header kicker="ANALYTICS" title="From footage to decisions" />
       {DASHBOARD ? (
         <div style={{ position: "absolute", left: PAD, top: 330, width: 1680, height: 600, borderRadius: 16, overflow: "hidden", border: `1px solid ${C.cardLine}`, boxShadow: "0 30px 70px rgba(0,0,0,0.55)", opacity: seg(f, 12, 16) }}>
-          <WindowChrome title="LogoLense — analytics dashboard" />
+          <WindowChrome title="LogoLens — analytics dashboard" />
           <Img src={staticFile(DASHBOARD)} style={{ width: "100%", height: "calc(100% - 44px)", objectFit: "cover" }} />
         </div>
       ) : (

@@ -16,7 +16,7 @@ const POINTS = [
 
 export const Results: React.FC = () => {
   const f = useCurrentFrame();
-  const target = Math.max(SPONSORS.length, 9);
+  const target = Math.max(SPONSORS.length, 17);
   const val = Math.round(interpolate(f, [12, 46], [0, target], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }));
   return (
     <Bg>

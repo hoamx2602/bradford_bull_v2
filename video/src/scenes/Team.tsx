@@ -6,7 +6,8 @@ import { seg } from "../anim";
 import { TEAM_GROUPS, TeamMember } from "../assets";
 import { Ticks } from "../components/Sfx";
 
-const INTRO = 30; // group photo + title fade-in
+const FADE_IN = 24; // group photo + title fade-in
+const HOLD = 90; // ~3s plain view of the full photo before highlighting starts
 const PER = 56; // frames spent spotlighting each member — slow enough to read
 const GAP = 26; // crossfade between the two group photos
 
@@ -27,7 +28,7 @@ const buildSchedule = () => {
   let cursor = 0;
   return TEAM_GROUPS.map((group) => {
     const start = cursor;
-    const introEnd = start + INTRO;
+    const introEnd = start + HOLD;
     const end = introEnd + group.members.length * PER;
     cursor = end + GAP;
     return { group, start, introEnd, end };
@@ -65,7 +66,7 @@ export const Team: React.FC = () => {
           const moveT = spring({ frame: t, fps, config: { damping: 200 } });
 
           const box = lerpBox(s.group.members[prevIdx], s.group.members[memberIdx], moveT);
-          const maskOpacity = seg(f - s.start, INTRO - 10, 16) * photoOpacity;
+          const maskOpacity = seg(f - s.start, HOLD - 14, 16) * photoOpacity;
 
           // hole rect (the active member) in screen px, masked out of the dim overlay
           const hx = PHOTO.left + (box.x / 100) * PHOTO.width;
@@ -80,7 +81,7 @@ export const Team: React.FC = () => {
           const listTop = PHOTO.top + Math.max(0, (PHOTO.height - listTotal) / 2);
           const listLeft = PHOTO.left + PHOTO.width + 64;
 
-          const titleIn = seg(f, s.start, INTRO);
+          const titleIn = seg(f, s.start, FADE_IN);
           return (
             <div key={s.group.title} style={{ opacity: photoOpacity }}>
               <div
@@ -99,10 +100,22 @@ export const Team: React.FC = () => {
                   transform: `translateY(${(1 - titleIn) * 18}px)`,
                 }}
               >
-                {s.group.title}
-              </div>
-              <div style={{ position: "absolute", left: 0, top: 198, width: "100%", display: "flex", justifyContent: "center" }}>
-                <div style={{ height: 5, width: 240 * seg(f, s.start + 10, 16), background: C.red, borderRadius: 3 }} />
+                <span style={{ position: "relative", display: "inline-block" }}>
+                  {s.group.title}
+                  <span
+                    style={{
+                      position: "absolute",
+                      left: 0,
+                      bottom: -22,
+                      height: 5,
+                      width: "100%",
+                      borderRadius: 3,
+                      background: C.red,
+                      transform: `scaleX(${seg(f, s.start + 10, 16)})`,
+                      transformOrigin: "left",
+                    }}
+                  />
+                </span>
               </div>
 
               {/* base photo, full brightness */}
@@ -117,7 +130,7 @@ export const Team: React.FC = () => {
                   overflow: "hidden",
                   border: `1px solid ${C.cardLine}`,
                   boxShadow: "0 30px 70px rgba(0,0,0,0.55)",
-                  opacity: seg(f, s.start, INTRO),
+                  opacity: seg(f, s.start, FADE_IN),
                 }}
               >
                 <Img src={staticFile(s.group.photo)} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
@@ -145,7 +158,7 @@ export const Team: React.FC = () => {
               {/* accumulating list — each member appends below the previous, active one highlighted */}
               <div style={{ position: "absolute", left: listLeft, top: listTop, display: "flex", flexDirection: "column", gap: rowGap }}>
                 {s.group.members.map((m, idx) => {
-                  const revealAt = s.start + INTRO + idx * PER;
+                  const revealAt = s.start + HOLD + idx * PER;
                   const itemOpacity = seg(f, revealAt + 4, 18) * photoOpacity;
                   const active = idx === memberIdx;
                   return (

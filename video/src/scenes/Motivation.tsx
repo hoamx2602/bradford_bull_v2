@@ -15,9 +15,9 @@ const ITEMS = [
   "Sponsors need objective, data-driven proof.",
 ];
 const CAPS = ["Jersey & board sponsorship", "Reviewed manually", "Movement & camera angles", "Automated, data-driven"];
-// ~1s rest after the title settles before the first bullet, then ~1.3s
-// between each so there's time to read before the next one lands.
-const STARTS = [40, 80, 120, 160];
+// ~1.3s rest after the title settles before the first bullet, then ~3s
+// between each so there's plenty of time to read before the next lands.
+const STARTS = [40, 130, 220, 310];
 
 export const Motivation: React.FC = () => {
   const f = useCurrentFrame();

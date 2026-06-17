@@ -20,10 +20,10 @@ export const SUPERVISOR_TEAM: TeamGroup = {
   title: "Stakeholders",
   photo: "img/team/supervisor_team.jpeg",
   members: [
-    { name: "Tillal Eldabi", role: "Supervisor", x: 0, y: 21.8, w: 27.0, h: 78.1 },
-    { name: "Irfan Mehmood", role: "Supervisor", x: 24.5, y: 20.3, w: 29.2, h: 79.6 },
-    { name: "Ian Stafford", role: "Supervisor", x: 52.5, y: 21.9, w: 25.5, h: 78.0 },
-    { name: "Takao Maruyama", role: "Supervisor", x: 74.8, y: 15.4, w: 25.1, h: 84.5 },
+    { name: "Prof. Tillal Eldabi", role: "Project Supervisor", x: 0, y: 21.8, w: 27.0, h: 78.1 },
+    { name: "Dr. Irfan Mehmood", role: "Project Supervisor & AI Lead", x: 24.5, y: 20.3, w: 29.2, h: 79.6 },
+    { name: "Ian Stafford", role: "Owner & Partner", x: 52.5, y: 21.9, w: 25.5, h: 78.0 },
+    { name: "Dr. Takao Maruyama", role: "Advisor", x: 74.8, y: 15.4, w: 25.1, h: 84.5 },
   ],
 };
 
@@ -31,12 +31,12 @@ export const STUDENT_TEAM: TeamGroup = {
   title: "Students",
   photo: "img/team/student_team.jpeg",
   members: [
-    { name: "Ezichi Abel", role: "MSc AI & Data Analytics", x: 0, y: 20.6, w: 21.4, h: 79.3 },
-    { name: "Jason Akhuemokhan", role: "MSc AI & Data Analytics", x: 16.8, y: 22.6, w: 25.8, h: 77.4 },
-    { name: "Mai Xuan Hoa", role: "MSc AI & Data Analytics", x: 34.1, y: 17.5, w: 20.3, h: 82.4 },
-    { name: "Simranjit Kaur", role: "MSc AI & Data Analytics", x: 45.2, y: 28.1, w: 22.2, h: 71.8 },
-    { name: "Tabby Mungai", role: "MSc AI & Data Analytics", x: 63.8, y: 18.5, w: 17.4, h: 81.4 },
-    { name: "Rashmi Yatawara", role: "MSc AI & Data Analytics", x: 75.7, y: 26.5, w: 24.3, h: 73.4 },
+    { name: "Ezichi Abel", role: "Data Collection", x: 0, y: 20.6, w: 21.4, h: 79.3 },
+    { name: "Jason Akhuemokhan", role: "Frame Annotation", x: 16.8, y: 22.6, w: 25.8, h: 77.4 },
+    { name: "Mai Xuan Hoa", role: "Technical Leader — Model Training & Evaluation", x: 34.1, y: 17.5, w: 20.3, h: 82.4 },
+    { name: "Simranjit Kaur", role: "Reports & Documentation", x: 45.2, y: 28.1, w: 22.2, h: 71.8 },
+    { name: "Tabby Mungai", role: "UI/UX", x: 63.8, y: 18.5, w: 17.4, h: 81.4 },
+    { name: "Rashmi Yatawara", role: "Data Processing & Visualization", x: 75.7, y: 26.5, w: 24.3, h: 73.4 },
   ],
 };
 

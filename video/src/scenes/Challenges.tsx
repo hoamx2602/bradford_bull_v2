@@ -21,10 +21,10 @@ export const Challenges: React.FC = () => {
   return (
     <Bg>
       <Header kicker="REAL-WORLD CHALLENGES" title="Built for messy match footage" />
-      <Ticks at={ITEMS.map((_, i) => 18 + i * 9)} volume={0.36} />
+      <Ticks at={ITEMS.map((_, i) => 40 + i * 90)} volume={0.36} />
       <div style={{ position: "absolute", left: PAD, top: 380, display: "grid", gridTemplateColumns: "780px 780px", gap: "26px 56px" }}>
         {ITEMS.map((it, i) => {
-          const ap = seg(f, 18 + i * 9, 16);
+          const ap = seg(f, 40 + i * 90, 16);
           return (
             <div
               key={i}

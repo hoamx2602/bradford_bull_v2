@@ -17,7 +17,7 @@ export const What: React.FC = () => {
   const f = useCurrentFrame();
   return (
     <Bg>
-      <Header kicker="WHAT IS LOGOLENSE" title="One platform, three audiences" />
+      <Header kicker="WHAT IS LOGOLENS" title="One platform, three audiences" />
       <Ticks at={[20, 30, 40]} name="pop" volume={0.42} />
       <div style={{ position: "absolute", left: PAD + 20, top: 340, display: "flex", gap: 40 }}>
         {COLS.map(([key, name, col, bs], i) => {

@@ -29,10 +29,10 @@ export const HardCases: React.FC = () => {
   const ROW_H = 300;
   return (
     <Bg>
-      <Header kicker="FINDINGS" title="Logos the eye would miss" />
+      <Header kicker="FINDINGS" title="Logo detection examples" />
       <div style={{ position: "absolute", left: PAD, top: 360, display: "grid", gridTemplateColumns: `${COL_W}px ${COL_W}px`, gap: "30px 40px" }}>
         {HARDCASES.map((h, i) => {
-          const start = 30 + i * 26; // ~1s rest, then one card every ~0.9s
+          const start = 40 + i * 70; // ~1.3s rest, then one card every ~2.3s
           const ap = seg(f, start, 18);
           const z = zoomStyle(h.cx, h.cy, COL_W, ROW_H);
           return (

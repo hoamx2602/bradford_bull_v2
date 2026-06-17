@@ -10,7 +10,7 @@ import { POSTER } from "../assets";
 const TODAY = ["Automated sponsorship reporting", "Brand & marketing intelligence", "Business decision support"];
 const FUTURE = ["Real-time match analytics", "Multi-sport deployment", "Advanced sponsor valuation", "Live dashboard integration"];
 
-const ITEM_GAP = 24; // frames between each bullet within a column — slow enough to read
+const ITEM_GAP = 90; // ~3s between each bullet within a column — slow enough to read
 
 const Col: React.FC<{ tag: string; title: string; color: string; items: string[]; left: number; f: number; base: number }> = ({ tag, title, color, items, left, f, base }) => (
   <div style={{ position: "absolute", left, top: 350, width: 760 }}>
@@ -36,8 +36,8 @@ export const Impact: React.FC = () => {
         src={staticFile(POSTER)}
         style={{ position: "absolute", left: "50%", top: "50%", width: "85%", transform: "translate(-50%, -50%)", opacity: 0.16, filter: "blur(6px)" }}
       />
-      <Header kicker="IMPACT & FUTURE" title="Where LogoLense goes next" />
-      <Ticks at={[30, 46, 54, 70, 78, 94, 102]} volume={0.34} />
+      <Header kicker="IMPACT & FUTURE" title="Where LogoLens goes next" />
+      <Ticks at={[46, 62, 136, 152, 226, 242, 332]} volume={0.34} />
       <Col tag="Now" title="Impact today" color={C.red} items={TODAY} left={120} f={f} base={30} />
       <Col tag="Roadmap" title="Future" color={C.term} items={FUTURE} left={1010} f={f} base={46} />
     </Bg>
