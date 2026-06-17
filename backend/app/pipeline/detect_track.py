@@ -117,9 +117,29 @@ class _YoloBackend:
 
     def __init__(self):
         self.settings = get_settings()
-        self.model = registry.get_logo_model()
-        self.device = registry.device()
-        self.names = self.model.names  # {class_id: raw_name}
+        self.backend = registry.get_logo_backend()
+        self.backend.reset()  # fresh tracker state per video
+        self.names = self.backend.names  # {class_id: raw_name}
+
+    def _to_detections(self, raw_boxes, t: float, w: int, h: int) -> list[Detection]:
+        out: list[Detection] = []
+        for b in raw_boxes:
+            raw = self.names.get(b.cls_id, str(b.cls_id))
+            out.append(
+                Detection(
+                    t=t,
+                    class_id=b.cls_id,
+                    raw_name=raw,
+                    brand_key=normalize_class(raw),
+                    brand_name=display_name(raw),
+                    conf=b.conf,
+                    xyxy=b.xyxy,  # type: ignore[arg-type]
+                    track_id=b.track_id,
+                    frame_w=w,
+                    frame_h=h,
+                )
+            )
+        return out
 
     def _rows(self, res, tracked: bool) -> list[RawBox]:
         boxes = getattr(res, "boxes", None)

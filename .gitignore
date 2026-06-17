@@ -45,3 +45,4 @@ team_detection/output
 /runs
 /wandb
 /logo_detection/wandb
+/video/node_modules

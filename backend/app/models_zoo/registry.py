@@ -31,13 +31,14 @@ def resolve_device(requested: str) -> str:
 
 
 @lru_cache
-def get_logo_model():
-    from ultralytics import YOLO
+def get_logo_backend():
+    """Load the configured logo detector (YOLO .pt or RF-DETR .pth) once.
 
-    settings = get_settings()
-    path = settings.resolved_model_path()
-    log.info("loading logo model: %s", path)
-    return YOLO(path)
+    Backend chosen by DETECTOR_BACKEND; see app.models_zoo.detectors.
+    """
+    from app.models_zoo.detectors import load_logo_backend
+
+    return load_logo_backend(get_settings(), device())
 
 
 # RF-DETR variant name -> class. Loaded lazily so the rfdetr package is only
