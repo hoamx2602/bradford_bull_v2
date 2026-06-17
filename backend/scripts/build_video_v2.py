@@ -51,8 +51,8 @@ def F(kind: str, size: int) -> ImageFont.FreeTypeFont:
 
 CONTENT = {
     "title": "LogoLense",
-    "subtitle": "Intelligent Sponsorship Visibility & Brand Analytics Using AI",
-    "tagline": "Transforming Sponsorship Analytics Through Artificial Intelligence.",
+    "subtitle": "Your Brand, Our Focus",
+    "tagline": "Intelligent Sponsorship Visibility & Brand Analytics Using AI.",
     "team_name": "VisionAI Analytics Team",
     "team_lead": "Edward",
     "members": ["Student Name 1", "Student Name 2", "Student Name 3", "Student Name 4"],
