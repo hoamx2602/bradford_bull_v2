@@ -8,6 +8,7 @@ interface Props {
   matches: MatchEntry[]
   selectedId: string
   onSelect: (id: string) => void
+  onRename?: (id: string, eventName: string) => Promise<void> | void
 }
 
 // Generate gradient backgrounds for video thumbnails
@@ -18,8 +19,26 @@ const GRADIENTS = [
   'linear-gradient(135deg, #0c0c1d 0%, #1a1a3e 50%, #2d2d5e 100%)',
 ]
 
-export default function VideoGallery({ matches, selectedId, onSelect }: Props) {
+export default function VideoGallery({ matches, selectedId, onSelect, onRename }: Props) {
   const [hoveredId, setHoveredId] = useState<string | null>(null)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [draft, setDraft] = useState('')
+  const [saving, setSaving] = useState(false)
+
+  const stop = (e: React.SyntheticEvent) => e.stopPropagation()
+  const beginEdit = (e: React.MouseEvent, m: MatchEntry) => {
+    e.stopPropagation()
+    setDraft(m.eventName)
+    setEditingId(m.id)
+  }
+  const commit = async (id: string) => {
+    const name = draft.trim()
+    if (name && onRename) {
+      setSaving(true)
+      try { await onRename(id, name) } finally { setSaving(false) }
+    }
+    setEditingId(null)
+  }
 
   return (
     <div style={{
@@ -127,20 +146,60 @@ export default function VideoGallery({ matches, selectedId, onSelect }: Props) {
 
             {/* Info */}
             <div style={{ padding: '14px 16px 16px' }}>
-              <div style={{
-                fontSize: 13,
-                fontWeight: 600,
-                color: 'var(--c-ink)',
-                marginBottom: 6,
-                lineHeight: 1.4,
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                display: '-webkit-box',
-                WebkitLineClamp: 2,
-                WebkitBoxOrient: 'vertical',
-              }}>
-                {match.eventName}
-              </div>
+              {editingId === match.id ? (
+                <div onClick={stop} style={{ display: 'flex', gap: 6, marginBottom: 6 }}>
+                  <input
+                    autoFocus
+                    value={draft}
+                    onChange={e => setDraft(e.target.value)}
+                    onClick={stop}
+                    onKeyDown={e => {
+                      if (e.key === 'Enter') commit(match.id)
+                      if (e.key === 'Escape') setEditingId(null)
+                    }}
+                    disabled={saving}
+                    style={{
+                      flex: 1, minWidth: 0, fontSize: 13, padding: '5px 8px', borderRadius: 6,
+                      background: 'var(--c-canvas)', color: 'var(--c-ink)', border: '1px solid var(--c-spark)',
+                    }}
+                  />
+                  <button onClick={() => commit(match.id)} disabled={saving} title="Save" style={{
+                    flexShrink: 0, padding: '0 9px', borderRadius: 6, border: 'none', cursor: 'pointer',
+                    background: 'var(--c-spark)', color: '#000', fontWeight: 700, fontSize: 12,
+                  }}>✓</button>
+                  <button onClick={e => { stop(e); setEditingId(null) }} disabled={saving} title="Cancel" style={{
+                    flexShrink: 0, padding: '0 9px', borderRadius: 6, cursor: 'pointer',
+                    background: 'transparent', color: 'var(--c-dim)', border: '1px solid var(--c-wire)', fontSize: 12,
+                  }}>✕</button>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6, marginBottom: 6 }}>
+                  <div style={{
+                    flex: 1, minWidth: 0,
+                    fontSize: 13,
+                    fontWeight: 600,
+                    color: 'var(--c-ink)',
+                    lineHeight: 1.4,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    display: '-webkit-box',
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: 'vertical',
+                  }}>
+                    {match.eventName}
+                  </div>
+                  {onRename && (
+                    <button onClick={e => beginEdit(e, match)} title="Rename" style={{
+                      flexShrink: 0, padding: 4, borderRadius: 6, cursor: 'pointer', lineHeight: 0,
+                      background: 'transparent', color: 'var(--c-dim)', border: '1px solid var(--c-wire)',
+                    }}>
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z" />
+                      </svg>
+                    </button>
+                  )}
+                </div>
+              )}
 
               <div style={{
                 fontSize: 11,

@@ -189,7 +189,17 @@ def run_analysis(job_id: str) -> None:
 
             seg_tmp = video_path.parent / f"{video_path.stem}_bodyseg.mp4"
             seg_path = None
-            if settings.bodyseg_engine == "yolo":
+            # DensePose needs detectron2 (CUDA, no MPS) and isn't importable in
+            # every env (e.g. the rfdetr env). Rather than silently skip the whole
+            # stage, fall back to the pure-torch YOLO-seg engine so a bodyseg
+            # video is still produced wherever ultralytics runs.
+            engine = settings.bodyseg_engine
+            if engine == "densepose" and not _reg.densepose_available():
+                log.warning("bodyseg: DensePose not importable in this env — "
+                            "falling back to the YOLO-seg engine")
+                engine = "yolo"
+
+            if engine == "yolo":
                 _update(job_id, P_PRICING, "bodyseg", "Body-part segmentation (YOLO-seg)")
                 from app.pipeline.bodyseg_yolo import render_bodyseg_yolo_video
 
@@ -199,7 +209,7 @@ def run_analysis(job_id: str) -> None:
                     max_frames=settings.bodyseg_max_frames, max_width=settings.bodyseg_width,
                     alpha=settings.bodyseg_alpha, imgsz=min(settings.imgsz, 960), conf=0.4,
                 )
-            elif _reg.densepose_available():
+            else:
                 _update(job_id, P_PRICING, "bodyseg", "Body-part segmentation (DensePose)")
                 from app.pipeline.bodyseg import render_bodyseg_video
 
@@ -209,8 +219,6 @@ def run_analysis(job_id: str) -> None:
                     max_frames=settings.bodyseg_max_frames, max_width=settings.bodyseg_width,
                     alpha=settings.bodyseg_alpha,
                 )
-            else:
-                log.info("bodyseg skipped: densepose engine selected but not available")
 
             if seg_path is not None:
                 from app.pipeline.av import mux_audio

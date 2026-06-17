@@ -30,6 +30,10 @@ def create_app() -> FastAPI:
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.cors_list,
+        # Accept ANY localhost port too — the Next dev server hops to 3001/3002
+        # when 3000 is busy, and a missing origin there silently falls back to
+        # demo data in the dashboard.
+        allow_origin_regex=r"https?://(localhost|127\.0\.0\.1)(:\d+)?",
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],

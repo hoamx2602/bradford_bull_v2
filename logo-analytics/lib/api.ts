@@ -90,6 +90,19 @@ export async function getAnalysis(id: string): Promise<AnalysisResult> {
   return asJson(await fetch(`${API_BASE}/api/analyses/${id}`))
 }
 
+/** Rename an analysis (event and/or video name). Returns the saved values. */
+export async function updateAnalysis(
+  id: string,
+  patch: { eventName?: string; videoName?: string },
+): Promise<{ id: string; eventName: string; videoName: string }> {
+  const res = await fetch(`${API_BASE}/api/analyses/${id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(patch),
+  })
+  return asJson(res)
+}
+
 export function csvUrl(id: string): string {
   return `${API_BASE}/api/analyses/${id}/export.csv`
 }

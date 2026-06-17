@@ -6,6 +6,7 @@ import io
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import FileResponse, StreamingResponse
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.api.schemas import MatchEntryOut
@@ -41,6 +42,26 @@ def get_analysis(analysis_id: str, session: Session = Depends(get_session)) -> d
     if a is None:
         raise HTTPException(status_code=404, detail="Analysis not found")
     return a.result_json
+
+
+class AnalysisPatch(BaseModel):
+    eventName: str | None = None
+    videoName: str | None = None
+
+
+@router.patch("/{analysis_id}")
+def update_analysis(
+    analysis_id: str, body: AnalysisPatch, session: Session = Depends(get_session)
+) -> dict:
+    """Rename an analysis (event and/or video name). Blank values are ignored."""
+    ev = body.eventName.strip() if body.eventName else None
+    vn = body.videoName.strip() if body.videoName else None
+    if not ev and not vn:
+        raise HTTPException(status_code=422, detail="Nothing to update")
+    a = AnalysisRepository(session).rename(analysis_id, event_name=ev, video_name=vn)
+    if a is None:
+        raise HTTPException(status_code=404, detail="Analysis not found")
+    return {"id": a.id, "eventName": a.event_name, "videoName": a.video_name}
 
 
 @router.get("/{analysis_id}/video")
