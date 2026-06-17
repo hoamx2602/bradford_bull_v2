@@ -1,5 +1,5 @@
 import React from "react";
-import { useCurrentFrame, AbsoluteFill, Img, staticFile, interpolate } from "remotion";
+import { useCurrentFrame, useVideoConfig, spring, AbsoluteFill, Img, staticFile, interpolate } from "remotion";
 import { Bg } from "../components/Bg";
 import { C, inter } from "../theme";
 import { seg } from "../anim";
@@ -17,11 +17,31 @@ const GAP = 26; // crossfade between the two group photos
 const PHOTO = { left: 268, top: 268, width: 760, height: Math.round((760 * 1122) / 1402) };
 const MASK_COLOR = "rgba(5,6,10,0.82)";
 
-// "x,y x,y ..." for an SVG <polygon> (points are already in 0–100 viewBox units).
-const polyPoints = (pts: Pt[]) => pts.map(([x, y]) => `${x},${y}`).join(" ");
-// A dim-everything path with the person's outline punched out (even-odd rule).
-const holePath = (pts: Pt[]) =>
-  "M0 0H100V100H0Z" + (pts.length ? "M" + pts.map(([x, y]) => `${x} ${y}`).join("L") + "Z" : "");
+type Box = { x: number; y: number; w: number; h: number };
+const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+const lerpBox = (a: Box, b: Box, t: number): Box => ({
+  x: lerp(a.x, b.x, t),
+  y: lerp(a.y, b.y, t),
+  w: lerp(a.w, b.w, t),
+  h: lerp(a.h, b.h, t),
+});
+
+// Tight bounding box (as % of the photo) around a member's outline points,
+// with a little padding so the box frames the person rather than clipping them.
+const PAD_PCT = 1.5;
+const boundsOf = (pts: Pt[]): Box | null => {
+  if (!pts.length) return null;
+  let minX = 100, minY = 100, maxX = 0, maxY = 0;
+  for (const [x, y] of pts) {
+    if (x < minX) minX = x;
+    if (y < minY) minY = y;
+    if (x > maxX) maxX = x;
+    if (y > maxY) maxY = y;
+  }
+  const x = Math.max(0, minX - PAD_PCT);
+  const y = Math.max(0, minY - PAD_PCT);
+  return { x, y, w: Math.min(100, maxX + PAD_PCT) - x, h: Math.min(100, maxY + PAD_PCT) - y };
+};
 
 // Flatten both groups into one timeline: each group gets an intro, then one
 // beat per member; groups crossfade into each other.
@@ -41,6 +61,7 @@ const SFX_AT = SCHEDULE.flatMap((s) => s.group.members.map((_, i) => s.introEnd 
 
 export const Team: React.FC = () => {
   const f = useCurrentFrame();
+  const { fps } = useVideoConfig();
 
   return (
     <Bg>
@@ -68,7 +89,18 @@ export const Team: React.FC = () => {
             seg(f - s.start, HOLD - 14, 16) *
             (1 - seg(f - s.start, highlightsEnd, 14)) *
             photoOpacity;
-          const pts = s.group.members[memberIdx].points;
+          // box glides smoothly from the previous member to the current one
+          const prevIdx = Math.max(0, memberIdx - 1);
+          const tBeat = localFrame - memberIdx * PER;
+          const moveT = spring({ frame: tBeat, fps, config: { damping: 200 } });
+          const cur = boundsOf(s.group.members[memberIdx].points);
+          const prev = boundsOf(s.group.members[prevIdx].points);
+          const b = cur && prev ? lerpBox(prev, cur, moveT) : cur;
+          // active member's box in screen px
+          const hx = PHOTO.left + ((b?.x ?? 0) / 100) * PHOTO.width;
+          const hy = PHOTO.top + ((b?.y ?? 0) / 100) * PHOTO.height;
+          const hw = ((b?.w ?? 0) / 100) * PHOTO.width;
+          const hh = ((b?.h ?? 0) / 100) * PHOTO.height;
 
           // accumulating reveal list, to the right of the photo
           const rowH = 86;
@@ -132,27 +164,27 @@ export const Team: React.FC = () => {
                 <Img src={staticFile(s.group.photo)} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
               </div>
 
-              {/* dim overlay with the active member's exact silhouette punched out,
-                  plus a red outline traced around them */}
-              {maskOpacity > 0 && pts.length > 0 ? (
-                <svg
-                  width={PHOTO.width}
-                  height={PHOTO.height}
-                  viewBox="0 0 100 100"
-                  preserveAspectRatio="none"
-                  style={{ position: "absolute", left: PHOTO.left, top: PHOTO.top, overflow: "visible" }}
-                >
-                  <path d={holePath(pts)} fillRule="evenodd" fill={MASK_COLOR} style={{ opacity: maskOpacity }} />
-                  <polygon
-                    points={polyPoints(pts)}
-                    fill="none"
-                    stroke={C.red}
-                    strokeWidth={3}
-                    strokeLinejoin="round"
-                    vectorEffect="non-scaling-stroke"
-                    style={{ opacity: maskOpacity, filter: `drop-shadow(0 0 6px ${C.red})` }}
+              {/* dim overlay with a rectangular hole cut around the active member */}
+              {maskOpacity > 0 && b ? (
+                <>
+                  <div style={{ position: "absolute", left: PHOTO.left, top: PHOTO.top, width: PHOTO.width, height: hy - PHOTO.top, background: MASK_COLOR, opacity: maskOpacity }} />
+                  <div style={{ position: "absolute", left: PHOTO.left, top: hy + hh, width: PHOTO.width, height: PHOTO.top + PHOTO.height - (hy + hh), background: MASK_COLOR, opacity: maskOpacity }} />
+                  <div style={{ position: "absolute", left: PHOTO.left, top: hy, width: hx - PHOTO.left, height: hh, background: MASK_COLOR, opacity: maskOpacity }} />
+                  <div style={{ position: "absolute", left: hx + hw, top: hy, width: PHOTO.left + PHOTO.width - (hx + hw), height: hh, background: MASK_COLOR, opacity: maskOpacity }} />
+                  <div
+                    style={{
+                      position: "absolute",
+                      left: hx,
+                      top: hy,
+                      width: hw,
+                      height: hh,
+                      border: `3px solid ${C.red}`,
+                      borderRadius: 10,
+                      boxShadow: `0 0 30px rgba(255,59,48,0.5)`,
+                      opacity: maskOpacity,
+                    }}
                   />
-                </svg>
+                </>
               ) : null}
 
               {/* accumulating list — each member appends below the previous, active one highlighted */}
