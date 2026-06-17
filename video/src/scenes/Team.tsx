@@ -1,14 +1,14 @@
 import React from "react";
 import { useCurrentFrame, useVideoConfig, spring, AbsoluteFill, Img, staticFile, interpolate } from "remotion";
 import { Bg } from "../components/Bg";
-import { C, mono, inter } from "../theme";
+import { C, inter } from "../theme";
 import { seg } from "../anim";
 import { TEAM_GROUPS, TeamMember } from "../assets";
 import { Ticks } from "../components/Sfx";
 
-const INTRO = 24; // group photo + label fade-in
-const PER = 38; // frames spent spotlighting each member
-const GAP = 22; // crossfade between the two group photos
+const INTRO = 30; // group photo + title fade-in
+const PER = 56; // frames spent spotlighting each member — slow enough to read
+const GAP = 26; // crossfade between the two group photos
 
 const PHOTO = { left: 150, top: 268, width: 760, height: Math.round((760 * 1122) / 1402) };
 const MASK_COLOR = "rgba(5,6,10,0.82)";
@@ -49,21 +49,6 @@ export const Team: React.FC = () => {
           <div style={{ fontFamily: inter, fontWeight: 700, fontSize: 22, letterSpacing: 3, color: C.red, marginTop: 70, opacity: seg(f, 2, 12) }}>
             THE TEAM
           </div>
-          <div
-            style={{
-              fontFamily: inter,
-              fontWeight: 700,
-              fontSize: 60,
-              letterSpacing: -1.5,
-              color: C.white,
-              marginTop: 10,
-              opacity: seg(f, 12, 14),
-              transform: `translateY(${(1 - seg(f, 12, 14)) * 18}px)`,
-            }}
-          >
-            LogoLens Analytics Team
-          </div>
-          <div style={{ height: 5, width: 360 * seg(f, 22, 16), background: C.red, borderRadius: 3, margin: "12px auto 0" }} />
         </div>
 
         {SCHEDULE.map((s, gi) => {
@@ -80,7 +65,7 @@ export const Team: React.FC = () => {
           const moveT = spring({ frame: t, fps, config: { damping: 200 } });
 
           const box = lerpBox(s.group.members[prevIdx], s.group.members[memberIdx], moveT);
-          const maskOpacity = seg(f - s.start, INTRO - 10, 12) * photoOpacity;
+          const maskOpacity = seg(f - s.start, INTRO - 10, 16) * photoOpacity;
 
           // hole rect (the active member) in screen px, masked out of the dim overlay
           const hx = PHOTO.left + (box.x / 100) * PHOTO.width;
@@ -95,10 +80,29 @@ export const Team: React.FC = () => {
           const listTop = PHOTO.top + Math.max(0, (PHOTO.height - listTotal) / 2);
           const listLeft = PHOTO.left + PHOTO.width + 64;
 
+          const titleIn = seg(f, s.start, INTRO);
           return (
-            <div key={s.group.label} style={{ opacity: photoOpacity }}>
-              <div style={{ position: "absolute", left: PHOTO.left, top: PHOTO.top - 56, fontFamily: mono, fontWeight: 700, fontSize: 22, letterSpacing: 2, color: C.steel, opacity: seg(f, s.start, INTRO) }}>
-                {s.group.label}
+            <div key={s.group.title} style={{ opacity: photoOpacity }}>
+              <div
+                style={{
+                  position: "absolute",
+                  left: 0,
+                  top: 116,
+                  width: "100%",
+                  textAlign: "center",
+                  fontFamily: inter,
+                  fontWeight: 700,
+                  fontSize: 60,
+                  letterSpacing: -1.5,
+                  color: C.white,
+                  opacity: titleIn,
+                  transform: `translateY(${(1 - titleIn) * 18}px)`,
+                }}
+              >
+                {s.group.title}
+              </div>
+              <div style={{ position: "absolute", left: 0, top: 198, width: "100%", display: "flex", justifyContent: "center" }}>
+                <div style={{ height: 5, width: 240 * seg(f, s.start + 10, 16), background: C.red, borderRadius: 3 }} />
               </div>
 
               {/* base photo, full brightness */}
@@ -142,7 +146,7 @@ export const Team: React.FC = () => {
               <div style={{ position: "absolute", left: listLeft, top: listTop, display: "flex", flexDirection: "column", gap: rowGap }}>
                 {s.group.members.map((m, idx) => {
                   const revealAt = s.start + INTRO + idx * PER;
-                  const itemOpacity = seg(f, revealAt + 4, 12) * photoOpacity;
+                  const itemOpacity = seg(f, revealAt + 4, 18) * photoOpacity;
                   const active = idx === memberIdx;
                   return (
                     <div

@@ -16,6 +16,7 @@ import { Results } from "./scenes/Results";
 import { Challenges } from "./scenes/Challenges";
 import { Impact } from "./scenes/Impact";
 import { Poster } from "./scenes/Poster";
+import { ProductDemo } from "./scenes/ProductDemo";
 import { Closing } from "./scenes/Closing";
 
 const FPS = 30;
@@ -27,8 +28,8 @@ type Scene = { id: string; Comp: React.FC; secs: number };
 const SCENES: Scene[] = [
   { id: "title", Comp: Title, secs: 4.5 },
   { id: "team", Comp: Team, secs: TEAM_SCENE_FRAMES / FPS },
-  { id: "credits", Comp: Credits, secs: 5 },
-  { id: "motivation", Comp: Motivation, secs: 5.5 },
+  { id: "credits", Comp: Credits, secs: 6 },
+  { id: "motivation", Comp: Motivation, secs: 7.5 },
   { id: "what", Comp: What, secs: 5 },
   { id: "pipeline", Comp: Pipeline, secs: 8 },
   { id: "stage_player", Comp: StagePlayer, secs: 5 },
@@ -38,8 +39,9 @@ const SCENES: Scene[] = [
   { id: "dashboard", Comp: Dashboard, secs: 7.5 },
   { id: "results", Comp: Results, secs: 6 },
   { id: "challenges", Comp: Challenges, secs: 5 },
-  { id: "impact", Comp: Impact, secs: 5 },
+  { id: "impact", Comp: Impact, secs: 6.5 },
   { id: "poster", Comp: Poster, secs: 5.5 },
+  { id: "product_demo", Comp: ProductDemo, secs: 8 },
   { id: "closing", Comp: Closing, secs: 5 },
 ];
 

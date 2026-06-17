@@ -9,7 +9,7 @@ import { DASHBOARD } from "../assets";
 import { PAD } from "../theme";
 
 const KPIS = [
-  { v: "9", l: "Sponsor brands tracked" },
+  { v: "9", l: "Brands tracked" },
   { v: "146s", l: "Total logo exposure" },
   { v: "37%", l: "Avg. visibility score" },
 ];
