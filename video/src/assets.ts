@@ -22,11 +22,14 @@ export type TeamMember = { name: string; role: string; points: Pt[] };
 export type TeamGroup = { title: string; photo: string; members: TeamMember[] };
 
 // Just names + roles here; the polygon is joined in from team_polys.json by name.
-type MemberDef = { name: string; role: string };
+// `poly` overrides which polygon key to use when the displayed name differs from
+// the segmentation label (e.g. when two members' name labels need swapping while
+// the highlight boxes keep their on-screen appearance order).
+type MemberDef = { name: string; role: string; poly?: string };
 const group = (title: string, photo: string, defs: MemberDef[]): TeamGroup => ({
   title,
   photo,
-  members: defs.map((d) => ({ ...d, points: (POLYS[d.name] ?? []) as Pt[] })),
+  members: defs.map(({ poly, ...d }) => ({ ...d, points: (POLYS[poly ?? d.name] ?? []) as Pt[] })),
 });
 
 export const SUPERVISOR_TEAM = group("Stakeholders", "img/team/supervisor_team.jpeg", [
@@ -40,9 +43,9 @@ export const STUDENT_TEAM = group("Students", "img/team/student_team.jpeg", [
   { name: "Ezichi Abel", role: "Data Collection" },
   { name: "Jason Akhuemokhan", role: "Frame Annotation" },
   { name: "Mai Xuan Hoa", role: "Technical Leader — Model Training & Evaluation" },
-  { name: "Simranjit Kaur", role: "Reports & Documentation" },
+  { name: "Rashmi Yatawara", role: "Reports & Documentation", poly: "Simranjit Kaur" },
   { name: "Tabby Mungai", role: "UI/UX" },
-  { name: "Rashmi Yatawara", role: "Data Processing & Visualization" },
+  { name: "Simranjit Kaur", role: "Data Processing & Visualization", poly: "Rashmi Yatawara" },
 ]);
 
 export const TEAM_GROUPS: TeamGroup[] = [SUPERVISOR_TEAM, STUDENT_TEAM];
