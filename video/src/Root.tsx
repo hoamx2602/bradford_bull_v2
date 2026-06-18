@@ -25,11 +25,11 @@ type Scene = { id: string; Comp: React.FC; secs: number };
 // No narration any more — each scene is held just long enough to read its
 // content comfortably, then cuts to the next. Tuned by hand for pace.
 const SCENES: Scene[] = [
-  { id: "title", Comp: Title, secs: 6.5 },
+  { id: "title", Comp: Title, secs: 8 },
   { id: "team", Comp: Team, secs: TEAM_SCENE_FRAMES / FPS },
   { id: "credits", Comp: Credits, secs: 6 },
   { id: "motivation", Comp: Motivation, secs: 13 },
-  { id: "what", Comp: What, secs: 5 },
+  { id: "what", Comp: What, secs: 8 },
   { id: "pipeline", Comp: Pipeline, secs: 8 },
   { id: "stage_player", Comp: StagePlayer, secs: 5 },
   { id: "stage_logo", Comp: StageLogo, secs: 5 },

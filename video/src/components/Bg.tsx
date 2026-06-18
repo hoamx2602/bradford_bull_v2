@@ -6,8 +6,9 @@ import { seg } from "../anim";
 /** The shared canvas: near-black, a faint grid, a slow drifting red glow and a
  *  soft vignette. `bars` adds the thin brand rails top & bottom (Title/Closing).
  *  Unless `bars` (hero scenes) a small project logo sits top-right as a mark. */
-export const Bg: React.FC<{ bars?: boolean; children?: React.ReactNode }> = ({
+export const Bg: React.FC<{ bars?: boolean; plain?: boolean; children?: React.ReactNode }> = ({
   bars,
+  plain,
   children,
 }) => {
   const f = useCurrentFrame();
@@ -48,7 +49,7 @@ export const Bg: React.FC<{ bars?: boolean; children?: React.ReactNode }> = ({
           <div style={{ position: "absolute", top: 0, left: 0, width: "100%", height: 5, background: C.red, boxShadow: `0 0 24px ${C.red}` }} />
           <div style={{ position: "absolute", bottom: 0, left: 0, width: "100%", height: 5, background: C.red, boxShadow: `0 0 24px ${C.red}` }} />
         </>
-      ) : (
+      ) : plain ? null : (
         <Img
           src={staticFile("logo/logolense-dark.svg")}
           style={{ position: "absolute", top: 104, right: 120, height: 40, opacity: 0.85 * seg(f, 4, 14) }}

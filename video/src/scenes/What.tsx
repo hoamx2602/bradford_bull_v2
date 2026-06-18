@@ -18,10 +18,11 @@ export const What: React.FC = () => {
   return (
     <Bg>
       <Header kicker="WHAT IS LOGOLENS" title="One platform, three audiences" />
-      <Ticks at={[20, 30, 40]} name="pop" volume={0.42} />
+      <Ticks at={[24, 54, 84]} name="pop" volume={0.42} />
       <div style={{ position: "absolute", left: PAD + 20, top: 340, display: "flex", gap: 40 }}>
         {COLS.map(([key, name, col, bs], i) => {
-          const ap = seg(f, 20 + i * 10, 18);
+          const cardStart = 24 + i * 30; // columns reveal one after another
+          const ap = seg(f, cardStart, 18);
           return (
             <div
               key={i}
@@ -43,7 +44,7 @@ export const What: React.FC = () => {
               </div>
               <div style={{ padding: "38px 36px", display: "flex", flexDirection: "column", gap: 34 }}>
                 {bs.map((b, j) => (
-                  <div key={j} style={{ display: "flex", alignItems: "center", gap: 18, opacity: seg(f, 34 + i * 8 + j * 5, 16) }}>
+                  <div key={j} style={{ display: "flex", alignItems: "center", gap: 18, opacity: seg(f, cardStart + 16 + j * 14, 16) }}>
                     <span style={{ width: 13, height: 13, borderRadius: "50%", background: col, flexShrink: 0 }} />
                     <div style={{ fontFamily: inter, fontWeight: 500, fontSize: 31, color: C.white }}>{b}</div>
                   </div>

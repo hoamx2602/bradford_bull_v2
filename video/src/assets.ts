@@ -55,6 +55,9 @@ export const IAN = "img/person/ian_bradford_bulls.png"; // Ian Stafford portrait
 // Product poster (full marketing artwork) shown as a showcase beat.
 export const POSTER = "img/poster/poster.svg";
 
+// Landscape key-art poster used as the opening title card.
+export const MAIN_POSTER = "poster/main-poster.jpeg";
+
 // ── Demonstration media (drop real clips/screens in; temp fallbacks until then) ─
 // Detection demo stages. Drop real clips into public/video/. Until present each
 // stage falls back to demo.mp4 (shown from a different point so they look

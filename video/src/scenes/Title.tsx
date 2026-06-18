@@ -1,36 +1,33 @@
 import React from "react";
-import { useCurrentFrame, useVideoConfig, spring, AbsoluteFill, Img, staticFile } from "remotion";
+import { useCurrentFrame, AbsoluteFill, Img, staticFile, interpolate } from "remotion";
 import { Bg } from "../components/Bg";
-import { C, inter } from "../theme";
+import { C } from "../theme";
 import { seg } from "../anim";
+import { MAIN_POSTER } from "../assets";
 import { Sfx } from "../components/Sfx";
 
+// Opening title card: the landscape key-art poster, held for a few seconds
+// with a gentle fade + slow zoom.
 export const Title: React.FC = () => {
   const f = useCurrentFrame();
-  const { fps } = useVideoConfig();
-  const pop = spring({ frame: f - 6, fps, config: { damping: 200 } });
-  const ul = seg(f, 22, 22);
+  const ap = seg(f, 2, 18);
+  const zoom = interpolate(f, [0, 150], [1.0, 1.04], { extrapolateRight: "clamp" });
   return (
-    <Bg bars>
+    <Bg plain>
       <Sfx name="chime" from={6} volume={0.6} />
-      <Sfx name="tick" from={48} volume={0.35} />
       <AbsoluteFill style={{ justifyContent: "center", alignItems: "center" }}>
         <Img
-          src={staticFile("logo/logolense-dark.svg")}
+          src={staticFile(MAIN_POSTER)}
           style={{
-            width: 900,
-            opacity: pop,
-            transform: `scale(${0.93 + 0.07 * pop})`,
-            filter: "drop-shadow(0 0 60px rgba(255,59,48,0.22))",
+            width: 1500,
+            maxWidth: "82%",
+            borderRadius: 20,
+            border: `1px solid ${C.cardLine}`,
+            boxShadow: "0 40px 90px rgba(0,0,0,0.6)",
+            opacity: ap,
+            transform: `scale(${zoom}) translateY(${(1 - ap) * 16}px)`,
           }}
         />
-        <div style={{ height: 7, width: 900 * ul, background: C.red, borderRadius: 4, marginTop: 30, boxShadow: `0 0 22px ${C.red}` }} />
-        <div style={{ fontFamily: inter, fontWeight: 500, fontSize: 40, color: "#c5f000", marginTop: 42, opacity: seg(f, 34, 18) }}>
-          Your Brand, Our Focus
-        </div>
-        <div style={{ fontFamily: inter, fontWeight: 600, fontSize: 28, color: C.red, marginTop: 48, opacity: seg(f, 48, 18), letterSpacing: 0.5 }}>
-          Intelligent Sponsorship Visibility &amp; Brand Analytics Using AI
-        </div>
       </AbsoluteFill>
     </Bg>
   );
