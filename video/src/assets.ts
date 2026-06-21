@@ -35,7 +35,7 @@ const group = (title: string, photo: string, defs: MemberDef[]): TeamGroup => ({
 export const SUPERVISOR_TEAM = group("Stakeholders", "img/team/supervisor_team.jpeg", [
   { name: "Prof. Tillal Eldabi", role: "Project Supervisor" },
   { name: "Dr. Irfan Mehmood", role: "Project Supervisor & AI Lead" },
-  { name: "Ian Stafford", role: "Owner & Partner" },
+  { name: "Ian Stafford", role: "Commercial Manager" },
   { name: "Dr. Takao Maruyama", role: "Advisor" },
 ]);
 
