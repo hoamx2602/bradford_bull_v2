@@ -59,20 +59,24 @@ export const Header: React.FC<{ kicker: string; title: string; step?: string }> 
           ...rise(f, 8, 18),
         }}
       >
-        {title}
+        <span style={{ position: "relative", display: "inline-block" }}>
+          {title}
+          <span
+            style={{
+              position: "absolute",
+              left: 0,
+              bottom: -22,
+              height: 6,
+              width: "100%",
+              borderRadius: 3,
+              background: C.red,
+              boxShadow: `0 0 18px ${C.red}`,
+              transform: `scaleX(${ul})`,
+              transformOrigin: "left",
+            }}
+          />
+        </span>
       </div>
-      <div
-        style={{
-          position: "absolute",
-          left: PAD + 2,
-          top: 248,
-          height: 6,
-          width: 132 * ul,
-          borderRadius: 3,
-          background: C.red,
-          boxShadow: `0 0 18px ${C.red}`,
-        }}
-      />
     </>
   );
 };

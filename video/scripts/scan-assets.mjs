@@ -20,7 +20,7 @@ const walk = (dir) => {
       out.push(relative(publicDir, p).split(sep).join("/"));
   }
 };
-for (const sub of ["img", "logo", "video"]) {
+for (const sub of ["img", "logo", "video", "hard_frames"]) {
   try {
     walk(join(publicDir, sub));
   } catch {

@@ -20,8 +20,8 @@ export const Closing: React.FC = () => {
           style={{ width: 660, opacity: seg(f, 2, 16), filter: "drop-shadow(0 0 50px rgba(255,59,48,0.2))" }}
         />
         <div style={{ height: 6, width: 640 * ul, background: C.red, borderRadius: 4, marginTop: 24, boxShadow: `0 0 20px ${C.red}` }} />
-        <div style={{ fontFamily: inter, fontWeight: 600, fontSize: 34, color: C.red, marginTop: 40, opacity: seg(f, 22, 18), letterSpacing: 0.5 }}>
-          Transforming Sponsorship Analytics Through AI
+        <div style={{ fontFamily: inter, fontWeight: 600, fontSize: 34, color: "#c5f000", marginTop: 40, opacity: seg(f, 22, 18), letterSpacing: 0.5 }}>
+          Your Brand, Our Focus
         </div>
         <div style={{ fontFamily: inter, fontWeight: 500, fontSize: 30, color: C.muted, marginTop: 26, opacity: seg(f, 34, 18) }}>
           LogoLens Analytics Team · University of Bradford

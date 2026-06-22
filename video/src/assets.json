@@ -1,4 +1,8 @@
 [
+  "hard_frames/far_and_small.jpg",
+  "hard_frames/motion_blur.jpg",
+  "hard_frames/occluded.jpg",
+  "hard_frames/partial_cropped.jpg",
   "img/hardcases/1.png",
   "img/hardcases/2.png",
   "img/hardcases/3.png",
@@ -22,5 +26,9 @@
   "logo/Group_34.svg",
   "logo/bradford_bulls_logo.svg",
   "logo/logolense-dark.svg",
-  "logo/university_of_bradford_logo.svg"
+  "logo/university_of_bradford_logo.svg",
+  "video/body_segmentation.mp4",
+  "video/dashboard-product.mp4",
+  "video/logo_detection.mp4",
+  "video/team_detection.mp4"
 ]

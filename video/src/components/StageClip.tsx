@@ -14,7 +14,8 @@ export const StageClip: React.FC<{
   src?: string;
   from?: number;
   temp?: boolean;
-}> = ({ label, caption, idx, total, src, from = 0, temp }) => {
+  muted?: boolean;
+}> = ({ label, caption, idx, total, src, from = 0, temp, muted }) => {
   const f = useCurrentFrame();
   const fade = seg(f, 0, 10);
   const real = src ?? DEMO_FALLBACK;
@@ -22,8 +23,8 @@ export const StageClip: React.FC<{
     <AbsoluteFill style={{ background: "#000" }}>
       <Video
         src={staticFile(real)}
-        muted
         startFrom={temp ? from : 0}
+        muted={muted}
         style={{ width: "100%", height: "100%", objectFit: "cover", opacity: fade }}
       />
       {/* gradient scrims for legibility */}

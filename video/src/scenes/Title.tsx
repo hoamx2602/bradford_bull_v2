@@ -24,12 +24,12 @@ export const Title: React.FC = () => {
             filter: "drop-shadow(0 0 60px rgba(255,59,48,0.22))",
           }}
         />
-        <div style={{ height: 7, width: 620 * ul, background: C.red, borderRadius: 4, marginTop: 30, boxShadow: `0 0 22px ${C.red}` }} />
-        <div style={{ fontFamily: inter, fontWeight: 500, fontSize: 40, color: C.muted, marginTop: 42, opacity: seg(f, 34, 18) }}>
-          Intelligent Sponsorship Visibility &amp; Brand Analytics Using AI
+        <div style={{ height: 7, width: 900 * ul, background: C.red, borderRadius: 4, marginTop: 30, boxShadow: `0 0 22px ${C.red}` }} />
+        <div style={{ fontFamily: inter, fontWeight: 500, fontSize: 40, color: "#c5f000", marginTop: 42, opacity: seg(f, 34, 18) }}>
+          Your Brand, Our Focus
         </div>
         <div style={{ fontFamily: inter, fontWeight: 600, fontSize: 28, color: C.red, marginTop: 48, opacity: seg(f, 48, 18), letterSpacing: 0.5 }}>
-          Transforming Sponsorship Analytics Through Artificial Intelligence
+          Intelligent Sponsorship Visibility &amp; Brand Analytics Using AI
         </div>
       </AbsoluteFill>
     </Bg>

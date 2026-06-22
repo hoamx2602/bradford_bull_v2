@@ -15,7 +15,7 @@ import { Dashboard } from "./scenes/Dashboard";
 import { Results } from "./scenes/Results";
 import { Challenges } from "./scenes/Challenges";
 import { Impact } from "./scenes/Impact";
-import { Poster } from "./scenes/Poster";
+import { ProductDemo, PRODUCT_DEMO_SECS } from "./scenes/ProductDemo";
 import { Closing } from "./scenes/Closing";
 
 const FPS = 30;
@@ -25,21 +25,21 @@ type Scene = { id: string; Comp: React.FC; secs: number };
 // No narration any more — each scene is held just long enough to read its
 // content comfortably, then cuts to the next. Tuned by hand for pace.
 const SCENES: Scene[] = [
-  { id: "title", Comp: Title, secs: 4.5 },
+  { id: "title", Comp: Title, secs: 6.5 },
   { id: "team", Comp: Team, secs: TEAM_SCENE_FRAMES / FPS },
-  { id: "credits", Comp: Credits, secs: 5 },
-  { id: "motivation", Comp: Motivation, secs: 5.5 },
+  { id: "credits", Comp: Credits, secs: 6 },
+  { id: "motivation", Comp: Motivation, secs: 13 },
   { id: "what", Comp: What, secs: 5 },
   { id: "pipeline", Comp: Pipeline, secs: 8 },
   { id: "stage_player", Comp: StagePlayer, secs: 5 },
   { id: "stage_logo", Comp: StageLogo, secs: 5 },
   { id: "stage_seg", Comp: StageSeg, secs: 5 },
-  { id: "hardcases", Comp: HardCases, secs: 6.5 },
+  { id: "hardcases", Comp: HardCases, secs: 12 },
   { id: "dashboard", Comp: Dashboard, secs: 7.5 },
   { id: "results", Comp: Results, secs: 6 },
-  { id: "challenges", Comp: Challenges, secs: 5 },
-  { id: "impact", Comp: Impact, secs: 5 },
-  { id: "poster", Comp: Poster, secs: 5.5 },
+  { id: "challenges", Comp: Challenges, secs: 19 },
+  { id: "impact", Comp: Impact, secs: 14.5 },
+  { id: "product_demo", Comp: ProductDemo, secs: PRODUCT_DEMO_SECS },
   { id: "closing", Comp: Closing, secs: 5 },
 ];
 
@@ -47,15 +47,17 @@ const frames = (s: Scene): number => Math.round(s.secs * FPS);
 
 // Smooth crossfade between every scene. Transitions overlap their neighbours,
 // so the total is the sum of scenes minus one fade per gap.
-const FADE = 18; // ~0.6s
+const FADE = 26; // ~0.87s — slower crossfade so cuts feel less abrupt
 const TOTAL =
   SCENES.reduce((n, s) => n + frames(s), 0) - (SCENES.length - 1) * FADE;
 
 const Main: React.FC = () => (
   <>
     {/* background music bed across the whole video — "Inspired" by Kevin MacLeod
-        (incompetech.com), CC BY. Swap public/audio/bg.mp3 for your own track. */}
-    <Audio src={staticFile("audio/bg.mp3")} volume={0.5} />
+        (incompetech.com), CC BY. Swap public/audio/bg.mp3 for your own track.
+        The track is ~80s but the video now runs much longer, so it loops to
+        fill the full duration instead of cutting out partway through. */}
+    <Audio src={staticFile("audio/bg.mp3")} volume={0.5} loop />
 
     <TransitionSeries>
       {SCENES.flatMap((s, i) => {

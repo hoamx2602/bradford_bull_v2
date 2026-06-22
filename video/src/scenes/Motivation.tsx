@@ -15,7 +15,9 @@ const ITEMS = [
   "Sponsors need objective, data-driven proof.",
 ];
 const CAPS = ["Jersey & board sponsorship", "Reviewed manually", "Movement & camera angles", "Automated, data-driven"];
-const STARTS = [14, 42, 70, 98];
+// ~1.3s rest after the title settles before the first bullet, then ~3s
+// between each so there's plenty of time to read before the next lands.
+const STARTS = [40, 130, 220, 310];
 
 export const Motivation: React.FC = () => {
   const f = useCurrentFrame();
@@ -48,7 +50,7 @@ export const Motivation: React.FC = () => {
           overflow: "hidden",
           border: `1px solid ${C.cardLine}`,
           boxShadow: "0 30px 70px rgba(0,0,0,0.55)",
-          opacity: seg(f, 16, 16),
+          opacity: seg(f, 40, 16),
         }}
       >
         <WindowChrome title="Match footage · sponsorship review" />
@@ -69,7 +71,7 @@ export const Motivation: React.FC = () => {
       {/* thumbnail strip */}
       <div style={{ position: "absolute", left: 1050, top: 870, display: "flex", gap: 18 }}>
         {CAPS.map((c, i) => (
-          <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, opacity: seg(f, 16, 16) }}>
+          <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, opacity: seg(f, 40, 16) }}>
             <div style={{ width: 174, height: 96, borderRadius: 8, overflow: "hidden", border: `${i === active ? 2 : 1}px solid ${i === active ? C.red : C.dim}` }}>
               <Img src={staticFile(`img/motiv_${i + 1}.png`)} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
             </div>
