@@ -1,0 +1,20 @@
+% Fig. 2 — Roster prior funnel (C1)
+\begin{tikzpicture}[font=\scriptsize]
+  % funnel trapezoids
+  \fill[blue!10, draw=black!50] (0,0) -- (5,0) -- (4,-1) -- (1,-1) -- cycle;
+  \node at (2.5,-0.5) {Open universe $\mathcal{B}$ ($\sim$thousands of brands)};
+
+  \fill[orange!15, draw=black!50] (1,-1.2) -- (4,-1.2) -- (3.4,-2.2) -- (1.6,-2.2) -- cycle;
+  \node at (2.5,-1.7) {Roster $R_e$ ($\sim$10--30)};
+
+  \fill[green!15, draw=black!50] (1.6,-2.4) -- (3.4,-2.4) -- (3.0,-3.3) -- (2.0,-3.3) -- cycle;
+  \node[align=center] at (2.5,-2.85) {Accepted\\detections};
+
+  % arrows / labels
+  \draw[-{Stealth[length=2mm]}, thick] (5.4,-0.5) -- (4.2,-0.5)
+       node[right=12mm, align=left, text width=24mm]
+       {\textbf{Roster prior}\\rejects $b\notin R_e$ at zero cost};
+  \draw[-{Stealth[length=2mm]}, thick] (3.7,-1.7) -- (3.0,-2.6)
+       node[right=2mm, align=left, text width=22mm]
+       {label model\\+ temporal\\evidence};
+\end{tikzpicture}

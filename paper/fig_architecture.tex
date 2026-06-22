@@ -1,0 +1,52 @@
+% Fig. 1 — Cyber-physical data engine (wide, for figure*)
+\begin{tikzpicture}[node distance=6mm and 9mm]
+  % inputs
+  \node[data] (roster) {Sponsor roster\\+ logo assets};
+  \node[data, below=8mm of roster] (video) {Broadcast\\video};
+
+  % roster prior + gallery
+  \node[blk, right=of roster] (prior) {Roster prior\\(closed-set/event)};
+  \node[stud, below=14mm of prior] (gallery) {Fingerprint gallery\\(zero-training)};
+
+  % teacher block
+  \node[teach, right=of prior, yshift=-3mm] (pcs) {Exemplar PCS\\(SAM\,3)};
+  \node[teach, below=4mm of pcs] (ocr) {OCR / box\\labellers};
+  \node[blk, right=of pcs, yshift=-4mm, fill=orange!18, text width=20mm]
+       (lm) {Label model\\+ temporal\\refine};
+
+  % twin
+  \node[blk, below=12mm of lm, fill=purple!10, text width=24mm]
+       (twin) {Gaussian-splatting\\venue twin\\(logo insertion)};
+
+  % clean labels + student
+  \node[data, right=of lm] (labels) {Clean labels\\(real + synthetic)};
+  \node[stud, right=of labels] (student) {Real-time student\\(distilled YOLO)};
+  \node[blk, below=10mm of student, fill=green!18, text width=24mm]
+       (analytics) {Exposure /\\visibility analytics};
+
+  % teacher grouping box
+  \begin{scope}[on background layer]
+    \node[draw=orange!60, dashed, rounded corners, fit=(pcs)(ocr)(lm),
+          inner sep=4pt, label={[font=\scriptsize\bfseries,orange!60!black]above:TEACHER (offline)}] {};
+  \end{scope}
+
+  % arrows
+  \draw[arr] (roster) -- (prior);
+  \draw[arr] (roster) |- (gallery);
+  \draw[arr] (video) -| (pcs);
+  \draw[arr] (video) -| (ocr);
+  \draw[arr] (prior) -- (pcs.west|-prior);
+  \draw[arr] (pcs) -- (lm);
+  \draw[arr] (ocr) -- (lm);
+  \draw[arr] (gallery) -| (lm);
+  \draw[arr] (twin) -- (lm);
+  \draw[arr] (lm) -- (labels);
+  \draw[arr] (labels) -- (student);
+  \draw[arr] (student) -- (analytics);
+  \draw[arr] (twin) -| (labels);
+
+  % flywheel feedback
+  \draw[arr, dashed, draw=green!50!black]
+       (student.north) .. controls +(0,9mm) and +(0,9mm) .. (gallery.north)
+       node[midway, above, font=\scriptsize\itshape, green!40!black] {flywheel: gallery + student grow per event};
+\end{tikzpicture}

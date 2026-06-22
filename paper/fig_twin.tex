@@ -1,0 +1,19 @@
+% Fig. 4 — Gaussian-splatting venue twin pipeline (C4)
+\begin{tikzpicture}[font=\scriptsize, node distance=8mm,
+  st/.style={rectangle, rounded corners=2pt, draw=black!60, align=center,
+             inner sep=3pt, text width=18mm, minimum height=9mm}]
+  \node[st, fill=gray!8]    (foot) {Broadcast\\footage};
+  \node[st, fill=purple!10, right=of foot] (gs) {3DGS\\reconstruction\\(venue twin)};
+  \node[st, fill=blue!8, right=of gs]   (ins) {Real-logo\\insertion\\(lighting-aware)};
+  \node[st, fill=orange!10, right=of ins] (dr) {6-DoF +\\domain\\randomisation};
+  \node[st, fill=green!12, right=of dr]  (out) {Photoreal frames\\+ pixel-perfect\\labels};
+
+  \draw[arr] (foot) -- (gs);
+  \draw[arr] (gs) -- (ins);
+  \draw[arr] (ins) -- (dr);
+  \draw[arr] (dr) -- (out);
+
+  \node[align=center, below=4mm of ins, font=\scriptsize\itshape, text width=44mm]
+    {background is the \textbf{real} scene; only logos are synthetic
+     $\Rightarrow$ small sim-to-real gap, exact labels};
+\end{tikzpicture}

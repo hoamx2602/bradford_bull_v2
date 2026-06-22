@@ -1,0 +1,24 @@
+% Fig. 3 — Weak-supervision label model (C3)
+\begin{tikzpicture}[font=\scriptsize, node distance=2.2mm and 10mm,
+  lab/.style={rectangle, rounded corners=2pt, draw=black!60, fill=orange!10,
+              align=center, inner sep=3pt, text width=20mm, minimum height=6mm}]
+  \node[lab] (a) {PCS exemplar mask};
+  \node[lab, below=of a] (b) {OV box detector};
+  \node[lab, below=of b] (c) {OCR / scene-text};
+  \node[lab, below=of c] (d) {Gallery embedding};
+  \node[lab, below=of d] (e) {Temporal track};
+  \node[lab, below=of e, fill=blue!10] (f) {Roster prior};
+
+  \node[rectangle, rounded corners, draw=black!70, thick, fill=gray!10,
+        right=18mm of c, yshift=-7mm, align=center, text width=20mm,
+        minimum height=20mm] (lm) {Label\\model\\(denoise +\\vote)};
+
+  \node[rectangle, rounded corners, draw=green!55!black, fill=green!12,
+        right=of lm, align=center, text width=20mm] (out) {Clean label\\+ confidence};
+  \node[rectangle, rounded corners, draw=red!55!black, fill=red!8,
+        below=8mm of out, align=center, text width=20mm] (al) {Low agreement\\$\rightarrow$ active learning};
+
+  \foreach \n in {a,b,c,d,e,f}{\draw[-{Stealth[length=1.6mm]}] (\n.east) -- (lm.west);}
+  \draw[-{Stealth[length=2mm]}, thick] (lm) -- (out);
+  \draw[-{Stealth[length=2mm]}, thick, red!55!black] (lm.south) |- (al.west);
+\end{tikzpicture}
