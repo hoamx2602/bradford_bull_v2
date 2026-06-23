@@ -198,8 +198,20 @@ def run_analysis(job_id: str) -> None:
                 preview_path.unlink(missing_ok=True)
                 if muxed != preview_path:
                     muxed.unlink(missing_ok=True)
-                timeline_dets = preview_dets
-                timeline_fps = meta.fps
+                # Use the smooth native-fps preview detections for the timeline
+                # ONLY when the preview actually spanned the whole video. The
+                # preview pass stops at preview_max_frames (~the first minute),
+                # so for longer videos its detections would truncate the
+                # timeline — there we keep the full-length 2fps analytics
+                # detections instead, so the bars cover the entire video (the
+                # preview clip itself stays a short annotated sample).
+                preview_secs = (
+                    settings.preview_max_frames / meta.fps if meta.fps > 0 else 0.0
+                )
+                preview_covers_all = meta.duration_seconds <= preview_secs + 1.0
+                if preview_covers_all:
+                    timeline_dets = preview_dets
+                    timeline_fps = meta.fps
 
         # 6b. Body-part segmentation overlay video. Engine selectable: "yolo"
         #     (YOLO11-seg+pose, runs on MPS/GPU, every frame → smooth) or
