@@ -50,3 +50,7 @@ team_detection/output
 /logo_detection/wandb
 /video/node_modules
 /video/out
+/logo_detection/synthetic/data_bac4_smoke
+/logo_detection/synthetic/data_bac3_smoke
+/logo_detection/synthetic/data_synth
+/logo_detection/synthetic/data_jrs_smoke
