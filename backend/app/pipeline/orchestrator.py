@@ -134,6 +134,28 @@ def run_analysis(job_id: str) -> None:
         _update(job_id, P_EXPOSURE, "exposure", "Quality-weighted segments")
         logos = exposure.aggregate_logos(all_dets, settings.sample_fps)
 
+        # 4b. Per-detection "exposure facts" — the raw Tier-1 factor components
+        #     per (zone, brand). Persisted separately so the location breakdown's
+        #     AI-percentage can be recomputed under any subset of enabled factors
+        #     without re-running detection. Only zone-attributed (and team-kept,
+        #     since all_dets is already filtered) detections are kept.
+        sample_dt = 1.0 / max(0.1, settings.sample_fps)
+        facts = [
+            {
+                "t": round(d.t, 3),
+                "zone": d.body_zone,
+                "brandKey": d.brand_key,
+                "brandName": d.brand_name,
+                "size": round(d.f_size, 4),
+                "pos": round(d.f_pos, 4),
+                "clarity": round(d.f_clarity, 4),
+                "obb": round(d.f_obb, 4),
+                "durSec": round(sample_dt, 3),
+            }
+            for d in all_dets
+            if d.body_zone is not None
+        ]
+
         # 5. Pricing (Tier 3).
         _update(job_id, P_PRICING, "pricing", "Computing EMV per brand")
         pricing.price_logos(
@@ -298,7 +320,7 @@ def run_analysis(job_id: str) -> None:
         with session_scope() as s:
             AnalysisRepository(s).create(
                 result, preview_key=preview_key, bodyseg_key=bodyseg_key,
-                teamdet_key=teamdet_key,
+                teamdet_key=teamdet_key, facts=facts,
             )
             JobRepository(s).mark_done(job_id, analysis_id)
         log.info("job %s done -> analysis %s (%d brands)", job_id, analysis_id, len(logos))

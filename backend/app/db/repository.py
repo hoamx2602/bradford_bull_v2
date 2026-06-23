@@ -11,7 +11,14 @@ import uuid
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.db.models import Analysis, Job, JobStatus
+from app.db.models import (
+    Analysis,
+    AppSetting,
+    Job,
+    JobStatus,
+    LocationConfig,
+    VideoLocationOverride,
+)
 
 
 def _new_id() -> str:
@@ -98,6 +105,7 @@ class AnalysisRepository:
         preview_key: str | None = None,
         bodyseg_key: str | None = None,
         teamdet_key: str | None = None,
+        facts: list | None = None,
     ) -> Analysis:
         analysis = Analysis(
             id=result["id"],
@@ -110,6 +118,7 @@ class AnalysisRepository:
             bodyseg_key=bodyseg_key,
             teamdet_key=teamdet_key,
             result_json=result,
+            facts_json=facts or [],
         )
         self.s.add(analysis)
         self.s.commit()
@@ -147,3 +156,97 @@ class AnalysisRepository:
     @staticmethod
     def new_id() -> str:
         return _new_id()
+
+
+class SettingsRepository:
+    """Global location taxonomy, ai_criteria setting, and per-video overrides."""
+
+    def __init__(self, session: Session):
+        self.s = session
+
+    # ── Location taxonomy (global mapping + human %) ──────────────────────
+    def list_locations(self) -> list[LocationConfig]:
+        stmt = select(LocationConfig).order_by(LocationConfig.order_index)
+        return list(self.s.scalars(stmt))
+
+    def replace_locations(self, rows: list[dict]) -> list[LocationConfig]:
+        """Full replace of the taxonomy. Each row: id?, name, anchorId, brandKey,
+        humanPercentage. Missing id -> slug from name."""
+        for existing in self.list_locations():
+            self.s.delete(existing)
+        self.s.flush()
+        out: list[LocationConfig] = []
+        seen: set[str] = set()
+        for i, r in enumerate(rows):
+            lid = (r.get("id") or _slugify(r.get("name", ""))) or f"location-{i}"
+            while lid in seen:
+                lid = f"{lid}-{i}"
+            seen.add(lid)
+            row = LocationConfig(
+                id=lid,
+                name=(r.get("name") or "").strip(),
+                order_index=i,
+                anchor_id=(r.get("anchorId") or "").strip(),
+                brand_key=(r.get("brandKey") or None),
+                human_percentage=float(r.get("humanPercentage") or 0.0),
+            )
+            self.s.add(row)
+            out.append(row)
+        self.s.commit()
+        return out
+
+    # ── AI criteria (which factors are enabled) ───────────────────────────
+    def get_ai_criteria(self) -> list[str]:
+        row = self.s.get(AppSetting, "ai_criteria")
+        if row is None:
+            return []
+        return list(row.value.get("enabled", []))
+
+    def set_ai_criteria(self, enabled: list[str]) -> list[str]:
+        row = self.s.get(AppSetting, "ai_criteria")
+        if row is None:
+            row = AppSetting(key="ai_criteria", value={"enabled": enabled})
+            self.s.add(row)
+        else:
+            row.value = {"enabled": enabled}
+        self.s.commit()
+        return enabled
+
+    # ── Per-video overrides (incl. manual Human-AI %) ─────────────────────
+    def get_overrides(self, analysis_id: str) -> dict[str, VideoLocationOverride]:
+        stmt = select(VideoLocationOverride).where(
+            VideoLocationOverride.analysis_id == analysis_id
+        )
+        return {o.location_id: o for o in self.s.scalars(stmt)}
+
+    def save_overrides(self, analysis_id: str, rows: list[dict]) -> None:
+        """Upsert per-location overrides. Each row: locationId, brandKey?,
+        humanPercentage?, humanAiPercentage?, notes?."""
+        existing = self.get_overrides(analysis_id)
+        for r in rows:
+            lid = r.get("locationId")
+            if not lid:
+                continue
+            o = existing.get(lid)
+            if o is None:
+                o = VideoLocationOverride(analysis_id=analysis_id, location_id=lid)
+                self.s.add(o)
+            o.brand_key = r.get("brandKey") or None
+            o.human_percentage = _opt_float(r.get("humanPercentage"))
+            o.human_ai_percentage = _opt_float(r.get("humanAiPercentage"))
+            o.notes = (r.get("notes") or "").strip()
+        self.s.commit()
+
+
+def _slugify(text: str) -> str:
+    out = "".join(c if c.isalnum() else "-" for c in text.strip().lower())
+    return "-".join(p for p in out.split("-") if p)
+
+
+def _opt_float(v) -> float | None:
+    if v is None or v == "":
+        return None
+    try:
+        return float(v)
+    except (TypeError, ValueError):
+        return None

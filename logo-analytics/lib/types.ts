@@ -106,3 +106,58 @@ export interface TimeSeriesPoint {
   logoName: string
   cumulativeExposure: number
 }
+
+// ── Settings: location taxonomy + AI criteria ────────────────────────────
+
+export interface LocationConfig {
+  id?: string
+  name: string
+  anchorId: string
+  brandKey?: string | null
+  humanPercentage: number
+  orderIndex?: number
+}
+
+export interface AnchorOption {
+  id: string
+  name: string
+}
+
+export interface BrandOption {
+  key: string
+  name: string
+}
+
+export interface AiCriterion {
+  key: string
+  label: string
+  scope: string
+  affectsShare: boolean
+  description: string
+}
+
+export interface LocationBreakdownRow {
+  locationId: string
+  locationName: string
+  anchorId: string
+  brandKey: string | null
+  logo: string
+  humanPercentage: number
+  aiPercentage: number
+  humanAiPercentage: number | null
+  notes: string
+}
+
+export interface LocationBreakdown {
+  analysisId: string
+  enabledCriteria: string[]
+  rows: LocationBreakdownRow[]
+}
+
+export interface LocationOverrideInput {
+  locationId: string
+  brandKey?: string | null
+  humanPercentage?: number | null
+  humanAiPercentage?: number | null
+  notes?: string | null
+}

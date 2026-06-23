@@ -10,6 +10,7 @@ import ExposurePieChart from '@/components/dashboard/exposure-pie-chart'
 import BodySegmentation3D from '@/components/dashboard/body-segmentation-3d'
 import DetectionPlayer from '@/components/dashboard/detection-player'
 import LogoTable from '@/components/dashboard/logo-table'
+import LocationTable from '@/components/dashboard/location-table'
 import { DonutChart, TrendChart, HeatmapGrid, RadarChart, ScatterChart, colorAt } from '@/components/dashboard/charts'
 import { MOCK_RESULT, MOCK_MATCHES, getBrandColor } from '@/lib/mock-data'
 import { listAnalyses, bodysegVideoUrl, teamdetVideoUrl, updateAnalysis } from '@/lib/api'
@@ -783,6 +784,10 @@ export default function DashboardPage() {
                       <span>{result.logos.length} brands · {totalSegments} appearances</span>
                       <span>CPM base ${result.metadata.cpmBase} · {result.metadata.placementType}</span>
                     </div>
+                  </Section>
+
+                  <Section title="Location Breakdown">
+                    <LocationTable analysisId={result.id} enabled={usingBackend} />
                   </Section>
                 </div>
               )}

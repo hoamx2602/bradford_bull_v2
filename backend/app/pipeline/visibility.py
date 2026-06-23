@@ -37,6 +37,15 @@ def visibility_score(det: Detection) -> float:
 
 
 def annotate(detections: list[Detection]) -> None:
-    """Fill det.visibility in place."""
+    """Fill det.visibility and the individual factor components in place.
+
+    The components (f_size/f_pos/f_clarity/f_obb) are stored so AI-percentage can
+    later be recomputed under a different subset of enabled factors without
+    re-running detection; visibility itself stays their clamped product.
+    """
     for det in detections:
-        det.visibility = visibility_score(det)
+        det.f_size = size_score(det)
+        det.f_pos = position_score(det)
+        det.f_clarity = det.conf
+        det.f_obb = OBB_PENALTY
+        det.visibility = max(0.0, min(1.0, det.f_size * det.f_pos * det.f_clarity * det.f_obb))

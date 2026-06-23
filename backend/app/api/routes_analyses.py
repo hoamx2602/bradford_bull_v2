@@ -10,9 +10,11 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.api.schemas import MatchEntryOut
+from app.config import BRAND_DISPLAY, display_name
 from app.db.base import get_session
 from app.db.models import Analysis
-from app.db.repository import AnalysisRepository
+from app.db.repository import AnalysisRepository, SettingsRepository
+from app.pipeline.location_breakdown import compute_location_ai_percentages
 from app.storage import get_storage
 
 router = APIRouter(prefix="/api/analyses", tags=["analyses"])
@@ -62,6 +64,86 @@ def update_analysis(
     if a is None:
         raise HTTPException(status_code=404, detail="Analysis not found")
     return {"id": a.id, "eventName": a.event_name, "videoName": a.video_name}
+
+
+def _brand_label(brand_key: str | None) -> str:
+    if not brand_key:
+        return ""
+    return BRAND_DISPLAY.get(brand_key, display_name(brand_key))
+
+
+@router.get("/{analysis_id}/location-breakdown")
+def location_breakdown(
+    analysis_id: str,
+    criteria: str | None = None,
+    session: Session = Depends(get_session),
+) -> dict:
+    """Per-location table: Location | Logo | Human % | AI % | Human-AI %.
+
+    Merges the global location taxonomy with this analysis's overrides, and
+    recomputes AI % from the stored exposure facts. `criteria` (comma-separated
+    factor keys) previews a different criteria set without saving; omitted, the
+    saved ai_criteria setting is used.
+    """
+    a: Analysis | None = AnalysisRepository(session).get(analysis_id)
+    if a is None:
+        raise HTTPException(status_code=404, detail="Analysis not found")
+
+    settings_repo = SettingsRepository(session)
+    locations = settings_repo.list_locations()
+    overrides = settings_repo.get_overrides(analysis_id)
+
+    if criteria is not None:
+        enabled = [c.strip() for c in criteria.split(",") if c.strip()]
+    else:
+        enabled = settings_repo.get_ai_criteria()
+
+    facts = getattr(a, "facts_json", None) or []
+    anchor_by_location = {loc.id: loc.anchor_id for loc in locations}
+    ai_pct = compute_location_ai_percentages(facts, enabled, anchor_by_location)
+
+    rows = []
+    for loc in locations:
+        ov = overrides.get(loc.id)
+        brand_key = (ov.brand_key if ov and ov.brand_key else loc.brand_key)
+        human = (ov.human_percentage if ov and ov.human_percentage is not None
+                 else loc.human_percentage)
+        human_ai = ov.human_ai_percentage if ov else None
+        rows.append({
+            "locationId": loc.id,
+            "locationName": loc.name,
+            "anchorId": loc.anchor_id,
+            "brandKey": brand_key,
+            "logo": _brand_label(brand_key),
+            "humanPercentage": round(human, 2),
+            "aiPercentage": ai_pct.get(loc.id, 0.0),
+            "humanAiPercentage": human_ai,
+            "notes": ov.notes if ov else "",
+        })
+    return {"analysisId": analysis_id, "enabledCriteria": enabled, "rows": rows}
+
+
+class LocationOverrideIn(BaseModel):
+    locationId: str
+    brandKey: str | None = None
+    humanPercentage: float | None = None
+    humanAiPercentage: float | None = None
+    notes: str | None = None
+
+
+@router.put("/{analysis_id}/location-overrides")
+def save_location_overrides(
+    analysis_id: str,
+    rows: list[LocationOverrideIn],
+    session: Session = Depends(get_session),
+) -> dict:
+    a = AnalysisRepository(session).get(analysis_id)
+    if a is None:
+        raise HTTPException(status_code=404, detail="Analysis not found")
+    SettingsRepository(session).save_overrides(
+        analysis_id, [r.model_dump() for r in rows]
+    )
+    return {"saved": True, "count": len(rows)}
 
 
 @router.get("/{analysis_id}/video")

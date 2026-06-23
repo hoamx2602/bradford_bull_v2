@@ -28,6 +28,14 @@ class Detection:
     frame_w: int
     frame_h: int
     visibility: float = 0.0  # filled by visibility stage
+    # Individual Tier-1 factor components (filled by the visibility stage). Kept
+    # separately so AI-percentage can be recomputed later under a different
+    # subset of enabled factors WITHOUT re-running detection. visibility is still
+    # the product of all four.
+    f_size: float = 1.0      # sqrt(box_area / frame_area)
+    f_pos: float = 1.0       # Gaussian position score (centre=1, corner~0.1)
+    f_clarity: float = 1.0   # YOLO confidence
+    f_obb: float = 1.0       # OBB penalty (1.0 for HBB model)
     body_zone: str | None = None  # filled by body-zone stage
     # Team-filter verdict: True = on a target-team player (keep), False = on an
     # opponent/referee or unattached (drop). None = stage disabled.

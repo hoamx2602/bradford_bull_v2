@@ -7,7 +7,13 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import routes_analyses, routes_health, routes_jobs, routes_teamrefs
+from app.api import (
+    routes_analyses,
+    routes_health,
+    routes_jobs,
+    routes_settings,
+    routes_teamrefs,
+)
 from app.config import get_settings
 from app.db.base import init_db
 
@@ -43,6 +49,7 @@ def create_app() -> FastAPI:
     app.include_router(routes_jobs.router)
     app.include_router(routes_analyses.router)
     app.include_router(routes_teamrefs.router)
+    app.include_router(routes_settings.router)
     return app
 
 

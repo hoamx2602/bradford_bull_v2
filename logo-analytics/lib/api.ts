@@ -1,6 +1,15 @@
 // Backend API client. Talks to the FastAPI service (see ../backend).
 // Base URL is configurable; defaults to local dev.
-import type { AnalysisResult, MatchEntry } from './types'
+import type {
+  AnalysisResult,
+  MatchEntry,
+  LocationConfig,
+  AnchorOption,
+  BrandOption,
+  AiCriterion,
+  LocationBreakdown,
+  LocationOverrideInput,
+} from './types'
 
 export const API_BASE =
   process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'
@@ -120,6 +129,68 @@ export function bodysegVideoUrl(id: string): string {
 /** Team-detection overlay video (tracked persons boxed TARGET vs OTHER). */
 export function teamdetVideoUrl(id: string): string {
   return `${API_BASE}/api/analyses/${id}/teamdet-video`
+}
+
+// ── Settings: location taxonomy, brands, anchors, AI criteria ──────────────
+
+export async function getLocations(): Promise<LocationConfig[]> {
+  return asJson(await fetch(`${API_BASE}/api/settings/locations`))
+}
+
+export async function saveLocations(rows: LocationConfig[]): Promise<LocationConfig[]> {
+  const res = await fetch(`${API_BASE}/api/settings/locations`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(rows),
+  })
+  return asJson(res)
+}
+
+export async function getAnchors(): Promise<AnchorOption[]> {
+  return asJson(await fetch(`${API_BASE}/api/settings/anchors`))
+}
+
+export async function getBrands(): Promise<BrandOption[]> {
+  return asJson(await fetch(`${API_BASE}/api/settings/brands`))
+}
+
+export async function getAiCriteriaOptions(): Promise<AiCriterion[]> {
+  return asJson(await fetch(`${API_BASE}/api/settings/ai-criteria/options`))
+}
+
+export async function getAiCriteria(): Promise<{ enabled: string[] }> {
+  return asJson(await fetch(`${API_BASE}/api/settings/ai-criteria`))
+}
+
+export async function saveAiCriteria(enabled: string[]): Promise<{ enabled: string[] }> {
+  const res = await fetch(`${API_BASE}/api/settings/ai-criteria`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ enabled }),
+  })
+  return asJson(res)
+}
+
+/** Per-video Location breakdown table (Location | Logo | Human% | AI% | Human-AI%).
+ *  Pass `criteria` (comma-joined keys) to preview a different criteria set. */
+export async function getLocationBreakdown(
+  analysisId: string,
+  criteria?: string[],
+): Promise<LocationBreakdown> {
+  const q = criteria && criteria.length ? `?criteria=${criteria.join(',')}` : ''
+  return asJson(await fetch(`${API_BASE}/api/analyses/${analysisId}/location-breakdown${q}`))
+}
+
+export async function saveLocationOverrides(
+  analysisId: string,
+  rows: LocationOverrideInput[],
+): Promise<{ saved: boolean; count: number }> {
+  const res = await fetch(`${API_BASE}/api/analyses/${analysisId}/location-overrides`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(rows),
+  })
+  return asJson(res)
 }
 
 // ── Team refs (manual team selection) ──────────────────────────────────────

@@ -7,6 +7,7 @@ const LINKS = [
   { href: '/dashboard', label: 'Dashboard' },
   { href: '/', label: 'New Analysis' },
   { href: '/team-refs', label: 'Team Refs' },
+  { href: '/settings', label: 'Settings' },
 ]
 
 export default function Nav({ right }: { right?: React.ReactNode }) {

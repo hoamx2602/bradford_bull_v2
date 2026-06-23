@@ -84,3 +84,57 @@ class Analysis(Base):
 
     # Full AnalysisResult payload (already camelCase, ready for the frontend).
     result_json: Mapped[dict] = mapped_column(JSON, default=dict)
+
+    # Per-detection Tier-1 factor components (list of dicts). Kept OUT of
+    # result_json (which the dashboard reads whole) so it doesn't bloat every
+    # dashboard load; only the location-breakdown endpoint reads it, to recompute
+    # AI-percentage under any subset of enabled factors.
+    facts_json: Mapped[list] = mapped_column(JSON, default=list)
+
+
+class LocationConfig(Base):
+    """Global, configurable kit-placement taxonomy (the dashboard's Location list).
+
+    Each location is the customer's name for a placement on the kit, mapped to an
+    internal pose anchor (`anchor_id` ∈ bodyzones.ZONE_IDS) so AI-percentage can be
+    derived, plus the default sponsor (`brand_key`) and the customer's contractual
+    `human_percentage`. Per-video tweaks live in VideoLocationOverride.
+    """
+
+    __tablename__ = "location_configs"
+
+    id: Mapped[str] = mapped_column(String(64), primary_key=True)   # slug
+    name: Mapped[str] = mapped_column(String(128), default="")
+    order_index: Mapped[int] = mapped_column(Integer, default=0)
+    anchor_id: Mapped[str] = mapped_column(String(64), default="")  # bodyzones zone id
+    brand_key: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    human_percentage: Mapped[float] = mapped_column(Float, default=0.0)
+
+
+class AppSetting(Base):
+    """Singleton key/value JSON store for app-wide settings (e.g. ai_criteria)."""
+
+    __tablename__ = "app_settings"
+
+    key: Mapped[str] = mapped_column(String(64), primary_key=True)
+    value: Mapped[dict] = mapped_column(JSON, default=dict)
+
+
+class VideoLocationOverride(Base):
+    """Per-analysis override of a location row + the manual Human-AI percentage.
+
+    Null fields fall back to the global LocationConfig. `human_ai_percentage` is
+    the value the user types after eyeballing the whole video.
+    """
+
+    __tablename__ = "video_location_overrides"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    analysis_id: Mapped[str] = mapped_column(
+        ForeignKey("analyses.id"), index=True
+    )
+    location_id: Mapped[str] = mapped_column(ForeignKey("location_configs.id"))
+    brand_key: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    human_percentage: Mapped[float | None] = mapped_column(Float, nullable=True)
+    human_ai_percentage: Mapped[float | None] = mapped_column(Float, nullable=True)
+    notes: Mapped[str] = mapped_column(String(512), default="")
