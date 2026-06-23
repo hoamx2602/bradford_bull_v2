@@ -46,3 +46,4 @@ team_detection/output
 /wandb
 /logo_detection/wandb
 /video/node_modules
+/logo_detection/synthetic
