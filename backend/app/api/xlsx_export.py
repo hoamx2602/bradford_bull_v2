@@ -76,7 +76,7 @@ def build_location_workbook(
         r += 1
 
     head_row = r + 1
-    headers = ["Location", "Logo", "Human %", "AI %", "Human AI %", "Notes"]
+    headers = ["Location", "Logo", "Human %", "AI %", "Visibility %", "Human AI %", "Notes"]
     for c, h in enumerate(headers, start=1):
         ws.cell(row=head_row, column=c, value=h)
     _style_header(ws, head_row, len(headers))
@@ -88,11 +88,12 @@ def build_location_workbook(
         ws.cell(row=rr, column=2, value=row["logo"] or "")
         ws.cell(row=rr, column=3, value=row["humanPercentage"]).number_format = _PCT
         ws.cell(row=rr, column=4, value=row["aiPercentage"]).number_format = _PCT
+        ws.cell(row=rr, column=5, value=row.get("visibility", 0.0)).number_format = _PCT
         hai = row["humanAiPercentage"]
-        cell = ws.cell(row=rr, column=5, value=hai)
+        cell = ws.cell(row=rr, column=6, value=hai)
         if hai is not None:
             cell.number_format = _PCT
-        ws.cell(row=rr, column=6, value=row["notes"] or "")
+        ws.cell(row=rr, column=7, value=row["notes"] or "")
         h_total += row["humanPercentage"] or 0.0
         ai_total += row["aiPercentage"] or 0.0
         rr += 1
@@ -101,7 +102,7 @@ def build_location_workbook(
     t3 = ws.cell(row=rr, column=3, value=round(h_total, 2)); t3.font = _TOTAL_FONT; t3.number_format = _PCT
     t4 = ws.cell(row=rr, column=4, value=round(ai_total, 2)); t4.font = _TOTAL_FONT; t4.number_format = _PCT
 
-    _autosize(ws, [22, 20, 12, 12, 14, 28])
+    _autosize(ws, [22, 20, 12, 12, 13, 14, 28])
 
     # ── Sheet 2: AI % Detail ──────────────────────────────────────────────
     ws2 = wb.create_sheet("AI % Detail")

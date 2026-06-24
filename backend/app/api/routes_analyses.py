@@ -114,6 +114,7 @@ def _build_breakdown(
     anchor_by_location = {loc.id: loc.anchor_id for loc in locations}
     ai_pct = compute_location_ai_percentages(facts, enabled, anchor_by_location)
     zone_detail = compute_zone_detail(facts, enabled)
+    video_seconds = a.video_duration_seconds or 0.0
 
     rows = []
     for loc in locations:
@@ -127,6 +128,11 @@ def _build_breakdown(
         human = (ov.human_percentage if ov and ov.human_percentage is not None
                  else loc.human_percentage)
         human_ai = ov.human_ai_percentage if ov else None
+        # Visibility = how much of the whole video the logo was on screen at this
+        # location: total attributed on-screen seconds / video duration. Raw
+        # presence (not criteria-weighted), so it does not sum to 100 %.
+        on_screen = zone_detail.get(loc.anchor_id, {}).get("totalDuration", 0.0)
+        visibility = round(on_screen / video_seconds * 100, 2) if video_seconds else 0.0
         rows.append({
             "locationId": loc.id,
             "locationName": loc.name,
@@ -135,6 +141,8 @@ def _build_breakdown(
             "logo": _brand_label(brand_key),
             "humanPercentage": round(human, 2),
             "aiPercentage": ai_pct.get(loc.id, 0.0),
+            "visibility": visibility,
+            "onScreenSeconds": round(on_screen, 1),
             "humanAiPercentage": human_ai,
             "notes": ov.notes if ov else "",
         })

@@ -146,6 +146,9 @@ export interface LocationBreakdownRow {
   logo: string
   humanPercentage: number
   aiPercentage: number
+  // On-screen time at this location / video duration (raw presence, %).
+  visibility: number
+  onScreenSeconds: number
   humanAiPercentage: number | null
   notes: string
 }

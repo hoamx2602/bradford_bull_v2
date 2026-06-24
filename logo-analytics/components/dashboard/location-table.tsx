@@ -99,6 +99,7 @@ export default function LocationTable({ analysisId, enabled = true }: Props) {
                 <th style={th}>Logo</th>
                 <th style={thR}>Human %</th>
                 <th style={thR}>AI %</th>
+                <th style={thR} title="On-screen time at this location ÷ video duration">Visibility %</th>
                 <th style={thR}>Human AI %</th>
               </tr>
             </thead>
@@ -109,6 +110,7 @@ export default function LocationTable({ analysisId, enabled = true }: Props) {
                   <td style={{ ...td, color: r.logo ? 'var(--c-ink)' : 'var(--c-ghost)' }}>{r.logo || '—'}</td>
                   <td style={{ ...tdR }} className="num">{pct(r.humanPercentage)}</td>
                   <td style={{ ...tdR, color: 'var(--c-spark)', fontWeight: 600 }} className="num">{pct(r.aiPercentage)}</td>
+                  <td style={{ ...tdR }} className="num" title={`${r.onScreenSeconds}s on screen`}>{pct(r.visibility)}</td>
                   <td style={{ ...tdR }}>
                     <input
                       type="number"
@@ -132,6 +134,7 @@ export default function LocationTable({ analysisId, enabled = true }: Props) {
                   <td style={td} />
                   <td style={{ ...tdR, fontWeight: 700 }} className="num">{humanTotal.toFixed(2)}%</td>
                   <td style={{ ...tdR, fontWeight: 700, color: 'var(--c-spark)' }} className="num">{aiTotal.toFixed(2)}%</td>
+                  <td style={tdR} />
                   <td style={tdR} />
                 </tr>
               )}
