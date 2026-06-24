@@ -32,6 +32,7 @@ export default function LocationTable({ analysisId, enabled = true }: Props) {
   const [rows, setRows] = useState<LocationBreakdownRow[]>([])
   const [criteria, setCriteria] = useState<string[]>([])
   const [kit, setKit] = useState<string>('')
+  const [adjustWeight, setAdjustWeight] = useState<number>(0.5)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   // Local draft of the manual Human-AI % per location id (string for free typing).
@@ -47,6 +48,7 @@ export default function LocationTable({ analysisId, enabled = true }: Props) {
       setRows(bd.rows)
       setCriteria(bd.enabledCriteria)
       setKit(bd.kit)
+      setAdjustWeight(bd.adjustWeight)
       setDraft(Object.fromEntries(
         bd.rows.map(r => [r.locationId, r.humanAiPercentage == null ? '' : String(r.humanAiPercentage)]),
       ))
@@ -86,6 +88,7 @@ export default function LocationTable({ analysisId, enabled = true }: Props) {
   }
 
   const aiTotal = rows.reduce((s, r) => s + (r.aiPercentage || 0), 0)
+  const adjTotal = rows.reduce((s, r) => s + (r.aiAdjusted || 0), 0)
   const humanTotal = rows.reduce((s, r) => s + (r.humanPercentage || 0), 0)
 
   return (
@@ -99,6 +102,7 @@ export default function LocationTable({ analysisId, enabled = true }: Props) {
                 <th style={th}>Logo</th>
                 <th style={thR}>Human %</th>
                 <th style={thR}>AI %</th>
+                <th style={thR} title="AI % reconciled toward the human reference (Human-AI % or Human %)">AI Adjusted %</th>
                 <th style={thR} title="On-screen time at this location ÷ video duration">Visibility %</th>
                 <th style={thR}>Human AI %</th>
               </tr>
@@ -110,6 +114,7 @@ export default function LocationTable({ analysisId, enabled = true }: Props) {
                   <td style={{ ...td, color: r.logo ? 'var(--c-ink)' : 'var(--c-ghost)' }}>{r.logo || '—'}</td>
                   <td style={{ ...tdR }} className="num">{pct(r.humanPercentage)}</td>
                   <td style={{ ...tdR, color: 'var(--c-spark)', fontWeight: 600 }} className="num">{r.logo ? pct(r.aiPercentage) : '—'}</td>
+                  <td style={{ ...tdR, color: 'var(--c-ink)', fontWeight: 600 }} className="num">{r.logo ? pct(r.aiAdjusted) : '—'}</td>
                   <td style={{ ...tdR }} className="num" title={r.logo ? `${r.onScreenSeconds}s on screen` : 'no logo mapped'}>{r.logo ? pct(r.visibility) : '—'}</td>
                   <td style={{ ...tdR }}>
                     <input
@@ -134,6 +139,7 @@ export default function LocationTable({ analysisId, enabled = true }: Props) {
                   <td style={td} />
                   <td style={{ ...tdR, fontWeight: 700 }} className="num">{humanTotal.toFixed(2)}%</td>
                   <td style={{ ...tdR, fontWeight: 700, color: 'var(--c-spark)' }} className="num">{aiTotal.toFixed(2)}%</td>
+                  <td style={{ ...tdR, fontWeight: 700 }} className="num">{adjTotal.toFixed(2)}%</td>
                   <td style={tdR} />
                   <td style={tdR} />
                 </tr>
@@ -148,7 +154,8 @@ export default function LocationTable({ analysisId, enabled = true }: Props) {
           {kit && (
             <>Kit: <span style={{ color: 'var(--c-dim)' }}>{kit === 'home' ? 'Home (white)' : kit === 'away' ? 'Away (black)' : kit}</span> · </>
           )}
-          AI % from {criteria.length} criteria: <span style={{ color: 'var(--c-dim)' }}>{criteria.join(', ') || 'none'}</span>{' '}
+          AI % from {criteria.length} criteria: <span style={{ color: 'var(--c-dim)' }}>{criteria.join(', ') || 'none'}</span>
+          {' · '}AI Adjusted blend β=<span style={{ color: 'var(--c-dim)' }}>{adjustWeight.toFixed(2)}</span>{' '}
           — configure in Settings.
         </span>
         <div style={{ flex: 1 }} />

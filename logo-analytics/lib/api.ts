@@ -171,6 +171,19 @@ export async function saveAiCriteria(enabled: string[]): Promise<{ enabled: stri
   return asJson(res)
 }
 
+export async function getAiAdjust(): Promise<{ weight: number }> {
+  return asJson(await fetch(`${API_BASE}/api/settings/ai-adjust`))
+}
+
+export async function saveAiAdjust(weight: number): Promise<{ weight: number }> {
+  const res = await fetch(`${API_BASE}/api/settings/ai-adjust`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ weight }),
+  })
+  return asJson(res)
+}
+
 /** Per-video Location breakdown table (Location | Logo | Human% | AI% | Human-AI%).
  *  Pass `criteria` (comma-joined keys) to preview a different criteria set. */
 export async function getLocationBreakdown(

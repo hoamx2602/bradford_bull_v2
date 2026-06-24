@@ -16,6 +16,7 @@ from app.db.base import get_session
 from app.db.models import Analysis, Job
 from app.db.repository import AnalysisRepository, SettingsRepository
 from app.pipeline.location_breakdown import (
+    compute_ai_adjusted,
     compute_location_ai_percentages,
     compute_zone_detail,
 )
@@ -132,6 +133,21 @@ def _build_breakdown(
     }
     ai_pct = compute_location_ai_percentages(facts, enabled, anchor_by_location)
 
+    # AI Adjusted — reconcile measured AI % with the human reference (manual
+    # Human-AI % per row when set, else contractual Human %), over the logo'd
+    # locations, blended by the configured weight.
+    reference: dict[str, float] = {}
+    for loc in locations:
+        if not eff_brand[loc.id]:
+            continue
+        ov = overrides.get(loc.id)
+        human = (ov.human_percentage if ov and ov.human_percentage is not None
+                 else loc.human_percentage)
+        human_ai = ov.human_ai_percentage if ov else None
+        reference[loc.id] = human_ai if human_ai is not None else (human or 0.0)
+    adjust_weight = settings_repo.get_ai_adjust_weight()
+    ai_adj = compute_ai_adjusted(ai_pct, reference, adjust_weight)
+
     rows = []
     for loc in locations:
         ov = overrides.get(loc.id)
@@ -156,6 +172,7 @@ def _build_breakdown(
             "logo": _brand_label(brand_key),
             "humanPercentage": round(human, 2),
             "aiPercentage": ai_pct.get(loc.id, 0.0),
+            "aiAdjusted": ai_adj.get(loc.id, 0.0) if has_logo else None,
             "visibility": visibility,
             "onScreenSeconds": round(on_screen, 1),
             "humanAiPercentage": human_ai,
@@ -181,7 +198,14 @@ def location_breakdown(
     if a is None:
         raise HTTPException(status_code=404, detail="Analysis not found")
     enabled, kit, rows, _ = _build_breakdown(session, a, criteria)
-    return {"analysisId": analysis_id, "kit": kit, "enabledCriteria": enabled, "rows": rows}
+    adjust_weight = SettingsRepository(session).get_ai_adjust_weight()
+    return {
+        "analysisId": analysis_id,
+        "kit": kit,
+        "enabledCriteria": enabled,
+        "adjustWeight": adjust_weight,
+        "rows": rows,
+    }
 
 
 @router.get("/{analysis_id}/location-export.xlsx")

@@ -91,3 +91,20 @@ def put_ai_criteria(
     valid = {c["key"] for c in AI_CRITERIA}
     enabled = [k for k in body.enabled if k in valid]
     return {"enabled": SettingsRepository(session).set_ai_criteria(enabled)}
+
+
+class AiAdjustIn(BaseModel):
+    weight: float
+
+
+@router.get("/ai-adjust")
+def get_ai_adjust(session: Session = Depends(get_session)) -> dict:
+    """Blend weight β for the AI Adjusted column (0 = pure AI, 1 = pure human)."""
+    return {"weight": SettingsRepository(session).get_ai_adjust_weight()}
+
+
+@router.put("/ai-adjust")
+def put_ai_adjust(
+    body: AiAdjustIn, session: Session = Depends(get_session)
+) -> dict:
+    return {"weight": SettingsRepository(session).set_ai_adjust_weight(body.weight)}

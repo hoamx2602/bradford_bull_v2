@@ -9,6 +9,7 @@ import Nav from '@/components/nav'
 import {
   getLocations, saveLocations, getAnchors, getBrands,
   getAiCriteriaOptions, getAiCriteria, saveAiCriteria,
+  getAiAdjust, saveAiAdjust,
 } from '@/lib/api'
 import type { LocationConfig, AnchorOption, BrandOption, AiCriterion } from '@/lib/types'
 
@@ -56,6 +57,7 @@ export default function SettingsPage() {
   const [brands, setBrands] = useState<BrandOption[]>([])
   const [criteriaOpts, setCriteriaOpts] = useState<AiCriterion[]>([])
   const [enabled, setEnabled] = useState<string[]>([])
+  const [adjustWeight, setAdjustWeight] = useState<number>(0.5)
   const [error, setError] = useState('')
   const [savingLoc, setSavingLoc] = useState(false)
   const [savedLoc, setSavedLoc] = useState(false)
@@ -64,10 +66,11 @@ export default function SettingsPage() {
   const load = useCallback(async () => {
     setError('')
     try {
-      const [l, a, b, opts, cur] = await Promise.all([
-        getLocations(), getAnchors(), getBrands(), getAiCriteriaOptions(), getAiCriteria(),
+      const [l, a, b, opts, cur, adj] = await Promise.all([
+        getLocations(), getAnchors(), getBrands(), getAiCriteriaOptions(), getAiCriteria(), getAiAdjust(),
       ])
       setRows(l); setAnchors(a); setBrands(b); setCriteriaOpts(opts); setEnabled(cur.enabled)
+      setAdjustWeight(adj.weight)
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Could not load settings (is the backend running?)')
     }
@@ -94,6 +97,16 @@ export default function SettingsPage() {
       setError(e instanceof Error ? e.message : 'Could not save locations')
     } finally {
       setSavingLoc(false)
+    }
+  }
+
+  const onChangeWeight = async (w: number) => {
+    setAdjustWeight(w)
+    try {
+      const res = await saveAiAdjust(w)
+      setAdjustWeight(res.weight)
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Could not save AI Adjusted weight')
     }
   }
 
@@ -232,6 +245,38 @@ export default function SettingsPage() {
                 </label>
               )
             })}
+          </div>
+        </Section>
+
+        {/* ── AI Adjusted blend ──────────────────────────────────────── */}
+        <Section title="AI Adjusted — reconciliation">
+          <div style={{ fontSize: 13, color: 'var(--c-dim)', marginBottom: 16, maxWidth: 760 }}>
+            The <b>AI Adjusted</b> column reconciles the measured AI % (raw on-screen exposure, which
+            over-weights always-visible placements like sleeves and any over-detected brand) with a
+            human reference — the manual <b>Human-AI %</b> when you&apos;ve entered it, otherwise the
+            contractual <b>Human %</b>. Pick how far to pull AI toward that reference.
+          </div>
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 18, maxWidth: 620,
+            background: 'var(--c-panel)', border: '1px solid var(--c-wire)', borderRadius: 10, padding: '18px 20px',
+          }}>
+            <span style={{ fontSize: 12, color: 'var(--c-ghost)', width: 70 }}>Pure AI</span>
+            <input
+              type="range" min={0} max={1} step={0.05} value={adjustWeight}
+              onChange={e => setAdjustWeight(Number(e.target.value))}
+              onMouseUp={e => onChangeWeight(Number((e.target as HTMLInputElement).value))}
+              onTouchEnd={e => onChangeWeight(Number((e.target as HTMLInputElement).value))}
+              style={{ flex: 1 }}
+            />
+            <span style={{ fontSize: 12, color: 'var(--c-ghost)', width: 90, textAlign: 'right' }}>Pure human</span>
+            <span className="num" style={{
+              fontSize: 16, fontWeight: 700, color: 'var(--c-spark)', width: 56, textAlign: 'right',
+            }}>
+              β={adjustWeight.toFixed(2)}
+            </span>
+          </div>
+          <div style={{ fontSize: 12, color: 'var(--c-ghost)', marginTop: 10 }}>
+            β=0 → AI Adjusted equals AI %. β=1 → equals the human reference. 0.5 = halfway. Applies to every video.
           </div>
         </Section>
       </div>

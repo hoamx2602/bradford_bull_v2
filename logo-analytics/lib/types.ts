@@ -146,6 +146,8 @@ export interface LocationBreakdownRow {
   logo: string
   humanPercentage: number
   aiPercentage: number
+  // AI % reconciled toward the human reference (null when no logo).
+  aiAdjusted: number | null
   // On-screen time at this location / video duration (raw presence, %).
   visibility: number
   onScreenSeconds: number
@@ -157,6 +159,8 @@ export interface LocationBreakdown {
   analysisId: string
   kit: string
   enabledCriteria: string[]
+  // AI Adjusted blend weight β (0 = pure AI, 1 = pure human reference).
+  adjustWeight: number
   rows: LocationBreakdownRow[]
 }
 

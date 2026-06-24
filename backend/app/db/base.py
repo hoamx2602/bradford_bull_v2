@@ -115,6 +115,10 @@ def _seed_defaults() -> None:
                     row.brand_key_away = brand_away
         if s.get(AppSetting, "ai_criteria") is None:
             s.add(AppSetting(key="ai_criteria", value={"enabled": _DEFAULT_AI_CRITERIA}))
+        if s.get(AppSetting, "ai_adjust") is None:
+            # β=0.5: AI Adjusted = halfway between measured AI % and the human
+            # reference (Human-AI % when set, else contractual Human %).
+            s.add(AppSetting(key="ai_adjust", value={"weight": 0.5}))
         s.commit()
 
 

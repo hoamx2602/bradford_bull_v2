@@ -76,27 +76,29 @@ def build_location_workbook(
         r += 1
 
     head_row = r + 1
-    headers = ["Location", "Logo", "Human %", "AI %", "Visibility %", "Human AI %", "Notes"]
+    headers = ["Location", "Logo", "Human %", "AI %", "AI Adjusted %", "Visibility %", "Human AI %", "Notes"]
     for c, h in enumerate(headers, start=1):
         ws.cell(row=head_row, column=c, value=h)
     _style_header(ws, head_row, len(headers))
 
     rr = head_row + 1
-    h_total = ai_total = 0.0
+    h_total = ai_total = adj_total = 0.0
     for row in rows:
         has_logo = bool(row["logo"])
         ws.cell(row=rr, column=1, value=row["locationName"])
         ws.cell(row=rr, column=2, value=row["logo"] or "")
         ws.cell(row=rr, column=3, value=row["humanPercentage"]).number_format = _PCT
-        # AI % / Visibility are blank for a slot with no logo (nothing attributed).
+        # AI % / AI Adjusted / Visibility are blank for a slot with no logo.
         if has_logo:
             ws.cell(row=rr, column=4, value=row["aiPercentage"]).number_format = _PCT
-            ws.cell(row=rr, column=5, value=row.get("visibility", 0.0)).number_format = _PCT
+            ws.cell(row=rr, column=5, value=row.get("aiAdjusted") or 0.0).number_format = _PCT
+            ws.cell(row=rr, column=6, value=row.get("visibility", 0.0)).number_format = _PCT
+            adj_total += row.get("aiAdjusted") or 0.0
         hai = row["humanAiPercentage"]
-        cell = ws.cell(row=rr, column=6, value=hai)
+        cell = ws.cell(row=rr, column=7, value=hai)
         if hai is not None:
             cell.number_format = _PCT
-        ws.cell(row=rr, column=7, value=row["notes"] or "")
+        ws.cell(row=rr, column=8, value=row["notes"] or "")
         h_total += row["humanPercentage"] or 0.0
         ai_total += row["aiPercentage"] or 0.0
         rr += 1
@@ -104,8 +106,9 @@ def build_location_workbook(
     ws.cell(row=rr, column=1, value="Total").font = _TOTAL_FONT
     t3 = ws.cell(row=rr, column=3, value=round(h_total, 2)); t3.font = _TOTAL_FONT; t3.number_format = _PCT
     t4 = ws.cell(row=rr, column=4, value=round(ai_total, 2)); t4.font = _TOTAL_FONT; t4.number_format = _PCT
+    t5 = ws.cell(row=rr, column=5, value=round(adj_total, 2)); t5.font = _TOTAL_FONT; t5.number_format = _PCT
 
-    _autosize(ws, [22, 20, 12, 12, 13, 14, 28])
+    _autosize(ws, [22, 20, 12, 12, 14, 13, 14, 28])
 
     # ── Sheet 2: AI % Detail ──────────────────────────────────────────────
     ws2 = wb.create_sheet("AI % Detail")

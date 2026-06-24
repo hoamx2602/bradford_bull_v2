@@ -156,6 +156,34 @@ def _round_to_total(raw: dict[str, float], target: float = 100.0) -> dict[str, f
     return {k: round(c / 100.0, 2) for k, c in cents.items()}
 
 
+def compute_ai_adjusted(
+    ai_pct: dict[str, float], reference: dict[str, float], weight: float
+) -> dict[str, float]:
+    """Reconcile the measured AI % with a human reference, summing to 100 %.
+
+    AI % alone is raw on-screen exposure share, which over-weights always-visible
+    placements (sleeves) and any over-detected brand. The reference is what a
+    human expects each placement to be worth — the manual Human-AI % when the
+    user has entered it, otherwise the contractual Human %.
+
+    Both distributions are normalised to 100 over the SAME locations, blended
+    convexly — `weight` (β) in [0,1]: 0 = pure AI, 1 = pure reference — so the
+    result also sums to 100, then rounded to exactly 100.00.
+    """
+    w = min(1.0, max(0.0, weight))
+    keys = list(ai_pct)
+    ai_sum = sum(ai_pct.values()) or 1.0
+    ref_sum = sum(reference.get(k, 0.0) for k in keys)
+
+    out_raw: dict[str, float] = {}
+    for k in keys:
+        ai_n = ai_pct[k] / ai_sum * 100.0
+        # No reference signal at all -> fall back to the AI distribution.
+        ref_n = (reference.get(k, 0.0) / ref_sum * 100.0) if ref_sum > 0 else ai_n
+        out_raw[k] = (1.0 - w) * ai_n + w * ref_n
+    return _round_to_total(out_raw, 100.0)
+
+
 def compute_location_ai_percentages(
     facts: list[dict], enabled: list[str], anchor_by_location: dict[str, str]
 ) -> dict[str, float]:

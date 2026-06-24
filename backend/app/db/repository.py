@@ -213,6 +213,28 @@ class SettingsRepository:
         self.s.commit()
         return enabled
 
+    # ── AI Adjusted blend weight (β: how much to pull AI % toward the human
+    #    reference when computing the AI Adjusted column) ────────────────────
+    def get_ai_adjust_weight(self) -> float:
+        row = self.s.get(AppSetting, "ai_adjust")
+        if row is None:
+            return 0.5
+        try:
+            return float(row.value.get("weight", 0.5))
+        except (TypeError, ValueError):
+            return 0.5
+
+    def set_ai_adjust_weight(self, weight: float) -> float:
+        w = min(1.0, max(0.0, float(weight)))
+        row = self.s.get(AppSetting, "ai_adjust")
+        if row is None:
+            row = AppSetting(key="ai_adjust", value={"weight": w})
+            self.s.add(row)
+        else:
+            row.value = {"weight": w}
+        self.s.commit()
+        return w
+
     # ── Per-video overrides (incl. manual Human-AI %) ─────────────────────
     def get_overrides(self, analysis_id: str) -> dict[str, VideoLocationOverride]:
         stmt = select(VideoLocationOverride).where(
