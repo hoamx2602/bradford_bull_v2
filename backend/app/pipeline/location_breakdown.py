@@ -60,15 +60,29 @@ def _frame_weight(fact: dict, enabled: set[str]) -> float:
     return w
 
 
-def _zone_quality(facts: list[dict], enabled: set[str]) -> float:
-    """Quality-weighted exposure for one zone's facts.
+def _zone_metrics(facts: list[dict], enabled: set[str]) -> dict:
+    """Quality-weighted exposure for one zone PLUS the parameters behind it.
 
     Splits the zone's detections into time segments (gap > 2.5 sample intervals),
     then sums mean(frame_weight) × duration_weight × duration per segment — the
     same shape as exposure.aggregate, but with the recomputed per-frame weight.
+    Also returns the factor means / counts so the AI % is fully explainable.
     """
+    n = len(facts)
+    base = {
+        "quality": 0.0, "detections": n, "segments": 0, "totalDuration": 0.0,
+        "meanSize": 0.0, "meanPos": 0.0, "meanClarity": 0.0, "meanObb": 0.0,
+        "meanFrameWeight": 0.0,
+    }
     if not facts:
-        return 0.0
+        return base
+
+    base["meanSize"] = sum(f.get("size", 1.0) for f in facts) / n
+    base["meanPos"] = sum(f.get("pos", 1.0) for f in facts) / n
+    base["meanClarity"] = sum(f.get("clarity", 1.0) for f in facts) / n
+    base["meanObb"] = sum(f.get("obb", 1.0) for f in facts) / n
+    base["meanFrameWeight"] = sum(_frame_weight(f, enabled) for f in facts) / n
+
     facts = sorted(facts, key=lambda f: f.get("t", 0.0))
     dt = facts[0].get("durSec", 0.5) or 0.5
     gap_limit = max(dt * 2.5, dt + 0.05)
@@ -83,28 +97,44 @@ def _zone_quality(facts: list[dict], enabled: set[str]) -> float:
     if cur:
         runs.append(cur)
 
-    total = 0.0
+    quality = 0.0
+    duration_total = 0.0
     for run in runs:
         duration = max(run[-1].get("t", 0.0) - run[0].get("t", 0.0) + dt, dt)
         weights = [_frame_weight(f, enabled) for f in run]
         mean_w = sum(weights) / len(weights)
         dw = _duration_weight(duration) if "durationWeight" in enabled else 1.0
-        total += mean_w * dw * duration
-    return total
+        quality += mean_w * dw * duration
+        duration_total += duration
+
+    base["quality"] = quality
+    base["segments"] = len(runs)
+    base["totalDuration"] = duration_total
+    return base
 
 
-def compute_zone_shares(facts: list[dict], enabled: list[str]) -> dict[str, float]:
-    """anchor zone id -> % share of total quality exposure (sums to ~100)."""
-    enabled_set = {e for e in enabled if e in CRITERIA_KEYS}
+def _zones_by_id(facts: list[dict]) -> dict[str, list[dict]]:
     by_zone: dict[str, list[dict]] = defaultdict(list)
     for f in facts:
         zone = f.get("zone")
         if zone:
             by_zone[zone].append(f)
+    return by_zone
 
-    quality = {zone: _zone_quality(fs, enabled_set) for zone, fs in by_zone.items()}
-    denom = sum(quality.values()) or 1.0
-    return {zone: q / denom * 100.0 for zone, q in quality.items()}
+
+def compute_zone_detail(facts: list[dict], enabled: list[str]) -> dict[str, dict]:
+    """anchor zone id -> metrics dict (incl. `share` %), explaining the AI %."""
+    enabled_set = {e for e in enabled if e in CRITERIA_KEYS}
+    metrics = {z: _zone_metrics(fs, enabled_set) for z, fs in _zones_by_id(facts).items()}
+    denom = sum(m["quality"] for m in metrics.values()) or 1.0
+    for m in metrics.values():
+        m["share"] = m["quality"] / denom * 100.0
+    return metrics
+
+
+def compute_zone_shares(facts: list[dict], enabled: list[str]) -> dict[str, float]:
+    """anchor zone id -> % share of total quality exposure (sums to ~100)."""
+    return {z: m["share"] for z, m in compute_zone_detail(facts, enabled).items()}
 
 
 def compute_location_ai_percentages(

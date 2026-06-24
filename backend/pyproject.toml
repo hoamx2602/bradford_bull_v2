@@ -23,6 +23,7 @@ dependencies = [
     "imageio-ffmpeg>=0.4.9",          # bundled ffmpeg: audio mux for output videos
     "numpy>=1.24",
     "Pillow>=10",
+    "openpyxl>=3.1",                 # .xlsx export of the per-video location breakdown
 ]
 
 [project.optional-dependencies]

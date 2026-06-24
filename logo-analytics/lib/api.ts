@@ -193,6 +193,12 @@ export async function saveLocationOverrides(
   return asJson(res)
 }
 
+/** Download URL for the per-video location breakdown as an Excel workbook
+ *  (table + the parameters behind each AI %). */
+export function locationExcelUrl(analysisId: string): string {
+  return `${API_BASE}/api/analyses/${analysisId}/location-export.xlsx`
+}
+
 // ── Team refs (manual team selection) ──────────────────────────────────────
 
 export interface TeamRefsStatus {

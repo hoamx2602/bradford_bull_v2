@@ -6,7 +6,7 @@
 // the manual visual estimate the user types in, saved as a per-video override.
 
 import { useCallback, useEffect, useState } from 'react'
-import { getLocationBreakdown, saveLocationOverrides } from '@/lib/api'
+import { getLocationBreakdown, saveLocationOverrides, locationExcelUrl } from '@/lib/api'
 import type { LocationBreakdownRow } from '@/lib/types'
 
 interface Props {
@@ -147,6 +147,20 @@ export default function LocationTable({ analysisId, enabled = true }: Props) {
         {error && <span style={{ color: '#e08585' }}>{error}</span>}
         {saved && <span style={{ color: 'var(--c-spark)' }}>Saved</span>}
         {loading && <span>Loading…</span>}
+        <a
+          href={locationExcelUrl(analysisId)}
+          className="no-print"
+          style={{
+            display: 'inline-flex', alignItems: 'center', gap: 7, textDecoration: 'none',
+            fontSize: 12, fontWeight: 600, padding: '8px 14px', borderRadius: 7,
+            border: '1px solid var(--c-wire)', background: 'transparent', color: 'var(--c-dim)',
+          }}
+        >
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />
+          </svg>
+          Export Excel
+        </a>
         <button
           onClick={onSave}
           disabled={saving || loading}

@@ -10,11 +10,15 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.api.schemas import MatchEntryOut
+from app.api.xlsx_export import build_location_workbook
 from app.config import BRAND_DISPLAY, display_name
 from app.db.base import get_session
 from app.db.models import Analysis
 from app.db.repository import AnalysisRepository, SettingsRepository
-from app.pipeline.location_breakdown import compute_location_ai_percentages
+from app.pipeline.location_breakdown import (
+    compute_location_ai_percentages,
+    compute_zone_detail,
+)
 from app.storage import get_storage
 
 router = APIRouter(prefix="/api/analyses", tags=["analyses"])
@@ -72,26 +76,18 @@ def _brand_label(brand_key: str | None) -> str:
     return BRAND_DISPLAY.get(brand_key, display_name(brand_key))
 
 
-@router.get("/{analysis_id}/location-breakdown")
-def location_breakdown(
-    analysis_id: str,
-    criteria: str | None = None,
-    session: Session = Depends(get_session),
-) -> dict:
-    """Per-location table: Location | Logo | Human % | AI % | Human-AI %.
+def _build_breakdown(
+    session: Session, a: Analysis, criteria: str | None
+) -> tuple[list[str], list[dict], dict[str, dict]]:
+    """Shared builder for the breakdown table + the per-anchor AI detail.
 
-    Merges the global location taxonomy with this analysis's overrides, and
-    recomputes AI % from the stored exposure facts. `criteria` (comma-separated
-    factor keys) previews a different criteria set without saving; omitted, the
-    saved ai_criteria setting is used.
+    Returns (enabled_criteria, rows, zone_detail). `rows` matches the JSON the
+    breakdown endpoint returns; `zone_detail` maps anchor id -> factor metrics
+    (used by the Excel export to explain each AI %).
     """
-    a: Analysis | None = AnalysisRepository(session).get(analysis_id)
-    if a is None:
-        raise HTTPException(status_code=404, detail="Analysis not found")
-
     settings_repo = SettingsRepository(session)
     locations = settings_repo.list_locations()
-    overrides = settings_repo.get_overrides(analysis_id)
+    overrides = settings_repo.get_overrides(a.id)
 
     if criteria is not None:
         enabled = [c.strip() for c in criteria.split(",") if c.strip()]
@@ -101,6 +97,7 @@ def location_breakdown(
     facts = getattr(a, "facts_json", None) or []
     anchor_by_location = {loc.id: loc.anchor_id for loc in locations}
     ai_pct = compute_location_ai_percentages(facts, enabled, anchor_by_location)
+    zone_detail = compute_zone_detail(facts, enabled)
 
     rows = []
     for loc in locations:
@@ -120,7 +117,49 @@ def location_breakdown(
             "humanAiPercentage": human_ai,
             "notes": ov.notes if ov else "",
         })
+    return enabled, rows, zone_detail
+
+
+@router.get("/{analysis_id}/location-breakdown")
+def location_breakdown(
+    analysis_id: str,
+    criteria: str | None = None,
+    session: Session = Depends(get_session),
+) -> dict:
+    """Per-location table: Location | Logo | Human % | AI % | Human-AI %.
+
+    Merges the global location taxonomy with this analysis's overrides, and
+    recomputes AI % from the stored exposure facts. `criteria` (comma-separated
+    factor keys) previews a different criteria set without saving; omitted, the
+    saved ai_criteria setting is used.
+    """
+    a: Analysis | None = AnalysisRepository(session).get(analysis_id)
+    if a is None:
+        raise HTTPException(status_code=404, detail="Analysis not found")
+    enabled, rows, _ = _build_breakdown(session, a, criteria)
     return {"analysisId": analysis_id, "enabledCriteria": enabled, "rows": rows}
+
+
+@router.get("/{analysis_id}/location-export.xlsx")
+def export_location_xlsx(
+    analysis_id: str,
+    criteria: str | None = None,
+    session: Session = Depends(get_session),
+):
+    """Excel workbook of the location breakdown + the parameters behind each AI %."""
+    a: Analysis | None = AnalysisRepository(session).get(analysis_id)
+    if a is None:
+        raise HTTPException(status_code=404, detail="Analysis not found")
+    enabled, rows, zone_detail = _build_breakdown(session, a, criteria)
+    content = build_location_workbook(
+        analysis=a, rows=rows, zone_detail=zone_detail, enabled=enabled
+    )
+    filename = f"{a.event_name or a.video_name or 'analysis'}_locations.xlsx".replace(" ", "_")
+    return StreamingResponse(
+        iter([content]),
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
 
 
 class LocationOverrideIn(BaseModel):
