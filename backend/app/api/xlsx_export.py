@@ -132,20 +132,23 @@ def build_location_workbook(
 
     rr = head2 + 1
     for row in rows:
-        d = zone_detail.get(row["anchorId"], {})
         ws2.cell(row=rr, column=1, value=row["locationName"])
         ws2.cell(row=rr, column=2, value=row["anchorId"])
         ws2.cell(row=rr, column=3, value=row["logo"] or "")
-        ws2.cell(row=rr, column=4, value=row["aiPercentage"]).number_format = _PCT
-        ws2.cell(row=rr, column=5, value=round(d.get("quality", 0.0), 4)).number_format = _NUM
-        ws2.cell(row=rr, column=6, value=d.get("detections", 0))
-        ws2.cell(row=rr, column=7, value=d.get("segments", 0))
-        ws2.cell(row=rr, column=8, value=round(d.get("totalDuration", 0.0), 2)).number_format = _PCT
-        ws2.cell(row=rr, column=9, value=round(d.get("meanSize", 0.0), 4)).number_format = _NUM
-        ws2.cell(row=rr, column=10, value=round(d.get("meanPos", 0.0), 4)).number_format = _NUM
-        ws2.cell(row=rr, column=11, value=round(d.get("meanClarity", 0.0), 4)).number_format = _NUM
-        ws2.cell(row=rr, column=12, value=round(d.get("meanObb", 0.0), 4)).number_format = _NUM
-        ws2.cell(row=rr, column=13, value=round(d.get("meanFrameWeight", 0.0), 4)).number_format = _NUM
+        # A location with no logo isn't attributed any exposure — leave its
+        # parameter cells blank (matches the Location Breakdown sheet).
+        if row["logo"]:
+            d = zone_detail.get(row["anchorId"], {})
+            ws2.cell(row=rr, column=4, value=row["aiPercentage"]).number_format = _PCT
+            ws2.cell(row=rr, column=5, value=round(d.get("quality", 0.0), 4)).number_format = _NUM
+            ws2.cell(row=rr, column=6, value=d.get("detections", 0))
+            ws2.cell(row=rr, column=7, value=d.get("segments", 0))
+            ws2.cell(row=rr, column=8, value=round(d.get("totalDuration", 0.0), 2)).number_format = _PCT
+            ws2.cell(row=rr, column=9, value=round(d.get("meanSize", 0.0), 4)).number_format = _NUM
+            ws2.cell(row=rr, column=10, value=round(d.get("meanPos", 0.0), 4)).number_format = _NUM
+            ws2.cell(row=rr, column=11, value=round(d.get("meanClarity", 0.0), 4)).number_format = _NUM
+            ws2.cell(row=rr, column=12, value=round(d.get("meanObb", 0.0), 4)).number_format = _NUM
+            ws2.cell(row=rr, column=13, value=round(d.get("meanFrameWeight", 0.0), 4)).number_format = _NUM
         rr += 1
 
     _autosize(ws2, [22, 16, 18, 10, 16, 12, 10, 14, 11, 13, 12, 11, 16])
