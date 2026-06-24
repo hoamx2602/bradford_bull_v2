@@ -10,7 +10,7 @@ from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from app.config import BRAND_DISPLAY
+from app.config import SPONSOR_DISPLAY
 from app.db.base import get_session
 from app.db.repository import SettingsRepository
 from app.pipeline.bodyzones import ZONES
@@ -24,6 +24,7 @@ class LocationIn(BaseModel):
     name: str
     anchorId: str = ""
     brandKey: str | None = None
+    brandKeyAway: str | None = None
     humanPercentage: float = 0.0
 
 
@@ -37,6 +38,7 @@ def _to_out(row) -> LocationOut:
         name=row.name,
         anchorId=row.anchor_id,
         brandKey=row.brand_key,
+        brandKeyAway=row.brand_key_away,
         humanPercentage=row.human_percentage,
         orderIndex=row.order_index,
     )
@@ -64,7 +66,7 @@ def get_anchors() -> list[dict]:
 @router.get("/brands")
 def get_brands() -> list[dict]:
     """Sponsor brands for the Logo dropdown (key + display name)."""
-    return [{"key": k, "name": v} for k, v in sorted(BRAND_DISPLAY.items(), key=lambda kv: kv[1])]
+    return [{"key": k, "name": v} for k, v in sorted(SPONSOR_DISPLAY.items(), key=lambda kv: kv[1])]
 
 
 @router.get("/ai-criteria/options")

@@ -48,7 +48,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   )
 }
 
-const emptyRow = (): LocationConfig => ({ name: '', anchorId: '', brandKey: '', humanPercentage: 0 })
+const emptyRow = (): LocationConfig => ({ name: '', anchorId: '', brandKey: '', brandKeyAway: '', humanPercentage: 0 })
 
 export default function SettingsPage() {
   const [rows, setRows] = useState<LocationConfig[]>([])
@@ -141,7 +141,8 @@ export default function SettingsPage() {
                     <th style={{ ...th, width: 40 }}>#</th>
                     <th style={th}>Location</th>
                     <th style={th}>Anchor (pose zone)</th>
-                    <th style={th}>Logo</th>
+                    <th style={th}>Logo (home)</th>
+                    <th style={th}>Logo (away)</th>
                     <th style={{ ...th, width: 120 }}>Human %</th>
                     <th style={{ ...th, width: 110 }} />
                   </tr>
@@ -162,6 +163,12 @@ export default function SettingsPage() {
                       <td style={{ padding: '8px 12px', minWidth: 150 }}>
                         <select value={r.brandKey ?? ''} onChange={e => setRow(i, { brandKey: e.target.value || null })} style={cellInput}>
                           <option value="">— none —</option>
+                          {brands.map(b => <option key={b.key} value={b.key}>{b.name}</option>)}
+                        </select>
+                      </td>
+                      <td style={{ padding: '8px 12px', minWidth: 150 }}>
+                        <select value={r.brandKeyAway ?? ''} onChange={e => setRow(i, { brandKeyAway: e.target.value || null })} style={cellInput} title="Leave blank if the same sponsor on both kits">
+                          <option value="">— same as home —</option>
                           {brands.map(b => <option key={b.key} value={b.key}>{b.name}</option>)}
                         </select>
                       </td>

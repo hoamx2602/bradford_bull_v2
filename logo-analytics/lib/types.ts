@@ -114,6 +114,8 @@ export interface LocationConfig {
   name: string
   anchorId: string
   brandKey?: string | null
+  // Away-kit sponsor when it differs from the home one (null = same on both).
+  brandKeyAway?: string | null
   humanPercentage: number
   orderIndex?: number
 }
@@ -150,6 +152,7 @@ export interface LocationBreakdownRow {
 
 export interface LocationBreakdown {
   analysisId: string
+  kit: string
   enabledCriteria: string[]
   rows: LocationBreakdownRow[]
 }

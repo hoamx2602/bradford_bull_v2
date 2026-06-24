@@ -107,7 +107,12 @@ class LocationConfig(Base):
     name: Mapped[str] = mapped_column(String(128), default="")
     order_index: Mapped[int] = mapped_column(Integer, default=0)
     anchor_id: Mapped[str] = mapped_column(String(64), default="")  # bodyzones zone id
+    # Logo at this placement. brand_key is the HOME-kit / default sponsor;
+    # brand_key_away overrides it for away-kit videos when the two differ (e.g.
+    # the main chest: Top Notch on home/white, Floor Tonic on away/black). Null
+    # away -> same sponsor on both kits.
     brand_key: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    brand_key_away: Mapped[str | None] = mapped_column(String(64), nullable=True)
     human_percentage: Mapped[float] = mapped_column(Float, default=0.0)
 
 

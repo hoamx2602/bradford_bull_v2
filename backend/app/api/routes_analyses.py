@@ -11,9 +11,9 @@ from sqlalchemy.orm import Session
 
 from app.api.schemas import MatchEntryOut
 from app.api.xlsx_export import build_location_workbook
-from app.config import BRAND_DISPLAY, display_name
+from app.config import SPONSOR_DISPLAY, display_name
 from app.db.base import get_session
-from app.db.models import Analysis
+from app.db.models import Analysis, Job
 from app.db.repository import AnalysisRepository, SettingsRepository
 from app.pipeline.location_breakdown import (
     compute_location_ai_percentages,
@@ -73,21 +73,37 @@ def update_analysis(
 def _brand_label(brand_key: str | None) -> str:
     if not brand_key:
         return ""
-    return BRAND_DISPLAY.get(brand_key, display_name(brand_key))
+    return SPONSOR_DISPLAY.get(brand_key, display_name(brand_key))
+
+
+def _analysis_kit(session: Session, analysis_id: str) -> str:
+    """Which kit this analysis was run on ("home" / "away").
+
+    Read from the originating job (drives which main sponsor is on the chest:
+    Top Notch on home/white, Floor Tonic on away/black). Defaults to "away".
+    """
+    job = (
+        session.query(Job)
+        .filter(Job.analysis_id == analysis_id)
+        .order_by(Job.created_at.desc())
+        .first()
+    )
+    return (job.kit if job and job.kit else "away")
 
 
 def _build_breakdown(
     session: Session, a: Analysis, criteria: str | None
-) -> tuple[list[str], list[dict], dict[str, dict]]:
+) -> tuple[list[str], str, list[dict], dict[str, dict]]:
     """Shared builder for the breakdown table + the per-anchor AI detail.
 
-    Returns (enabled_criteria, rows, zone_detail). `rows` matches the JSON the
-    breakdown endpoint returns; `zone_detail` maps anchor id -> factor metrics
-    (used by the Excel export to explain each AI %).
+    Returns (enabled_criteria, kit, rows, zone_detail). `rows` matches the JSON
+    the breakdown endpoint returns; `zone_detail` maps anchor id -> factor
+    metrics (used by the Excel export to explain each AI %).
     """
     settings_repo = SettingsRepository(session)
     locations = settings_repo.list_locations()
     overrides = settings_repo.get_overrides(a.id)
+    kit = _analysis_kit(session, a.id)
 
     if criteria is not None:
         enabled = [c.strip() for c in criteria.split(",") if c.strip()]
@@ -102,7 +118,12 @@ def _build_breakdown(
     rows = []
     for loc in locations:
         ov = overrides.get(loc.id)
-        brand_key = (ov.brand_key if ov and ov.brand_key else loc.brand_key)
+        # Default sponsor is kit-aware (away override falls back to the home one);
+        # a per-video manual override beats both.
+        default_brand = (
+            loc.brand_key_away if (kit == "away" and loc.brand_key_away) else loc.brand_key
+        )
+        brand_key = (ov.brand_key if ov and ov.brand_key else default_brand)
         human = (ov.human_percentage if ov and ov.human_percentage is not None
                  else loc.human_percentage)
         human_ai = ov.human_ai_percentage if ov else None
@@ -117,7 +138,7 @@ def _build_breakdown(
             "humanAiPercentage": human_ai,
             "notes": ov.notes if ov else "",
         })
-    return enabled, rows, zone_detail
+    return enabled, kit, rows, zone_detail
 
 
 @router.get("/{analysis_id}/location-breakdown")
@@ -136,8 +157,8 @@ def location_breakdown(
     a: Analysis | None = AnalysisRepository(session).get(analysis_id)
     if a is None:
         raise HTTPException(status_code=404, detail="Analysis not found")
-    enabled, rows, _ = _build_breakdown(session, a, criteria)
-    return {"analysisId": analysis_id, "enabledCriteria": enabled, "rows": rows}
+    enabled, kit, rows, _ = _build_breakdown(session, a, criteria)
+    return {"analysisId": analysis_id, "kit": kit, "enabledCriteria": enabled, "rows": rows}
 
 
 @router.get("/{analysis_id}/location-export.xlsx")
@@ -150,9 +171,9 @@ def export_location_xlsx(
     a: Analysis | None = AnalysisRepository(session).get(analysis_id)
     if a is None:
         raise HTTPException(status_code=404, detail="Analysis not found")
-    enabled, rows, zone_detail = _build_breakdown(session, a, criteria)
+    enabled, kit, rows, zone_detail = _build_breakdown(session, a, criteria)
     content = build_location_workbook(
-        analysis=a, rows=rows, zone_detail=zone_detail, enabled=enabled
+        analysis=a, rows=rows, zone_detail=zone_detail, enabled=enabled, kit=kit
     )
     filename = f"{a.event_name or a.video_name or 'analysis'}_locations.xlsx".replace(" ", "_")
     return StreamingResponse(

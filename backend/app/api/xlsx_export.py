@@ -48,9 +48,11 @@ def build_location_workbook(
     rows: list[dict],
     zone_detail: dict[str, dict],
     enabled: list[str],
+    kit: str = "",
 ) -> bytes:
     label_by_key = {c["key"]: c["label"] for c in AI_CRITERIA}
     enabled_labels = ", ".join(label_by_key.get(k, k) for k in enabled) or "none"
+    kit_label = {"home": "Home (white)", "away": "Away (black)"}.get(kit, kit or "—")
 
     wb = Workbook()
 
@@ -63,6 +65,7 @@ def build_location_workbook(
     meta = [
         ("Event", analysis.event_name or ""),
         ("Video", analysis.video_name or ""),
+        ("Kit", kit_label),
         ("Analysed at", analysis.result_json.get("analyzedAt", "")),
         ("AI criteria enabled", enabled_labels),
     ]

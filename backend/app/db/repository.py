@@ -188,6 +188,7 @@ class SettingsRepository:
                 order_index=i,
                 anchor_id=(r.get("anchorId") or "").strip(),
                 brand_key=(r.get("brandKey") or None),
+                brand_key_away=(r.get("brandKeyAway") or None),
                 human_percentage=float(r.get("humanPercentage") or 0.0),
             )
             self.s.add(row)

@@ -31,6 +31,7 @@ function pct(v: number | null | undefined): string {
 export default function LocationTable({ analysisId, enabled = true }: Props) {
   const [rows, setRows] = useState<LocationBreakdownRow[]>([])
   const [criteria, setCriteria] = useState<string[]>([])
+  const [kit, setKit] = useState<string>('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   // Local draft of the manual Human-AI % per location id (string for free typing).
@@ -45,6 +46,7 @@ export default function LocationTable({ analysisId, enabled = true }: Props) {
       const bd = await getLocationBreakdown(analysisId)
       setRows(bd.rows)
       setCriteria(bd.enabledCriteria)
+      setKit(bd.kit)
       setDraft(Object.fromEntries(
         bd.rows.map(r => [r.locationId, r.humanAiPercentage == null ? '' : String(r.humanAiPercentage)]),
       ))
@@ -140,6 +142,9 @@ export default function LocationTable({ analysisId, enabled = true }: Props) {
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px 0', fontSize: 12, color: 'var(--c-ghost)', flexWrap: 'wrap' }}>
         <span>
+          {kit && (
+            <>Kit: <span style={{ color: 'var(--c-dim)' }}>{kit === 'home' ? 'Home (white)' : kit === 'away' ? 'Away (black)' : kit}</span> · </>
+          )}
           AI % from {criteria.length} criteria: <span style={{ color: 'var(--c-dim)' }}>{criteria.join(', ') || 'none'}</span>{' '}
           — configure in Settings.
         </span>

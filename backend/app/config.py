@@ -248,6 +248,18 @@ BRAND_DISPLAY: dict[str, str] = {
     "top_notch": "Top Notch",
 }
 
+# Full sponsor roster for the Location→Logo dropdown. Superset of BRAND_DISPLAY:
+# adds shirt sponsors the logo detector wasn't trained on but that still appear on
+# the kit (so they can be mapped to a location even without detections of their
+# own). floor_tonic is the AWAY main sponsor; top_notch the HOME main sponsor.
+SPONSOR_DISPLAY: dict[str, str] = {
+    **BRAND_DISPLAY,
+    "floor_tonic": "Floor Tonic",
+    "lawrence": "Lawrence",
+    "cedar_court": "Cedar Court Hotels",
+}
+
+
 _KIT_SUFFIX = re.compile(r"_(home|away|alt|third)$")
 
 
