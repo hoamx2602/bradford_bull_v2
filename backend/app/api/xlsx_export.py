@@ -84,11 +84,14 @@ def build_location_workbook(
     rr = head_row + 1
     h_total = ai_total = 0.0
     for row in rows:
+        has_logo = bool(row["logo"])
         ws.cell(row=rr, column=1, value=row["locationName"])
         ws.cell(row=rr, column=2, value=row["logo"] or "")
         ws.cell(row=rr, column=3, value=row["humanPercentage"]).number_format = _PCT
-        ws.cell(row=rr, column=4, value=row["aiPercentage"]).number_format = _PCT
-        ws.cell(row=rr, column=5, value=row.get("visibility", 0.0)).number_format = _PCT
+        # AI % / Visibility are blank for a slot with no logo (nothing attributed).
+        if has_logo:
+            ws.cell(row=rr, column=4, value=row["aiPercentage"]).number_format = _PCT
+            ws.cell(row=rr, column=5, value=row.get("visibility", 0.0)).number_format = _PCT
         hai = row["humanAiPercentage"]
         cell = ws.cell(row=rr, column=6, value=hai)
         if hai is not None:

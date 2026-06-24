@@ -111,28 +111,43 @@ def _build_breakdown(
         enabled = settings_repo.get_ai_criteria()
 
     facts = getattr(a, "facts_json", None) or []
-    anchor_by_location = {loc.id: loc.anchor_id for loc in locations}
-    ai_pct = compute_location_ai_percentages(facts, enabled, anchor_by_location)
     zone_detail = compute_zone_detail(facts, enabled)
     video_seconds = a.video_duration_seconds or 0.0
+
+    def effective_brand(loc) -> str | None:
+        """Logo at this location for this video: kit-aware default, beaten by a
+        per-video manual override."""
+        ov = overrides.get(loc.id)
+        default_brand = (
+            loc.brand_key_away if (kit == "away" and loc.brand_key_away) else loc.brand_key
+        )
+        return (ov.brand_key if ov and ov.brand_key else default_brand)
+
+    eff_brand = {loc.id: effective_brand(loc) for loc in locations}
+    # Only locations that actually have a logo get exposure — a slot with no
+    # sponsor (e.g. Collar Back) must not absorb a share of its anchor zone, and
+    # the zone's exposure splits across the logo'd locations sharing it only.
+    anchor_by_location = {
+        loc.id: loc.anchor_id for loc in locations if eff_brand[loc.id]
+    }
+    ai_pct = compute_location_ai_percentages(facts, enabled, anchor_by_location)
 
     rows = []
     for loc in locations:
         ov = overrides.get(loc.id)
-        # Default sponsor is kit-aware (away override falls back to the home one);
-        # a per-video manual override beats both.
-        default_brand = (
-            loc.brand_key_away if (kit == "away" and loc.brand_key_away) else loc.brand_key
-        )
-        brand_key = (ov.brand_key if ov and ov.brand_key else default_brand)
+        brand_key = eff_brand[loc.id]
+        has_logo = bool(brand_key)
         human = (ov.human_percentage if ov and ov.human_percentage is not None
                  else loc.human_percentage)
         human_ai = ov.human_ai_percentage if ov else None
         # Visibility = how much of the whole video the logo was on screen at this
-        # location: total attributed on-screen seconds / video duration. Raw
-        # presence (not criteria-weighted), so it does not sum to 100 %.
-        on_screen = zone_detail.get(loc.anchor_id, {}).get("totalDuration", 0.0)
-        visibility = round(on_screen / video_seconds * 100, 2) if video_seconds else 0.0
+        # location: attributed on-screen seconds / video duration. Raw presence
+        # (not criteria-weighted), so it does not sum to 100 %. No logo -> no
+        # visibility (nothing to be seen there).
+        on_screen = (
+            zone_detail.get(loc.anchor_id, {}).get("totalDuration", 0.0) if has_logo else 0.0
+        )
+        visibility = round(on_screen / video_seconds * 100, 2) if (video_seconds and has_logo) else 0.0
         rows.append({
             "locationId": loc.id,
             "locationName": loc.name,

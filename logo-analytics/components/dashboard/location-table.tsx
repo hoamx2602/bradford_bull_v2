@@ -109,8 +109,8 @@ export default function LocationTable({ analysisId, enabled = true }: Props) {
                   <td style={{ ...td, fontWeight: 600 }}>{r.locationName}</td>
                   <td style={{ ...td, color: r.logo ? 'var(--c-ink)' : 'var(--c-ghost)' }}>{r.logo || '—'}</td>
                   <td style={{ ...tdR }} className="num">{pct(r.humanPercentage)}</td>
-                  <td style={{ ...tdR, color: 'var(--c-spark)', fontWeight: 600 }} className="num">{pct(r.aiPercentage)}</td>
-                  <td style={{ ...tdR }} className="num" title={`${r.onScreenSeconds}s on screen`}>{pct(r.visibility)}</td>
+                  <td style={{ ...tdR, color: 'var(--c-spark)', fontWeight: 600 }} className="num">{r.logo ? pct(r.aiPercentage) : '—'}</td>
+                  <td style={{ ...tdR }} className="num" title={r.logo ? `${r.onScreenSeconds}s on screen` : 'no logo mapped'}>{r.logo ? pct(r.visibility) : '—'}</td>
                   <td style={{ ...tdR }}>
                     <input
                       type="number"
