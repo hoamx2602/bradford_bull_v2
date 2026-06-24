@@ -16,6 +16,7 @@ tính **EMV (Equivalent Media Value)** cho từng brand và trực quan hóa tr�
 | 7 | [API reference](07-api.md) | Endpoint backend cho tích hợp |
 | 8 | [Annotation & Training](08-annotation-training.md) | Quy trình data Roboflow + train model logo |
 | 9 | [Vận hành & Troubleshooting](09-operations.md) | Tuning knobs, lỗi thường gặp, scaling |
+| 10 | [Location Breakdown](10-location-breakdown.md) | Bảng vị trí logo: Human/AI/AI Adjusted/Visibility % + công thức + export Excel |
 
 ## Tài liệu deep-dive (giữ ở repo root)
 
