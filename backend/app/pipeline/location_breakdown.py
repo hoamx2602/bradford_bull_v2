@@ -140,22 +140,31 @@ def compute_zone_shares(facts: list[dict], enabled: list[str]) -> dict[str, floa
 def compute_location_ai_percentages(
     facts: list[dict], enabled: list[str], anchor_by_location: dict[str, str]
 ) -> dict[str, float]:
-    """location id -> AI %, derived from each location's mapped anchor's zone share.
+    """location id -> AI %, normalised to 100 % across the CONFIGURED locations.
 
-    When several locations map to the same anchor, that anchor's share is split
-    evenly between them so the column still totals ~100 %.
+    Only quality exposure that lands on an anchor mapped to a location counts;
+    exposure on unmapped anatomical zones (e.g. abdomen, opposite shoulder) is
+    excluded, so the column totals ~100 % over the locations the customer set up.
+    When several locations map to the same anchor, that anchor's quality is split
+    evenly between them.
     """
-    zone_shares = compute_zone_shares(facts, enabled)
+    detail = compute_zone_detail(facts, enabled)
 
-    # How many locations share each anchor (for even splitting).
+    # Anchors actually mapped to at least one location, and how many share each.
     anchor_loc_count: dict[str, int] = defaultdict(int)
     for anchor in anchor_by_location.values():
         if anchor:
             anchor_loc_count[anchor] += 1
 
+    # Renormalise over the mapped anchors only (drop the unmapped-zone exposure).
+    mapped_quality = sum(
+        detail.get(a, {}).get("quality", 0.0) for a in anchor_loc_count
+    )
+    denom = mapped_quality or 1.0
+
     out: dict[str, float] = {}
     for loc_id, anchor in anchor_by_location.items():
-        share = zone_shares.get(anchor, 0.0)
+        quality = detail.get(anchor, {}).get("quality", 0.0)
         n = anchor_loc_count.get(anchor, 1) or 1
-        out[loc_id] = round(share / n, 2)
+        out[loc_id] = round(quality / denom * 100.0 / n, 2)
     return out
