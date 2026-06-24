@@ -137,16 +137,35 @@ def compute_zone_shares(facts: list[dict], enabled: list[str]) -> dict[str, floa
     return {z: m["share"] for z, m in compute_zone_detail(facts, enabled).items()}
 
 
+def _round_to_total(raw: dict[str, float], target: float = 100.0) -> dict[str, float]:
+    """Round each value to 2 decimals so the rounded values sum EXACTLY to target.
+
+    Largest-remainder method: floor every value to whole cents, then hand the few
+    leftover cents to the entries with the biggest fractional remainder. Avoids
+    the "sum shows 100.01 %" artefact of rounding each value independently.
+    """
+    total = sum(raw.values())
+    if total <= 0:
+        return {k: 0.0 for k in raw}
+    # Normalise to `target` first (guards against float drift), in whole cents.
+    cents = {k: int(v / total * target * 100) for k, v in raw.items()}  # floor (v >= 0)
+    remainder = {k: (raw[k] / total * target * 100) - cents[k] for k in raw}
+    deficit = int(round(target * 100)) - sum(cents.values())
+    for k in sorted(remainder, key=lambda k: remainder[k], reverse=True)[:max(0, deficit)]:
+        cents[k] += 1
+    return {k: round(c / 100.0, 2) for k, c in cents.items()}
+
+
 def compute_location_ai_percentages(
     facts: list[dict], enabled: list[str], anchor_by_location: dict[str, str]
 ) -> dict[str, float]:
-    """location id -> AI %, normalised to 100 % across the CONFIGURED locations.
+    """location id -> AI %, normalised to EXACTLY 100 % across configured locations.
 
     Only quality exposure that lands on an anchor mapped to a location counts;
     exposure on unmapped anatomical zones (e.g. abdomen, opposite shoulder) is
-    excluded, so the column totals ~100 % over the locations the customer set up.
+    excluded, so the column totals 100 % over the locations the customer set up.
     When several locations map to the same anchor, that anchor's quality is split
-    evenly between them.
+    evenly between them. Final values are rounded so they sum to exactly 100.00.
     """
     detail = compute_zone_detail(facts, enabled)
 
@@ -156,15 +175,11 @@ def compute_location_ai_percentages(
         if anchor:
             anchor_loc_count[anchor] += 1
 
-    # Renormalise over the mapped anchors only (drop the unmapped-zone exposure).
-    mapped_quality = sum(
-        detail.get(a, {}).get("quality", 0.0) for a in anchor_loc_count
-    )
-    denom = mapped_quality or 1.0
-
-    out: dict[str, float] = {}
+    # Raw (unrounded) share per location, over the mapped anchors only.
+    raw: dict[str, float] = {}
     for loc_id, anchor in anchor_by_location.items():
         quality = detail.get(anchor, {}).get("quality", 0.0)
         n = anchor_loc_count.get(anchor, 1) or 1
-        out[loc_id] = round(quality / denom * 100.0 / n, 2)
-    return out
+        raw[loc_id] = quality / n
+
+    return _round_to_total(raw, 100.0)
