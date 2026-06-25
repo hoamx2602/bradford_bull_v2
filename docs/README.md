@@ -17,6 +17,7 @@ tính **EMV (Equivalent Media Value)** cho từng brand và trực quan hóa tr�
 | 8 | [Annotation & Training](08-annotation-training.md) | Quy trình data Roboflow + train model logo |
 | 9 | [Vận hành & Troubleshooting](09-operations.md) | Tuning knobs, lỗi thường gặp, scaling |
 | 10 | [Location Breakdown](10-location-breakdown.md) | Bảng vị trí logo: Human/AI/AI Adjusted/Visibility % + công thức + export Excel |
+| 11 | [AI % calculation (EN)](11-ai-percentage-calculation.md) | English deep-dive: how every parameter is computed to produce the `AI %` / "AI % Detail" |
 
 ## Tài liệu deep-dive (giữ ở repo root)
 
