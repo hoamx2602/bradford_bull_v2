@@ -5,6 +5,38 @@
 
 <!-- new entries below -->
 
+## 2026-06-28 — TEST NGHIÊM TÚC #1: COCO gold + real gallery → Tầng 2 ăn điểm cao
+**Mục tiêu (vì sao làm):** dùng tập gán tay `Auto Label White.coco` (280 ảnh, 1095 ann, 16 brand Bradford) ĐÚNG vai trò (gold + real gallery, KHÔNG phải closed-set manual) → đo Tầng 2 nghiêm túc, vá synthetic→real gap.
+**Đã làm:** `auto_label/coco_ingest.py` (COCO→crop theo brand + split ẢNH 60/40 no-leakage + xuất YOLO); `recognizer.build` cho phép gallery-only; build DB từ **659 real crop** (16 brand); query 436 test crop + 40 crop St Helens làm unknown.
+**Kiểm chứng / kết quả:** **top-1 = 0.823**, **open-set AUROC = 0.986**, calibrate **τ=0.623 → known-acc 0.986 / unknown-rej 0.925**. Vá hẳn gap (trước: real crop ≤0.58, all-unknown). Per-brand precision/recall phần lớn 0.7–0.94; confusion hợp lý (mcp↔klg, mna_support↔mna_cladding, asc↔top_notch).
+**Caveat / hạn chế:** rare class cch(1 test)/chadlaw(2) quá ít → không tin được; CHƯA bật OCR text; mới 1 tập (1 match-domain) → cần đa trận để robust; CHƯA đo Tầng 1 mAP (cần SAM3/localizer vs COCO box). Split mức ảnh đúng (no leakage).
+**Bước tiếp:** eval Tầng 1 (SAM3 concept / YOLOv11-OBB vs COCO boxes → mAP); +OCR text; per-stratum blur; thêm trận khác.
+
+## 2026-06-28 — Code đủ các tầng: synthetic ladder (Bậc 1/3/4) + team-filter
+**Mục tiêu (vì sao làm):** user yêu cầu code TẤT CẢ các tầng để tự thử nghiệm sau; phần 3D (Bậc 4) research tool internet.
+**Đã làm:**
+- `auto_label/synth_copypaste.py` (Bậc 1): logo thật + nền (real/grass) + domain randomization → OBB label + crops. **Đã chạy thật** 30 ảnh nền=frame video → 63 box.
+- `auto_label/synth_diffusion.py` (Bậc 3): SDXL-inpaint + ControlNet-canny giữ logo, sinh context; 2 luồng (Tầng1 composite_back / Tầng2 giữ-biến-thể+embedding-QC). diffusers lazy.
+- `auto_label/synth_3d_blenderproc.py` (Bậc 4): skeleton BlenderProc (UV-map logo + cloth sim + render + nhãn tự); `docs/3d-synthetic-tools.md` so sánh tool (BlenderProc/Omniverse/Kubric/Infinigen; Cloth2Tex/TexGarment/FabricDiffusion; 3DGS-hybrid nền).
+- `auto_label/team_filter.py`: lọc logo theo target team (color hist ⊕ embedding ref, gán logo→cầu thủ, giữ target). Reference-based, không train.
+**Kiểm chứng / kết quả:** 35/35 pytest; 4 selftest mới OK. Bậc 1 ảnh thật xem `/tmp/b1.jpg` (seam cứng → minh hoạ vì sao cần Bậc 3). **Phát hiện: nền frame video CÓ cầu thủ Bradford** (kit trắng/đỏ/hổ phách + board AON) → video đúng có Bradford.
+**Caveat / hạn chế:** Bậc 3 cần `pip install diffusers controlnet_aux` + SDXL ~7GB (chưa chạy ở đây, logic composite/QC đã test). Bậc 4 cần Blender + asset (mesh áo UV, SMPL, pose rugby) — chưa chạy, là skeleton. team_filter cần person detector (YOLO lazy) + ref kit.
+**Bước tiếp:** sample frame Bradford trong clip → recognize (DB + real gallery) + team_filter → exposure Bradford thật (task #8).
+
+## 2026-06-28 — SAM 3 CHẠY THẬT: auto-label logo trên video YouTube (zero manual)
+**Mục tiêu (vì sao làm):** chạy khâu auto-label Tầng 1 trên video trận THẬT bằng SAM 3 (user cấp HF token) → thoát hẳn data synthetic.
+**Đã làm:** lưu HF token vào `.env` (gitignored, thêm rule `.env` vào `.gitignore`); tải `sam3.pt` (3.3GB, `facebook/sam3` gated) qua token; **giải mã API thật = `SAM3SemanticPredictor(text=["logo"])`** (KHÔNG phải `SAM("sam3.pt")` interactive — bản đó chỉ prompt hình học); viết `auto_label/sam3_concept_label.py` (concept text → OBB class-agnostic + crops + viz). Hạ `huggingface_hub<1.0` cho transformers chạy lại.
+**Kiểm chứng / kết quả:** clip thật `data/real/match.mp4` → 40 frame, **403 logo box** conf tới 0.88, **box bám sát logo thật** (CBS/bargains/Betfred/crest/ref sponsor) — kiểm bằng mắt `data/real/auto/viz/`. Zero manual annotate.
+**Caveat / hạn chế:** SAM 3 bắt MỌI logo (cả trọng tài, scoreboard, đối thủ) → **cần team-filter** chỉ giữ Bradford. `.env`/`sam3.pt` KHÔNG commit (gitignored). transformers cần `huggingface_hub<1.0`. SAM 3 ~1.3s/frame.
+**Bước tiếp:** (1) team-filter target team; (2) recognizer trên crops vs DB Bradford → exposure thật; hoặc distill YOLOv11-OBB từ 403 nhãn này (real-domain).
+
+## 2026-06-28 — Probe chạy thật trên video YouTube (SAM3 gated → pivot YOLOE)
+**Mục tiêu (vì sao làm):** chạy pipeline trên video trận THẬT (user cấp link YouTube) để thoát khỏi data synthetic.
+**Đã làm:** `pip install yt-dlp`; tải clip 90s@720p (`data/real/match.mp4`). Thử SAM 3: ultralytics 8.4.60 có code (`build_sam3`) nhưng **weights GATED (Meta/HF), không auto-download → blocked**. Pivot YOLOE (auto-download): text-prompt "logo".
+**Kiểm chứng / kết quả:** YOLOE-11s text "logo" yếu (1 box, chỉ trúng scoreboard, conf 0.12). YOLOE-**11l @imgsz1920 conf0.04** → 25 box, **bắt được vùng logo jersey** (CBS/BREWDOG/RWL…) nhưng **loose/nhiễu/trùng nhiều**. Phát hiện thêm: clip là **St Helens** (sponsor CBS/BREWDOG/RWL/bargains/EFT), **KHÔNG trùng bộ Sponsor Logo Bradford** (aon/mna/klg/mcp…) → recognizer sẽ trả "unknown".
+**Caveat / hạn chế:** SAM 3 cần HF token + chấp nhận license (user "không chắc"). YOLOE là fallback khả thi nhưng cần NMS + (lý tưởng) distill→fine-tune để box gọn/OBB. Demo brand-exposure CÓ NGHĨA cần video Bradford (sponsor khớp DB) hoặc build DB từ sponsor của chính video.
+**Bước tiếp:** user chốt (1) video Bradford-kit hay chấp nhận demo generic, (2) detector path (wire YOLOE fallback vào run_pipeline ngay / lấy SAM3 weights qua HF token). Artifacts: `data/real/{frame.jpg,yoloe_frame.jpg,yoloe_big.jpg}`.
+
 ## 2026-06-28 — Glue end-to-end: video → dets.jsonl → exposure
 **Mục tiêu (vì sao làm):** nối trọn Tầng1 + Tầng2 + aggregation thành **1 lệnh chạy 1 video → exposure**; mảnh data-independent cuối trước khi cần SAM3 + gold thật.
 **Đã làm:** `auto_label/run_pipeline.py` — sample frame → YOLOv11-OBB localizer → crop+mask(OBB) → recognizer (brand+score) + clarity(Laplacian) + area_pct(shoelace) → `dets.jsonl` → `aggregate` → `result.json` (+ tự eval nếu có `--gold`). Cờ: `--tau` open-set, `--w-color/--w-text/--score`, `--bridge/--min-seg/--rate/--every`.

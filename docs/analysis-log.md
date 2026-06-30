@@ -6,6 +6,13 @@
 
 <!-- new entries below -->
 
+## 2026-06-28 — Tầng 1: SAM 3 zero-shot KHÔNG hợp làm localizer đo bằng mAP → train YOLO trên COCO
+**Bối cảnh / câu hỏi:** đo Tầng 1 (SAM 3 concept "logo") vs box gán tay COCO (280 ảnh, class-agnostic).
+**Kết quả đo:** mAP@0.5 **0.013** (1095 gt / **13.682 pred**), recall@0.5 **0.23** nhưng recall@0.3 **0.72**; **pred area ~0.2× gt** (box SAM3 nhỏ/vụn hơn ~5×). Overlay: SAM3 conf 0.1 over-detect tràn lan (cả số áo/sọc/đối thủ London), gt thưa.
+**Kết luận:** SAM 3 zero-shot **tìm đúng vùng (recall@0.3 cao) nhưng over-detect + box vụn lệch granularity** với cách annotate người → mAP thấp giả tạo. KHÔNG dùng trực tiếp làm localizer chấm mAP.
+**Khuyến nghị:** **train YOLOv11 localizer trên box COCO** (đúng granularity, nhanh, precision cao) cho Tầng 1; **SAM 3 để bootstrap club MỚI** (chưa có nhãn). Hậu xử lý SAM3 (conf cao + NMS/merge fragment + team-filter bỏ đối thủ) là phương án giữ-zero-shot nếu không muốn train.
+**Tham chiếu:** `docs/worklog.md` (TEST #1); `data/real/tier1_eval/`; overlay `/tmp/tier1_overlay.jpg`.
+
 ## 2026-06-28 — Quyết định: dừng tinh chỉnh Tầng 2 lúc này, ưu tiên aggregation engine (Phase 3)
 **Bối cảnh / câu hỏi:** tiếp tục Tầng 2 có khả thi & cho kết quả tốt không, hay sang Phase 3?
 **Phương án xem xét:** (a) tiếp Phase 2 (calibrate τ, bật OCR, chỉnh trọng số fusion); (b) sang Phase 3.

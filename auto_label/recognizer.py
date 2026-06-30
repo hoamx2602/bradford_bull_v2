@@ -317,8 +317,10 @@ def _collect(d: Path, brand_from: str, mask_on: bool, tight: bool,
 def cmd_build(a: argparse.Namespace) -> None:
     emb = Embedder(a.model, device=a.device, batch=a.batch)
     tr = TextReader(a.text_backend)
-    rgbs, colors, texts, brands, paths = _collect(
-        Path(a.logos), "filename", a.mask, a.tight, tr)
+    rgbs, colors, texts, brands, paths = ([], [], [], [], [])
+    if a.logos:
+        rgbs, colors, texts, brands, paths = _collect(
+            Path(a.logos), "filename", a.mask, a.tight, tr)
     if a.gallery:
         r2, c2, t2, b2, p2 = _collect(Path(a.gallery), "folder", a.mask, a.tight, tr)
         rgbs += r2; colors += c2; texts += t2; brands += b2; paths += p2
@@ -406,8 +408,8 @@ def main() -> None:
                         choices=["none", "easyocr", "tesseract"])
 
     b = sub.add_parser("build"); common(b)
-    b.add_argument("--logos", required=True)
-    b.add_argument("--gallery", default=None)
+    b.add_argument("--logos", default=None, help="thư mục logo PNG (brand từ tên file)")
+    b.add_argument("--gallery", default=None, help="gallery crops (brand từ thư mục con)")
     b.add_argument("--out", required=True)
     b.set_defaults(func=cmd_build)
 

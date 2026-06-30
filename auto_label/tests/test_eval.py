@@ -1,4 +1,4 @@
-"""Test deterministic cho bộ eval Phase 0 — không cần GPU/model/ảnh thật.
+"""Test deterministic cho bộ eval Phase 0-3 — không cần GPU/model/ảnh thật.
 
 Chạy:  pytest auto_label/tests/test_eval.py -q
 """
@@ -8,6 +8,7 @@ import json
 import sys
 from pathlib import Path
 
+import cv2
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -20,6 +21,12 @@ import sam3_exemplar_autolabel as sam3  # noqa: E402
 import train_localizer   # noqa: E402
 import recognizer        # noqa: E402
 import aggregate         # noqa: E402
+import synth_copypaste   # noqa: E402
+import team_filter       # noqa: E402
+import synth_diffusion   # noqa: E402
+import coco_ingest       # noqa: E402
+import eval_map          # noqa: E402
+import run_pipeline      # noqa: E402
 
 
 # --------------------------- OBB --------------------------------------------- #
@@ -305,6 +312,44 @@ def test_aggregate_drops_ghost_lowconf_and_scene():
     assert r["brands"] == {}
 
 
+# --------------------------- Bậc 1 / 3 / team-filter ------------------------ #
+
+def test_synth_copypaste_paste_and_lines():
+    bg = np.zeros((80, 160, 3), np.uint8)
+    logo = np.dstack([np.full((30, 30, 3), 255, np.uint8),
+                      np.full((30, 30), 255, np.uint8)])
+    out, quad = synth_copypaste.paste_logo(bg, logo)
+    assert quad.shape == (4, 2) and out.sum() > 0
+    q = np.array([[0, 0], [10, 0], [10, 20], [0, 20]], np.float32)
+    assert len(synth_copypaste.to_obb_line(q, 0, 100, 100).split()) == 9
+    assert len(synth_copypaste.to_hbb_line(q, 2, 100, 100).split()) == 5
+
+
+def test_team_filter_classify_and_filter():
+    refs = {"bradford": np.array([1, 0, 0], np.float32),
+            "other": np.array([0, 1, 0], np.float32)}
+    assert team_filter.classify(np.array([0.9, 0.1, 0], np.float32), refs)[0] == "bradford"
+    persons = [[0, 0, 100, 200], [40, 40, 70, 120]]
+    assert team_filter.assign_owner([50, 50, 60, 60], persons) == 1
+    res = team_filter.filter_logos([[50, 50, 60, 60], [10, 10, 20, 20]],
+                                   persons, ["other", "bradford"], target="bradford")
+    keep = {r["idx"]: r["keep"] for r in res}
+    assert keep[0] is True and keep[1] is False
+
+
+def test_synth_diffusion_composite_back_restores_logo():
+    bg = np.zeros((50, 50, 3), np.uint8)
+    logo = np.dstack([np.full((16, 16, 3), 200, np.uint8),
+                      np.full((16, 16), 255, np.uint8)])
+    pasted, lmask, quad = synth_diffusion.paste_with_mask(bg, logo)
+    inv = synth_diffusion.inpaint_mask_from_logo(lmask)
+    assert np.all((inv == 0) == (lmask == 255))
+    gen = np.full_like(pasted, 99)
+    out = synth_diffusion.composite_back(gen, pasted, lmask, feather=0)
+    px = lmask == 255
+    assert np.array_equal(out[px], pasted[px])
+
+
 def test_aggregate_coverage_clamped_and_summed():
     # 2 instance cùng frame cùng brand → coverage cộng, clamp 100
     fps, sfps = 25.0, 2.5
@@ -314,3 +359,182 @@ def test_aggregate_coverage_clamped_and_summed():
             for f in (0, 10)]
     r = aggregate.aggregate(dets, fps, sfps, min_seg=0.3)
     assert abs(r["brands"]["x"]["visibility_pct"] - 100.0) < 1e-6   # 140→clamp 100
+
+
+# --------------------------- coco_ingest ------------------------------------ #
+
+def _make_coco_json(tmp_path: Path, n_images: int = 4) -> Path:
+    """Tạo COCO JSON giả + ảnh dummy cho test."""
+    tmp_path.mkdir(parents=True, exist_ok=True)
+    cats = [{"id": 1, "name": "aon"}, {"id": 2, "name": "klg"}]
+    images, annotations, ann_id = [], [], 1
+    for i in range(n_images):
+        fname = f"img_{i:03d}.jpg"
+        images.append({"id": i, "file_name": fname,
+                        "width": 200, "height": 100})
+        img = np.zeros((100, 200, 3), np.uint8) + (i * 30)
+        cv2.imwrite(str(tmp_path / fname), img)
+        cat_id = 1 + (i % 2)
+        annotations.append({"id": ann_id, "image_id": i,
+                             "category_id": cat_id,
+                             "bbox": [10, 10, 50, 30]})
+        ann_id += 1
+    js = {"images": images, "annotations": annotations, "categories": cats}
+    p = tmp_path / "_annotations.coco.json"
+    p.write_text(json.dumps(js))
+    return tmp_path
+
+
+def _coco_args(**kw):
+    import argparse
+    defaults = dict(split=0.5, pad=0.0, yolo=False, seed=42)
+    defaults.update(kw)
+    return argparse.Namespace(**defaults)
+
+
+def test_coco_ingest_splits_at_image_level(tmp_path):
+    """Split tỉ lệ 0.5 → mỗi bên nhận đúng n_images/2 ảnh (không leakage)."""
+    coco_dir = _make_coco_json(tmp_path / "coco", n_images=4)
+    out = tmp_path / "out"
+    coco_ingest.run(_coco_args(coco=str(coco_dir), out=str(out), split=0.5))
+    gal = list((out / "gallery").rglob("*.jpg"))
+    tst = list((out / "test").rglob("*.jpg"))
+    assert len(gal) == 2 and len(tst) == 2
+
+
+def test_coco_ingest_yolo_labels(tmp_path):
+    """Nhãn YOLO HBB đúng: 5 token, cx/cy/w/h ∈ (0,1), cls hợp lệ."""
+    coco_dir = _make_coco_json(tmp_path / "coco", n_images=4)
+    out = tmp_path / "out"
+    coco_ingest.run(_coco_args(coco=str(coco_dir), out=str(out), split=1.0, yolo=True))
+    lbl_files = list((out / "labels").glob("*.txt"))
+    assert lbl_files, "phải có ít nhất 1 file nhãn"
+    for f in lbl_files:
+        for line in f.read_text().splitlines():
+            toks = line.split()
+            assert len(toks) == 5, f"YOLO HBB cần 5 token, got {len(toks)}"
+            cx, cy, w, h = (float(t) for t in toks[1:])
+            assert 0 < cx < 1 and 0 < cy < 1
+            assert 0 < w <= 1 and 0 < h <= 1
+
+
+def test_coco_ingest_crops_padded(tmp_path):
+    """Pad > 0 → crop rộng hơn bbox gốc (không vượt biên ảnh)."""
+    coco_dir = _make_coco_json(tmp_path / "coco", n_images=2)
+    out_nop = tmp_path / "out_nop"
+    out_pad = tmp_path / "out_pad"
+    coco_ingest.run(_coco_args(coco=str(coco_dir), out=str(out_nop), split=1.0, pad=0.0))
+    coco_ingest.run(_coco_args(coco=str(coco_dir), out=str(out_pad), split=1.0, pad=0.5))
+    imgs_nop = list(out_nop.rglob("*.jpg"))
+    imgs_pad = list(out_pad.rglob("*.jpg"))
+    assert imgs_nop and imgs_pad
+    sizes_nop = {p.name: cv2.imread(str(p)).shape for p in imgs_nop}
+    sizes_pad = {p.name: cv2.imread(str(p)).shape for p in imgs_pad}
+    any_larger = any(sizes_pad[n][0] >= sizes_nop[n][0] and
+                     sizes_pad[n][1] >= sizes_nop[n][1]
+                     for n in sizes_nop if n in sizes_pad)
+    assert any_larger
+
+
+# --------------------------- eval_map end-to-end ---------------------------- #
+
+def _write_hbb_labels(d: Path, rows: list[str]) -> None:
+    d.mkdir(parents=True, exist_ok=True)
+    for i, r in enumerate(rows):
+        (d / f"img_{i:03d}.txt").write_text(r + "\n")
+
+
+def _write_images(d: Path, n: int) -> None:
+    d.mkdir(parents=True, exist_ok=True)
+    for i in range(n):
+        img = np.zeros((100, 200, 3), np.uint8)
+        cv2.imwrite(str(d / f"img_{i:03d}.jpg"), img)
+
+
+def test_eval_map_perfect_hbb(tmp_path):
+    """mAP@0.5 = 1.0 và mAP@[.5:.95] cao khi pred = gt."""
+    gold = tmp_path / "gold"
+    pred = tmp_path / "pred"
+    labels = ["0 0.25 0.25 0.2 0.2", "0 0.75 0.75 0.2 0.2"]
+    _write_images(gold / "images", 2)
+    _write_hbb_labels(gold / "labels", labels)
+    # pred = gt + conf
+    _write_hbb_labels(pred / "labels", [l + " 0.95" for l in labels])
+    res = eval_map.evaluate(gold, pred)
+    assert abs(res["map50"] - 1.0) < 1e-9
+    assert res["map5095"] > 0.5
+    assert res["n_images"] == 2
+
+
+def test_eval_map_no_pred(tmp_path):
+    """Không có pred → mAP = 0.0."""
+    gold = tmp_path / "gold"
+    _write_images(gold / "images", 1)
+    _write_hbb_labels(gold / "labels", ["0 0.5 0.5 0.2 0.2"])
+    pred = tmp_path / "pred"
+    (pred / "labels").mkdir(parents=True, exist_ok=True)
+    # pred dir rỗng → không match GT nào
+    res = eval_map.evaluate(gold, pred)
+    assert res["map50"] == 0.0
+
+
+def test_eval_map_iou_fallback_no_images(tmp_path):
+    """Khi thiếu ảnh trong gold/images → iou_fallback = True."""
+    gold = tmp_path / "gold"
+    pred = tmp_path / "pred"
+    _write_hbb_labels(gold / "labels", ["0 0.5 0.5 0.2 0.2"])
+    _write_hbb_labels(pred / "labels", ["0 0.5 0.5 0.2 0.2 0.9"])
+    (gold / "images").mkdir(parents=True, exist_ok=True)   # thư mục rỗng, không có ảnh
+    res = eval_map.evaluate(gold, pred)
+    assert res["iou_fallback_normalized"] is True
+
+
+# --------------------------- run_pipeline utilities ------------------------- #
+
+def test_poly_area_unit_square():
+    """Diện tích ô vuông đơn vị = 1.0."""
+    poly = np.array([[0, 0], [1, 0], [1, 1], [0, 1]], np.float32)
+    assert abs(run_pipeline.poly_area(poly) - 1.0) < 1e-9
+
+
+def test_poly_area_triangle():
+    """Tam giác cạnh 2 → diện tích = 2."""
+    poly = np.array([[0, 0], [2, 0], [0, 2]], np.float32)
+    assert abs(run_pipeline.poly_area(poly) - 2.0) < 1e-9
+
+
+def test_clarity_score_in_range():
+    """Score ∈ [0, 1) trên ảnh bất kỳ."""
+    img = np.random.randint(0, 256, (50, 50, 3), dtype=np.uint8)
+    s = run_pipeline.clarity_score(img)
+    assert 0.0 <= s < 1.0
+
+
+def test_clarity_score_empty():
+    """Ảnh rỗng → 0.0 (không crash)."""
+    assert run_pipeline.clarity_score(np.zeros((0, 0, 3), np.uint8)) == 0.0
+
+
+def test_clarity_sharp_gt_blur():
+    """Ảnh sắc nét có clarity cao hơn ảnh mờ."""
+    sharp = np.random.randint(0, 256, (80, 80, 3), dtype=np.uint8)
+    blurred = cv2.GaussianBlur(sharp, (21, 21), 10)
+    assert run_pipeline.clarity_score(sharp) > run_pipeline.clarity_score(blurred)
+
+
+def test_crop_and_mask_shape():
+    """crop_and_mask trả đúng kích thước và mask nhị phân."""
+    frame = np.random.randint(0, 256, (100, 200, 3), dtype=np.uint8)
+    poly = np.array([[10, 20], [60, 20], [60, 50], [10, 50]], np.float32)
+    crop, mask = run_pipeline.crop_and_mask(frame, poly, pad=0)
+    assert crop is not None and mask is not None
+    assert crop.shape[:2] == mask.shape
+    assert set(np.unique(mask)) <= {0, 1}
+
+
+def test_crop_and_mask_degenerate():
+    """Poly suy biến (0 diện tích) → trả (None, None), không crash."""
+    frame = np.zeros((100, 200, 3), np.uint8)
+    poly = np.array([[5, 5], [5, 5], [5, 5], [5, 5]], np.float32)
+    crop, mask = run_pipeline.crop_and_mask(frame, poly, pad=0)
+    assert crop is None and mask is None
