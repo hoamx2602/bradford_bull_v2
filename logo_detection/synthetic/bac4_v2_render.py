@@ -71,11 +71,40 @@ _POS_GLTF, _UV = _read_glb(GLB)
 _POS = np.column_stack([_POS_GLTF[:, 0], -_POS_GLTF[:, 2], _POS_GLTF[:, 1]])
 
 
+# Pre-filter to front panel UV region to avoid picking up back/sleeve vertices in fallback
+_FRONT_MASK = ((_UV[:, 0] >= 0.13) & (_UV[:, 0] <= 0.38) &
+               (_UV[:, 1] >= 0.44) & (_UV[:, 1] <= 0.82))
+_FRONT_UV  = _UV[_FRONT_MASK]
+_FRONT_POS = _POS[_FRONT_MASK]
+
+
 def logo_verts(uv_cx, uv_cy, uv_w, uv_h):
+    """Find mesh vertices covering the logo UV region.
+    Falls back to nearest-corner when the tight box is sparse (< 4 verts).
+    The nearest-corner approach finds the closest front-panel vertex to each of the
+    4 UV corners, giving a tight bbox even in mesh-sparse regions.
+    """
     u0, u1 = uv_cx - uv_w / 2, uv_cx + uv_w / 2
     v0, v1 = uv_cy - uv_h / 2, uv_cy + uv_h / 2
+
+    # Tight box (exact, when vertex density allows)
     mask = (_UV[:, 0] >= u0) & (_UV[:, 0] <= u1) & (_UV[:, 1] >= v0) & (_UV[:, 1] <= v1)
-    return _POS[mask]
+    verts = _POS[mask]
+    if len(verts) >= 4:
+        return verts
+
+    # Nearest-corner fallback: one nearest front-panel vertex per UV corner
+    if len(_FRONT_UV) == 0:
+        return np.array([])
+    MAX_UV_DIST = 0.12
+    corners = [(u0, v0), (u1, v0), (u0, v1), (u1, v1)]
+    found = []
+    for cu, cv in corners:
+        dists = (_FRONT_UV[:, 0] - cu) ** 2 + (_FRONT_UV[:, 1] - cv) ** 2
+        idx = int(np.argmin(dists))
+        if dists[idx] ** 0.5 <= MAX_UV_DIST:
+            found.append(_FRONT_POS[idx])
+    return np.array(found) if len(found) >= 4 else np.array([])
 
 
 # ── Scene helpers ─────────────────────────────────────────────────────────────
@@ -283,17 +312,30 @@ for entry in manifest:
     bpy.context.scene.render.filepath = out_path
     bpy.ops.render.render(write_still=True)
 
-    verts = logo_verts(entry["uv_cx"], entry["uv_cy"], entry["uv_w"], entry["uv_h"])
-    bbox  = compute_bbox(jersey, cam, verts)
-    lbl   = LBL_DIR / f"{i:05d}.txt"
-    if bbox:
-        cx, cy, w, h = bbox
-        lbl.write_text(f"0 {cx:.6f} {cy:.6f} {w:.6f} {h:.6f}\n")
-        status = f"bbox=({cx:.3f},{cy:.3f},{w:.3f},{h:.3f})"
+    # Support both multi-logo format {"logos": [...]} and legacy single-logo format
+    if "logos" in entry:
+        logo_list = entry["logos"]
     else:
-        lbl.write_text("")
-        status = "logo not visible"
-    print(f"[{i+1}/{len(manifest)}] {entry['brand']}  {status}")
+        logo_list = [{"brand": entry.get("brand", "logo"),
+                      "uv_cx": entry["uv_cx"], "uv_cy": entry["uv_cy"],
+                      "uv_w": entry["uv_w"],   "uv_h": entry["uv_h"]}]
+
+    lbl      = LBL_DIR / f"{i:05d}.txt"
+    lines    = []
+    statuses = []
+    for lg in logo_list:
+        verts = logo_verts(lg["uv_cx"], lg["uv_cy"], lg["uv_w"], lg["uv_h"])
+        bbox  = compute_bbox(jersey, cam, verts)
+        if bbox:
+            cx, cy, w, h = bbox
+            lines.append(f"0 {cx:.6f} {cy:.6f} {w:.6f} {h:.6f}")
+            statuses.append(f"{lg['brand']}=({cx:.3f},{cy:.3f},{w:.3f},{h:.3f})")
+        else:
+            statuses.append(f"{lg['brand']}=hidden")
+
+    lbl.write_text("\n".join(lines) + ("\n" if lines else ""))
+    kit_tag = entry.get("kit", "?")
+    print(f"[{i+1}/{len(manifest)}] kit={kit_tag}  " + "  ".join(statuses))
 
 # YAML
 (OUT_DIR / "dataset.yaml").write_text(

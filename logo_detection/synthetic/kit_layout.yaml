@@ -1,0 +1,75 @@
+# Bradford Bulls jersey front-panel sponsor layout
+# UV positions calibrated via bac4_dot_test.py diagnostic render (cam_seed=42)
+#
+# Coordinate system for rugby_jersey_-_visual_animation.glb:
+#   U: normal (0=left, 1=right in render)
+#   V: INVERTED (high V = bottom of jersey in render)
+#   PIL pixel: cx_px = U * TEX_SIZE, cy_px = (1 - V) * TEX_SIZE
+#
+# Calibrated reference points (from dot-test grid render):
+#   Row 1 (V=0.535) = top of white chest area  (near collar / V-pattern boundary)
+#   Row 2 (V=0.620) = mid-chest                (primary sponsor row)
+#   Row 3 (V=0.710) = lower chest / abdomen    (main large sponsor area)
+#   U=0.200 = left of panel, U=0.250 = center, U=0.295 = right of panel
+
+home:
+  jersey_color: [238, 238, 238]   # off-white base
+  slots:
+    - brand: topnotch
+      logo_file: "13 - Top Notch Logo.png"
+      uv_cx: 0.250   # center
+      uv_cy: 0.700   # lower chest
+      uv_w:  0.145   # large main sponsor
+      jitter: true
+
+    - brand: romantica
+      logo_file: "Romantica Beds - Logo FINAL WHITE.jpg"   # black version is 0-byte/corrupt
+      uv_cx: 0.207   # left-of-center
+      uv_cy: 0.622   # mid-chest; shifted from 0.597 → denser vertex zone (V=0.600-0.650: 194 verts)
+      uv_w:  0.075
+      jitter: true
+
+    - brand: mna_cladding
+      logo_file: "10 - MNA Cladding.png"
+      uv_cx: 0.207   # left
+      uv_cy: 0.532   # near top of white area
+      uv_w:  0.050
+      jitter: false
+
+    - brand: mna_support
+      logo_file: "11 - MNA Support Services.png"
+      uv_cx: 0.281   # right-of-center
+      uv_cy: 0.532
+      uv_w:  0.050
+      jitter: false
+
+away:
+  jersey_color: [28, 28, 28]     # near-black base
+  slots:
+    - brand: floor_tonic
+      logo_file: "Floor tonic Logo.jpg"
+      uv_cx: 0.250
+      uv_cy: 0.700
+      uv_w:  0.145
+      jitter: true
+
+    - brand: romantica
+      logo_file: "Romantica Beds - Logo FINAL WHITE.jpg"
+      uv_cx: 0.207
+      uv_cy: 0.597
+      uv_w:  0.075
+      jitter: true
+
+    - brand: mna_cladding
+      logo_file: "10 - MNA Cladding.png"
+      uv_cx: 0.207
+      uv_cy: 0.532
+      uv_w:  0.050
+      jitter: false
+
+    - brand: mna_support
+      logo_file: "11 - MNA Support Services.png"
+      uv_cx: 0.281
+      uv_cy: 0.532
+      uv_w:  0.050
+      jitter: false
