@@ -46,3 +46,10 @@ team_detection/output
 /wandb
 /logo_detection/wandb
 /video/node_modules
+Auto\ Label\ White.coco/
+data/
+/training-result
+logo_detection/meshes/
+logo_detection/synthetic
+.env
+/logo_detection/runs/**
