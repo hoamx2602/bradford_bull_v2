@@ -1,4 +1,5 @@
-# Bradford Bulls jersey front-panel sponsor layout
+# Bradford Bulls 2025/26 jersey front-panel sponsor layout
+# Verified against: KIT/Home Kit.jpg, KIT/Away Kit.jpg, KIT/Kit Regulations 2025 SPONSORS SIZINGS.pdf
 # UV positions calibrated via bac4_dot_test.py diagnostic render (cam_seed=42)
 #
 # Coordinate system for rugby_jersey_-_visual_animation.glb:
@@ -7,59 +8,72 @@
 #   PIL pixel: cx_px = U * TEX_SIZE, cy_px = (1 - V) * TEX_SIZE
 #
 # Calibrated reference points (from dot-test grid render):
-#   Row 1 (V=0.535) = top of white chest area  (near collar / V-pattern boundary)
-#   Row 2 (V=0.620) = mid-chest                (primary sponsor row)
-#   Row 3 (V=0.710) = lower chest / abdomen    (main large sponsor area)
+#   Row 1 (V=0.535) = top of white/chest area  (near collar / V-pattern boundary)
+#   Row 2 (V=0.622) = mid-chest                (secondary sponsor row)
+#   Row 3 (V=0.700) = lower chest / abdomen    (main large sponsor — 300 sq cm slot)
 #   U=0.200 = left of panel, U=0.250 = center, U=0.295 = right of panel
+#
+# Logo file choices per kit:
+#   Romantica:
+#     HOME  → romantica_home.jpg       (black text on light bg, generated from FINAL WHITE by inversion)
+#     AWAY  → "Romantica Beds - Logo FINAL WHITE.jpg"  (white text on black bg, matches black jersey)
+#   MNA logos appear on the black/yellow V-pattern area near the collar (small patches, ~60 sq cm)
+#   TopNotch / Floor Tonic occupy the large 300 sq cm main sponsor slot on the white/black chest
 
 home:
-  jersey_color: [238, 238, 238]   # off-white base
+  jersey_color: [238, 238, 238]   # off-white base (home kit)
   slots:
+    # ── Main sponsor (lower chest, 300 sq cm) ──────────────────────────────────
     - brand: topnotch
       logo_file: "13 - Top Notch Logo.png"
-      uv_cx: 0.250   # center
-      uv_cy: 0.700   # lower chest
-      uv_w:  0.145   # large main sponsor
+      uv_cx: 0.250   # center of front panel
+      uv_cy: 0.700   # lower chest (calibrated Row 3)
+      uv_w:  0.145   # ~300 sq cm slot — widest logo on kit
       jitter: true
 
+    # ── Secondary sponsor (mid-left chest, ~60 sq cm) ─────────────────────────
     - brand: romantica
-      logo_file: "Romantica Beds - Logo FINAL WHITE.jpg"   # black version is 0-byte/corrupt
-      uv_cx: 0.207   # left-of-center
-      uv_cy: 0.622   # mid-chest; shifted from 0.597 → denser vertex zone (V=0.600-0.650: 194 verts)
+      logo_file: "romantica_home.jpg"   # generated: black text + red rose on light bg
+      uv_cx: 0.207   # left of center
+      uv_cy: 0.622   # mid-chest (calibrated Row 2); V=0.600-0.650 zone = 194 verts → good coverage
       uv_w:  0.075
       jitter: true
 
+    # ── Small collar-area patches (V-pattern boundary, ~50-60 sq cm each) ─────
     - brand: mna_cladding
       logo_file: "10 - MNA Cladding.png"
-      uv_cx: 0.207   # left
-      uv_cy: 0.532   # near top of white area
+      uv_cx: 0.207   # left side of panel (matches kit: MNA Cladding is left of MNA Support)
+      uv_cy: 0.532   # top of chest area (calibrated Row 1)
       uv_w:  0.050
       jitter: false
 
     - brand: mna_support
       logo_file: "11 - MNA Support Services.png"
-      uv_cx: 0.281   # right-of-center
+      uv_cx: 0.281   # right of MNA Cladding (kit shows them side-by-side near collar)
       uv_cy: 0.532
       uv_w:  0.050
       jitter: false
 
 away:
-  jersey_color: [28, 28, 28]     # near-black base
+  jersey_color: [28, 28, 28]     # near-black base (away kit)
   slots:
+    # ── Main sponsor (lower chest, 300 sq cm) ──────────────────────────────────
     - brand: floor_tonic
       logo_file: "Floor tonic Logo.jpg"
-      uv_cx: 0.250
-      uv_cy: 0.700
+      uv_cx: 0.250   # center
+      uv_cy: 0.700   # lower chest (calibrated Row 3)
       uv_w:  0.145
       jitter: true
 
+    # ── Secondary sponsor (mid-left chest, ~60 sq cm) ─────────────────────────
     - brand: romantica
-      logo_file: "Romantica Beds - Logo FINAL WHITE.jpg"
+      logo_file: "Romantica Beds - Logo FINAL WHITE.jpg"   # white text on black bg — correct for black jersey
       uv_cx: 0.207
-      uv_cy: 0.597
+      uv_cy: 0.622   # aligned with home kit (both at Row 2 denser vertex zone)
       uv_w:  0.075
       jitter: true
 
+    # ── Small collar-area patches ──────────────────────────────────────────────
     - brand: mna_cladding
       logo_file: "10 - MNA Cladding.png"
       uv_cx: 0.207
@@ -73,3 +87,31 @@ away:
       uv_cy: 0.532
       uv_w:  0.050
       jitter: false
+
+# ── Reference: full logo inventory by location (2025/26 season) ───────────────
+# JERSEY FRONT body (above = slots rendered in 3D):
+#   TopNotch        → home main chest    | "13 - Top Notch Logo.png"
+#   Floor Tonic     → away main chest    | "Floor tonic Logo.jpg"
+#   Romantica       → mid-left chest     | romantica_home.jpg / FINAL WHITE.jpg
+#   MNA Cladding    → top-left collar    | "10 - MNA Cladding.png"
+#   MNA Support     → top-right collar   | "11 - MNA Support Services.png"
+#
+# JERSEY SLEEVES (not in 3D front-panel render):
+#   Chadwick Lawrence → left sleeve      | "4 - ChadLaw1.png"
+#   ATM Hospitality   → right sleeve     | "2 - ATM-Hospitality-Logo-New-Font.png"
+#   Bartercard        → right sleeve     | "Bartercard.jpg"
+#   Betfred SL patch  → left sleeve      | (league-supplied, not in folder)
+#
+# JERSEY BACK (not in 3D front-panel render):
+#   Fairway Flooring  → back top-right   | "6 - Fairway Flooring Ltd Logo nO NUMBER.jpg"
+#   MCP               → back top-center  | "9 - MCP.png" (home) / "8 - MCP Away.png" (away)
+#   ACS Group         → back center      | "acs_group.jpg"
+#
+# SHORTS (not in 3D jersey render):
+#   Cedar Court Hotels → shorts front    | "3 - CCH - Master Logo Black [A3 Digital].png"
+#   KLG Europe         → shorts back     | "7 - KLG Transparent Final.png"
+#   AON                → shorts back R   | "1 - aon_logo_signature_red_rgb (2).png"
+#   Paints & Lacquers  → shorts back L   | "Paints & Laquers Logo FINAL.jpg" / "12 - yellow.jpg"
+#
+# SOCKS:
+#   EM Workwear  → socks                 | "5 - EM workwear logo.png"

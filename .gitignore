@@ -62,3 +62,4 @@ team_detection/output
 /logo_detection/meshes/
 /logo_detection/synthetic/logo_detection/
 Auto\ Label\ White.coco/
+/training-result

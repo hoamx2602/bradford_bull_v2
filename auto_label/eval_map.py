@@ -37,7 +37,11 @@ IOU_THRS = np.round(np.arange(0.5, 1.0, 0.05), 2)  # 0.50 .. 0.95
 # --------------------------------------------------------------------------- #
 
 def load_label_file(p: Path, with_conf: bool) -> list[tuple]:
-    """Đọc 1 file YOLO -> list (cls, cx, cy, w, h, conf)."""
+    """Đọc 1 file YOLO → list (cls, cx, cy, w, h, conf).
+
+    Hỗ trợ cả AABB (5 fields) và OBB (9 fields: cls x1 y1 x2 y2 x3 y3 x4 y4).
+    OBB được convert thành AABB lấy axis-aligned bounding box từ 4 góc.
+    """
     out: list[tuple] = []
     if not p.exists():
         return out
@@ -46,8 +50,18 @@ def load_label_file(p: Path, with_conf: bool) -> list[tuple]:
         if len(parts) < 5:
             continue
         cls = int(float(parts[0]))
-        cx, cy, w, h = (float(v) for v in parts[1:5])
-        conf = float(parts[5]) if (with_conf and len(parts) >= 6) else 1.0
+        if len(parts) >= 9:
+            # OBB format: cls x1 y1 x2 y2 x3 y3 x4 y4 (normalized coords)
+            xs = [float(parts[i]) for i in range(1, 9, 2)]
+            ys = [float(parts[i]) for i in range(2, 9, 2)]
+            x1, y1, x2, y2 = min(xs), min(ys), max(xs), max(ys)
+            cx = (x1 + x2) / 2; cy = (y1 + y2) / 2
+            w = x2 - x1; h = y2 - y1
+            conf = 1.0
+        else:
+            # AABB format: cls cx cy w h [conf]
+            cx, cy, w, h = (float(v) for v in parts[1:5])
+            conf = float(parts[5]) if (with_conf and len(parts) >= 6) else 1.0
         out.append((cls, cx, cy, w, h, conf))
     return out
 
