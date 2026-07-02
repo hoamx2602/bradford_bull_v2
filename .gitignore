@@ -1,3 +1,7 @@
+# Secrets — KHÔNG commit
+.env
+*.env
+
 # Python
 __pycache__/
 *.py[cod]
@@ -18,6 +22,9 @@ selected_frames/
 metadata/
 best_crops/
 auto_annotated_crops/
+# auto-label data engine outputs (images/labels/gallery/fingerprint) + eval runs
+/data/
+eval_runs/
 *.pt
 *.onnx
 yolo*.pt
@@ -46,10 +53,13 @@ team_detection/output
 /wandb
 /logo_detection/wandb
 /video/node_modules
+/video/out
+/logo_detection/synthetic/data_bac4_smoke
+/logo_detection/synthetic/data_bac3_smoke
+/logo_detection/synthetic/data_synth
+/logo_detection/synthetic/data_jrs_smoke
+/logo_detection/synthetic/data_bac4*/
+/logo_detection/meshes/
+/logo_detection/synthetic/logo_detection/
 Auto\ Label\ White.coco/
-data/
 /training-result
-logo_detection/meshes/
-logo_detection/synthetic
-.env
-/logo_detection/runs/**
