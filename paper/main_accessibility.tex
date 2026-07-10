@@ -1,0 +1,598 @@
+%% ============================================================================
+%%  Sponsor Exposure Analytics for the Rest of Us: An Open, Self-Hostable
+%%  Framework for Small and Mid-Tier Sports Clubs
+%%
+%%  Target venue : TBD (IEEE CyberWorlds / ACM MMSports workshop / CVsports
+%%                 workshop — decide with advisor, see paper_outline_for_advisor.md)
+%%  Format       : IEEEtran conference, 2-column. Compile on Overleaf or:
+%%                   latexmk -pdf main_accessibility.tex
+%%
+%%  NOTE ON NUMBERS: remaining \TODOnum{...} (red) are PLACEHOLDERS. Detection
+%%  numbers are now real, verified against logo_detection/runs/*/results.csv:
+%%    - random-frame split   : logo_yolo26m        best mAP@0.5 = 0.862
+%%    - clip-disjoint split  : logo_yolo26m_clipsplit  best mAP@0.5 = 0.702
+%%    - extended data (v2)   : logo_yolo26m_v2_full-2  best mAP@0.5 = 0.745 (P .65 R .74)
+%%  CONFIRM before submission: the 0.862 run predates the clip-split fix (split
+%%  provenance inferred from run names — all args.yaml point at the same
+%%  data.yaml path, regenerated in place). RF-DETR run (training-result/,
+%%  ema mAP@0.5 = 0.778) used Roboflow's RANDOM split -> not citable as-is.
+%%  Do NOT submit while any \TODOnum remains.
+%%  NOTE ON CLUB IDENTITY: the deploying club's name is intentionally withheld
+%%  throughout for client confidentiality — keep it that way in any edits.
+%%  This includes FIGURES: raw video frames reveal the club instantly
+%%  (scoreboards, crest, kit, club-TV watermark, opponents). Do not add
+%%  qualitative frame figures unless scoreboard/crest/watermark are redacted
+%%  and the user has approved the redaction (decision 2026-07-10).
+%% ============================================================================
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage{url}
+\usepackage[colorlinks=true,allcolors=blue]{hyperref}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usetikzlibrary{positioning,arrows.meta,shapes.geometric,fit,backgrounds,calc}
+
+% --- placeholder helper: makes unfilled numbers visually obvious -------------
+\newcommand{\TODOnum}[1]{{\color{red}\textbf{#1}}}
+
+% --- shared tikz styles (kept consistent with the companion CyberWorlds draft) -
+\tikzset{
+  blk/.style   ={rectangle, rounded corners=2pt, draw=black!70, thick,
+                 fill=blue!6, align=center, inner sep=4pt, font=\scriptsize,
+                 minimum height=8mm, text width=22mm},
+  data/.style  ={rectangle, draw=black!55, fill=gray!8, align=center,
+                 inner sep=3pt, font=\scriptsize\itshape, text width=20mm},
+  teach/.style ={blk, fill=orange!12},
+  stud/.style  ={blk, fill=green!12},
+  arr/.style   ={-{Stealth[length=2mm]}, thick, draw=black!65},
+}
+
+\begin{document}
+
+\title{Sponsor Exposure Analytics for the Rest of Us: An Open, Self-Hostable\\
+Framework for Small and Mid-Tier Sports Clubs}
+
+\author{\IEEEauthorblockN{First Author\IEEEauthorrefmark{1},
+Second Author\IEEEauthorrefmark{1}}
+\IEEEauthorblockA{\IEEEauthorrefmark{1}Affiliation\\
+\texttt{\{author1,author2\}@inst.edu}}}
+
+\maketitle
+
+% ============================================================================
+\begin{abstract}
+Measuring how long and how prominently a sponsor's logo appears in match video, and
+converting that exposure into an estimated media value (EMV), is a well-served problem
+for clubs that can afford an enterprise vendor (Nielsen Sports, GumGum/Zoomph, Relo
+Metrics, Shikenso) or that maintain an in-house data-science team — and, in practice,
+for clubs whose matches are covered by an official broadcast feed those vendors can
+integrate with in the first place. Most professional clubs outside the top-revenue
+leagues have neither the budget nor a broadcast deal. We present an end-to-end,
+self-hosted framework that a club can use to ingest \emph{its own} match video —
+whatever it is able to capture itself, not necessarily an official broadcast feed — and
+turn it into sponsor exposure and media-value reports. The framework is assembled
+entirely from open-source models and libraries, deployable on commodity hardware, and
+deployed and evaluated at a real professional sports club whose identity we withhold for
+confidentiality. Beyond detection, the framework resolves two problems that prior
+published systems leave open: attributing each detected logo to the correct team when
+the same sponsor appears on both sides' kits, advertising boards, or officials; and
+pricing sponsor placements at the level of individual kit slots rather than only
+aggregate screen time. We position our pricing formula explicitly against existing
+valuation practice — both the manual Advertising/Earned Media Value Equivalency (AVE)
+methodology used across the sponsorship industry, and recent AI-driven valuation
+systems — and show that neither line of work prices exposure below the level of a
+brand's total on-screen time. On self-ingested match video from a real fixture, the
+framework tracks players, filters out opponent-owned instances of shared sponsors, and
+produces
+per-brand and per-placement exposure and EMV reports; we report detection accuracy on a
+clip-disjoint split (mAP@0.5 = 0.75; the same detector evaluated under a naive
+random-frame split reaches 0.86, a gap we report explicitly as evidence of
+split-induced inflation rather than model quality), team-attribution behaviour on an
+initial set of labelled clips, and the scale of the overcounting that attribution
+prevents: across eight of nine full-match deployment videos, 41\% of raw logo
+detections belonged to opponents or officials, or were unattached to any tracked
+player, and would otherwise have been priced as the target club's kit exposure; the
+ninth match, flagged by a visual audit, is reported as a failure case of the team
+classifier rather than as filtering. We report the design choices, calibration lessons, and
+failure modes needed to take a sponsor-analytics system from paper to a low-cost,
+production deployment.
+\end{abstract}
+
+\begin{IEEEkeywords}
+sponsor visibility, media value equivalency, logo detection, team attribution, sports
+analytics, open-source, accessibility, self-service video ingestion.
+\end{IEEEkeywords}
+
+% ============================================================================
+\section{Introduction}
+\label{sec:intro}
+
+Sports clubs sell advertising space on their kits, but only a small number of clubs can
+verify what that space is actually worth. Our partner club — a professional club that
+sells sponsor slots on its kit but, like most clubs outside the top handful of leagues,
+has no in-house analytics team and no enterprise sponsorship-measurement contract — is
+representative of the majority of the market this paper targets. (We withhold the
+club's name throughout this paper for commercial confidentiality; nothing in the
+results depends on the club's identity.)
+
+A commercial layer already serves the sponsor-measurement need: Nielsen's sponsorship
+benchmarking~\cite{nielsen_sponsorship_benchmark}, GumGum/Zoomph, Relo
+Metrics~\cite{relometrics_ai}, and Shikenso all offer automated or semi-automated
+sponsor-visibility services. These are delivered as closed, hosted platforms: a club
+sends its footage to a third party and receives a report back, typically under a
+recurring contract, typically by integrating with an official broadcast feed. This is a
+reasonable model for a club with the budget, the appetite for such a contract, and a
+broadcast deal to plug into — but it leaves three structural costs unaddressed for
+everyone else: vendor lock-in and recurring fees; the requirement to hand a club's raw
+video and commercial sponsorship data to an external party rather than keeping it
+in-house; and, for the many clubs with no official broadcast coverage at all, a
+dependency on broadcast access that simply does not exist for them regardless of
+budget. Our framework instead is built around \emph{self-service ingestion}: a club
+uploads whatever match video it is able to capture itself — a fixed pitch-side camera,
+a livestream recording, footage from a coach's or media officer's own filming — and the
+system produces exposure and EMV reports from that, with no dependency on an official
+broadcast feed or a vendor integration. We target clubs for whom these costs — not
+detection accuracy — are the binding constraint. To be precise about what we mean by ``accessible'': self-hosting
+removes cost and vendor lock-in, but it does not remove the need for some technical
+capacity to operate the system; our claim is narrower than ``any club, zero technical
+skill'' and is better stated as ``clubs with modest technical capacity but no
+analytics budget or vendor contract.''
+
+Even with a working, open-source logo detector, two problems remain unresolved by the
+closest published system, ExposureEngine~\cite{exposureengine} (\S\ref{sec:related}).
+First, the same sponsor frequently appears on both competing teams' kits, on
+perimeter advertising boards, or on match officials, so raw detection systematically
+overcounts a sponsor's exposure unless ownership is resolved per detected instance.
+Second, sponsors are priced by placement in practice — a chest-centre logo is worth
+more than one on a sock — yet no published system we are aware of attributes exposure,
+or price, at that granularity.
+
+\noindent\textbf{Contributions.}
+\begin{itemize}
+  \item \textbf{C1.} A formulation and training-free solution for
+  \emph{team attribution}: resolving which team owns a detected logo instance without
+  training a separate model per opponent, using a reference-based bootstrap, appearance
+  fusion, and track-level temporal voting.
+  \item \textbf{C2.} A three-tier, zero-manual-setup reference bootstrap for team
+  attribution (manual override $\to$ kit-anchor auto-clustering $\to$ luminance
+  heuristic), so the system requires no per-match human configuration.
+  \item \textbf{C3.} \emph{Placement-level pricing}: attributing exposure, and
+  therefore price, to eighteen individual kit slots via pose estimation — a granularity
+  absent from both the manual AVE/EMV literature and recent AI-driven valuation systems
+  (\S\ref{sec:related}).
+  \item \textbf{C4.} An open reference architecture assembled entirely from
+  open-source models and libraries, built around \emph{self-service video ingestion}
+  rather than a broadcast-feed integration, with infrastructure abstracted behind
+  swappable interfaces so that a club can start at near-zero infrastructure cost, with
+  no dependency on having a broadcast deal, and scale only if and when needed.
+  \item \textbf{C5.} Production-grade design and calibration lessons from a real
+  deployment: a two-pass sampled/full-fps detection trade-off, graceful degradation
+  under partial failure, and two specific calibration corrections (visibility threshold,
+  train/test leakage) that changed our reported numbers substantially.
+\end{itemize}
+Of these, C1 and C3 are the primary technical claims; C2, C4, and C5 are supporting
+system contributions that make C1 and C3 practical to deploy.
+
+% ============================================================================
+\section{Related Work}
+\label{sec:related}
+
+\subsection{Logo detection}
+Logo detection is a comparatively mature problem~\cite{logo_detection_survey}; we build
+on a standard fine-tuned open-weight detector rather than proposing a new detection
+architecture, and treat detection accuracy as a means to an end rather than as this
+paper's contribution.
+
+\subsection{Team classification and jersey-based re-identification}
+Assigning a detected player to a team from jersey appearance is an active area in its
+own right, including joint re-identification, team-affiliation, and role classification
+for sports tracking~\cite{team_reid_roles}, jersey-number recognition under
+uncertainty~\cite{jersey_number_cvsports}, and earlier work combining spatial
+constellation features with jersey-number recognition for player
+identification~\cite{soccer_player_recognition}; see also the broader computer-vision-
+in-sports survey~\cite{cv_sports_survey}. Most of this literature performs per-frame
+colour or embedding clustering for team assignment. We build directly on this and add a
+track-level temporal voting scheme with hysteresis, together with a zero-manual-setup
+reference bootstrap — the differentiation is in \emph{how} team identity is made
+stable and cheap to configure per match, not in team classification itself.
+
+\subsection{Ad-board localization in broadcast video}
+A separate, older line of work localizes static advertising surfaces in broadcast video
+in order to insert or replace advertising content: implanting virtual advertisements
+into broadcast soccer video~\cite{virtual_ad_insertion}, automated billboard
+insertion~\cite{billboard_insertion}, and billboard-advertisement
+detection~\cite{billboard_detection_sport_tv}. This literature solves a related but
+different problem — inserting or replacing an ad on a located surface — whereas we
+measure the exposure of sponsors that are already, physically, on screen.
+
+\subsection{Automated sponsor-visibility systems}
+The closest published system is ExposureEngine~\cite{exposureengine}, which introduces
+an oriented-bounding-box detector for sponsor logos and a visibility/exposure analytics
+pipeline for soccer broadcasts, reporting mAP@0.5 of 0.859 on a purpose-built Swedish
+top-flight soccer dataset drawn from official broadcast coverage. As far as its
+published description shows, it does not address logos shared between opposing teams
+or officials, does not attribute exposure below brand level, does not discuss
+deployment cost, and — like the commercial vendors below — assumes access to an
+official broadcast feed rather than club-captured video. This last point matters in
+practice: most clubs outside the top leagues have no broadcast coverage to draw on at
+all, independent of budget. Commercial vendors
+(Nielsen~\cite{nielsen_sponsorship_benchmark}, GumGum/Zoomph, Relo
+Metrics~\cite{relometrics_ai}, Shikenso) confirm that the underlying problem is
+commercially important, but their methods are closed, unpublished, and not independently
+reproducible.
+
+\subsection{Existing pricing and valuation models — manual and AI-driven}
+\label{sec:related-pricing}
+The industry-standard manual approach is Advertising/Earned Media Value Equivalency
+(AVE/EMV): convert the size, duration, and placement of exposure into the cost of an
+equivalent slot of paid advertising, typically via a hand-set placement multiplier. Our
+own Tier-3 pricing formula (\S\ref{sec:emv}) is drawn from exactly this family of
+formulas, as used in prior industry and academic practice, and we cite it directly here
+rather than treating it as generic background. The AVE methodology is also the target of
+sustained, public criticism from industry bodies — AMEC, IPR, PRSA, PRCA, and ICCO have
+each issued position statements rejecting AVE as unreliable~\cite{ave_criticism},
+citing arbitrary multipliers, no signal for content or audience sentiment, and treating
+every viewer as identical regardless of placement or audience quality. Our
+placement-level pricing (C3) makes one specific weakness of this criticism — the
+arbitrariness of a single, flat multiplier — more principled, by grounding a portion of
+the multiplier in measured, per-slot exposure share; it does \emph{not} address the
+deeper criticism that AVE-style metrics ignore audience quality, sentiment, or brand
+recall, and we state this as an explicit scope limitation
+(\S\ref{sec:discussion}) rather than imply the pricing problem is solved.
+
+On the AI-driven side, recent systems apply machine learning directly to sponsorship
+valuation: SSPAIN.ai~\cite{sspain_ai}, a survival-analysis model trained on more than
+5{,}800 historical sponsorships to forecast sponsorship renewal probability and
+duration, and Relo Metrics'~\cite{relometrics_ai} combined
+computer-vision-and-machine-learning pipeline for automated media value and dynamic
+pricing. Both are methodologically related to more general machine-learning-based
+dynamic pricing, e.g.\ in e-commerce~\cite{dynamic_pricing_ml_ecommerce}, which reacts
+to real-time demand signals rather than sports-specific placement data. None of this
+AI-driven work, as far as published material shows, prices exposure below the level of
+a brand's aggregate on-screen time, and none discusses low-cost or self-hosted
+deployment.
+
+\subsection{Summary of the gap}
+No published work we are aware of simultaneously addresses (a) team/opponent-overlap
+attribution, (b) placement-level pricing, in either the manual or AI-driven valuation
+literature, and (c) deployment accessibility for clubs without an enterprise budget or
+an in-house ML team. This is the gap this paper targets.
+
+% ============================================================================
+\section{System Architecture}
+\label{sec:arch}
+
+\begin{figure*}[t]
+\centering
+\input{fig_pipeline}
+\caption{\textbf{End-to-end pipeline.} An orchestrated job runs frame sampling, a
+zero-manual-setup team-reference bootstrap, logo detection, team attribution, pose-based
+kit-slot assignment, exposure aggregation, and EMV pricing, feeding a multi-match
+dashboard. Every optional stage degrades gracefully on failure rather than aborting the
+job, and infrastructure (storage, database, job queue) sits behind swappable interfaces
+so a deployment can start at near-zero cost.}
+\label{fig:pipeline}
+\end{figure*}
+
+The system is organized as a single orchestrated job per uploaded video
+(Fig.~\ref{fig:pipeline}). Two design choices are central to the accessibility claim.
+First, every optional pipeline stage degrades gracefully: if a stage's dependency is
+unavailable (e.g.\ no team reference could be bootstrapped), the stage is skipped and
+logged rather than failing the job, so a club always gets a usable, if partial, result.
+Second, infrastructure is abstracted behind swappable interfaces: the default
+configuration uses local file storage, an embedded database, and an in-process job
+queue, with an optional, opt-in path to object storage, a managed database, and a
+distributed queue for clubs whose volume justifies it. A deployment therefore starts at
+near-zero infrastructure cost and only incurs additional cost when actually needed.
+
+The pipeline also separates two passes over the video at different sampling rates: a
+sparsely sampled pass drives the exposure/EMV numbers (accurate enough for aggregate
+timing at a fraction of the compute cost), and a full-frame-rate pass produces a smooth
+annotated preview for human review. This trade-off is explicit and reported
+(\S\ref{sec:exp}) rather than hidden inside a single, uniformly-sampled detection pass.
+
+% ============================================================================
+\section{Method}
+\label{sec:method}
+
+\subsection{Detection and annotation}
+The logo detector is a YOLO26m model fine-tuned at 1280-pixel input on manually
+annotated frames drawn
+from the same kind of video the framework is meant to run on in deployment — video a
+club captures and uploads itself, not necessarily an official broadcast feed, and
+therefore potentially more variable in camera stability, framing, and production
+quality than the broadcast-sourced footage used to train and evaluate prior published
+detectors. To reduce annotation cost, we use a model-assisted labelling loop: a small
+hand-labelled seed set (on the order of tens of images per class) trains an early model,
+which then proposes boxes on new frames for a human to accept, correct, or reject,
+before a final model is trained on the combined set. This does not eliminate manual
+annotation, and we treat the remaining annotation cost explicitly as the main residual
+barrier to full accessibility (\S\ref{sec:future}), rather than claiming an
+annotation-free pipeline in this paper. Per-frame detection sits behind a swappable
+backend interface, so a transformer-based detector (RF-DETR) can replace the YOLO
+backend without touching the rest of the pipeline; all detection numbers reported in
+this paper use the YOLO26m backend. In deployment, detections below a confidence
+floor of 0.25 are discarded, but confidence is otherwise used as a continuous weight
+in the visibility score (\S\ref{sec:emv}) rather than as a gate — a deliberately
+recall-first choice: in our deployment data, detections with confidence below 0.4
+account for 29\% of pose-attributed detections but only 9.5\% of quality-weighted
+exposure, so genuine small or motion-blurred kit logos are retained at little cost to
+the aggregate, and spurious ones are further suppressed by the minimum-duration rule
+of \S\ref{sec:emv}.
+
+\subsection{Team attribution}
+\label{sec:teamfilter}
+Detected persons are tracked across frames; for each track, a jersey crop is classified
+by fusing a colour histogram with a general-purpose vision embedding, and
+classifications are accumulated per track with hysteresis, so that a single blurred or
+occluded frame cannot flip an already-confident team label. Reference examples for each
+kit are obtained automatically rather than by manual setup: from official kit images
+when available, and otherwise by clustering the video's own early frames and selecting
+the cluster closest to a simple luminance heuristic (e.g.\ a known dark alternate kit).
+Each detected logo instance is then attributed to the team of its nearest tracked
+person. When the evidence for opponent ownership is insufficient (a track has not yet
+accumulated enough confident votes), the instance is \emph{kept} rather than dropped —
+an explicit, revenue-safe design choice: an under-confident drop would silently
+understate a paying sponsor's measured exposure, which we consider a worse failure mode
+than a small number of false positives that a human reviewer can catch.
+
+\subsection{Visibility, exposure, and EMV pricing}
+\label{sec:emv}
+Exposure and pricing are computed in three tiers, adapted from the manual AVE/EMV family
+discussed in \S\ref{sec:related-pricing} rather than proposed as a new pricing theory:
+(1) a per-frame \emph{visibility} score combining detection size, on-screen position,
+and detector confidence; (2) temporal aggregation of visibility into per-brand
+\emph{exposure} segments, discarding very short, likely spurious detections; and (3) a
+conversion to \emph{estimated media value} using an audience size, a cost-per-thousand
+(CPM) baseline, and a placement multiplier supplied per deployment (the implementation
+additionally supports sponsor-category and prime-time multipliers, both disabled in the
+deployment reported here). A specific
+calibration lesson from deployment: the visibility floor of 0.1 suggested in the
+pricing methodology we adapt, applied as published, discards nearly all real, small,
+off-centre sponsor logos typical of kit sponsorship — under our size term such logos
+score in the 0.03--0.08 range — so we use an empirically set floor of 0.02
+(\TODOnum{report the sensitivity of exposure-seconds to this visibility floor and to
+the detector confidence floor of 0.25 jointly}).
+
+\subsection{Placement-level pricing}
+Each attributed detection is additionally assigned to one of eighteen kit slots (e.g.\
+chest-centre, sleeve, sock) via pose-estimation keypoints, so that exposure — and hence
+the placement multiplier applied in Tier 3 — can be reported and priced per slot rather
+than only per brand (the measured per-slot distribution from our deployment is shown in
+Fig.~\ref{fig:kitslots}). This directly targets the ``arbitrary multiplier'' criticism of
+AVE-style pricing (\S\ref{sec:related-pricing}) by grounding part of the multiplier in
+measured, slot-specific exposure share, while leaving audience-quality and sentiment
+signals as future work (\S\ref{sec:discussion}).
+
+% ============================================================================
+\section{Experiments}
+\label{sec:exp}
+
+\subsection{Setup}
+We evaluate on match video self-ingested by our partner club (identity withheld) —
+video the club captured and uploaded itself, not an official broadcast feed. The
+annotated detection dataset covers seventeen sponsor classes and is severely
+imbalanced, from roughly 200 instances for the most frequent kit sponsor down to
+single digits for the rarest — a property of real kit sponsorship, not of our
+sampling, since a chest sponsor simply appears in almost every frame while a
+shorts-leg sponsor does not. Detector
+training and evaluation use a clip-disjoint split: all frames from the same clip or
+match are kept entirely within one split. This choice matters more than any
+architectural one we made: because analytics frames are sampled at 2\,fps,
+neighbouring frames are near-duplicates, and a naive random-frame split leaks them
+across train and validation. The same YOLO26m detector scores mAP@0.5 = 0.86 under a
+random-frame split but 0.70 under the clip-disjoint split of the same source data
+(Table~\ref{tab:split}) —
+the higher number reflects leakage, not a better model, and we report the pair
+explicitly because published results in this domain rarely state which split
+strategy was used.
+
+\begin{table}[t]
+\centering
+\caption{Effect of the train/validation split policy on measured detection accuracy
+(fine-tuned YOLO26m, best validation epoch). The random-frame figure is inflated by
+near-duplicate frames leaking across the split, not by a better model.}
+\label{tab:split}
+\begin{tabular}{lcc}
+\toprule
+Split policy & mAP@0.5 & mAP@[.5:.95] \\
+\midrule
+Random-frame                  & 0.86 & 0.57 \\
+Clip-disjoint, same data      & 0.70 & 0.42 \\
+Clip-disjoint, extended data  & \textbf{0.75} & \textbf{0.44} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Detection accuracy}
+On the initial annotated set, the clip-disjoint validation score is mAP@0.5 = 0.70
+(mAP@[.5:.95] = 0.42); after extending the dataset with additional annotated clips
+under the same clip-aware split policy, the current detector reaches mAP@0.5 = 0.75
+(mAP@[.5:.95] = 0.44, precision 0.65, recall 0.74). Rare-class AP is unreliable at
+these instance counts and the validation split intentionally holds no instances of
+the rarest classes, so aggregate mAP should be read together with the per-class
+breakdown. \TODOnum{Report per-class average precision and a confusion matrix on a
+held-out clip-disjoint test split (current numbers are validation-split figures used
+for model selection).}
+
+\subsection{Team attribution}
+\TODOnum{Report precision/recall of team attribution on a labelled clip sample spanning
+more than one match and lighting condition (current evidence: two case-study clips only
+— insufficient for a quantitative claim and must be extended before submission).}
+
+\subsection{Team-attribution counterfactual}
+\label{sec:exp-counterfactual}
+Across nine full-match highlight videos processed by the deployed pipeline, team
+attribution flagged and excluded 44\% of raw logo detections (11{,}161 of 25{,}153)
+as owned by the opposing team or match officials, or as not attached to any tracked
+player (e.g.\ perimeter advertising boards). We did not take this aggregate at face
+value: we visually audited the per-track attribution overlays of all nine matches.
+Five show correct target/opponent assignment; three (two night-time,
+long-range club-feed fixtures and one fixture in which both teams wore dark kits)
+work overall but exhibit per-track errors in both directions; and in one — the
+match with the highest exclusion rate, 78\% — the fused classifier systematically
+assigned the target club's own white kit to the opponent class under night
+floodlighting, despite reference features that a luminance check confirms are
+correct. We report that last match as a failure case (\S\ref{sec:discussion}), not
+as filtering, and exclude it from the headline figure: over the remaining eight
+matches, attribution excluded 41\% of raw detections (9{,}383 of 22{,}863), with
+per-match rates of 21--50\% on dark-kit fixtures and 26--72\% on white-kit fixtures
+— the upper end driven by the noisy night-time captures above, in which many distant
+tracks never accumulate a confident label. Without attribution, every excluded detection would have been counted —
+and priced — as target-club kit exposure. These figures quantify how much raw
+exposure the filter removes in production, not yet its per-instance accuracy, which
+is the subject of the labelled-clip evaluation of the previous subsection. To isolate
+the value of C1 further, we additionally run the pipeline with team attribution
+enabled and disabled on clips where a sponsor appears on both teams' kits, and report
+the resulting difference in measured exposure-seconds and EMV.
+\TODOnum{Report the counterfactual over-counting avoided on shared-sponsor clips,
+e.g.\ ``X\% lower EMV / correctly attributed exposure-seconds with team attribution
+on.''}
+
+\begin{figure*}[t]
+\centering
+\resizebox{\textwidth}{!}{\input{fig_timeline}}
+\caption{\textbf{Per-sponsor exposure timeline produced by the deployed pipeline}
+for one club-captured highlight video (8.9\,min, black-kit fixture, 2\,fps analytics
+pass, team attribution enabled; this match's attribution overlay was visually audited
+and assigns target/opponent correctly, \S\ref{sec:exp-counterfactual}). Each bar marks
+an interval in which the sponsor was
+detected on the target team's kit after attribution; sponsors are sorted by total
+on-screen time (right column). Very short intervals are widened to a minimum drawable
+width for legibility; totals are computed from the underlying segments, not from the
+drawing.}
+\label{fig:timeline}
+\end{figure*}
+
+\begin{figure}[!t]
+\centering
+\input{fig_kitslots}
+\caption{\textbf{Where kit exposure actually accrues: share of quality-weighted
+exposure per kit slot}, aggregated over eight full-highlight analyses
+(\S\ref{sec:exp-counterfactual}; the ninth match is excluded after the attribution
+audit described there, since its kept detections are not trustworthy). Percentages
+are weighted by each match's attributed exposure and cover only detections the pose
+stage could assign to a slot. The
+distribution is strongly non-uniform — the two shoulder slots alone carry
+$\sim$30\% of attributed exposure, an order of magnitude more than a sock slot —
+which is exactly the structure a single flat placement multiplier cannot express.}
+\label{fig:kitslots}
+\end{figure}
+
+\subsection{Exposure and EMV validation}
+Fig.~\ref{fig:timeline} shows the per-sponsor exposure segments the pipeline recovers
+for one full highlight video, which is the intermediate representation all exposure
+and EMV figures are computed from. To validate it,
+we compare system-computed exposure-seconds against an independent manual timing of
+logo appearances for at least one full match. We report EMV as a downstream consequence
+of this validated exposure measurement rather than as independently verified: CPM,
+audience size, and placement multiplier are deployment-supplied business inputs, not
+measurable ground truth, so multiplying by them is arithmetic rather than something to
+validate against an external reference — unless an independent buyer valuation is
+available for direct comparison, which would be a stronger, separate claim.
+\TODOnum{Report exposure-seconds MAE against manual ground truth.}
+
+\subsection{Placement-level exposure in deployment}
+Fig.~\ref{fig:kitslots} reports the measured per-slot exposure distribution that
+placement-level pricing (C3) is built on. Two observations matter for pricing. First,
+the distribution is far from uniform: shoulder and chest-adjacent slots dominate
+attributed exposure, while sleeve, sock, and back-centre slots individually carry
+under 2\% each — supporting the practice of pricing slots differently, but from
+measurement rather than convention. Second, the ordering is not the conventional
+price ordering: in this deployment the shorts-back slot outranks chest-centre,
+an artefact of how the club's own pitch-side camera views play, and precisely the
+kind of deployment-specific evidence a flat industry multiplier cannot anticipate.
+
+\subsection{Accessibility evidence}
+\TODOnum{Report end-to-end processing time (video-minutes processed per wall-clock
+minute) on one named, commodity hardware configuration, and the approximate annotation
+time spent per sponsor class using the model-assisted labelling loop of
+\S\ref{sec:method}.} These two numbers are the primary quantitative support for the
+accessibility claim in this paper and are prioritized for measurement before submission.
+
+% ============================================================================
+\section{Discussion and Limitations}
+\label{sec:discussion}
+
+Team attribution assumes a stable kit within a match; a mid-season kit change requires a
+reference refresh. Colour-and-embedding fusion for team classification has not yet been
+stress-tested across a wide range of lighting conditions, and this is not hypothetical:
+in one night fixture in our deployment, the classifier systematically assigned the
+target club's own white kit to the opponent class even though the stored reference
+features were correct (\S\ref{sec:exp-counterfactual}) — silently deleting most of that
+match's genuine sponsor exposure. Because the failure direction is revenue-critical, a
+deployment should monitor the per-match exclusion rate and treat an outlier (here,
+78\% against a fleet median near 40\%) as a signal for human review rather than as a
+valid measurement. Because the framework targets
+self-captured video rather than official broadcast feeds, it must also tolerate a wider
+range of camera stability, framing, and production quality than prior systems evaluated
+only on broadcast-sourced footage; we have not yet characterized detection or
+team-attribution robustness across this range of capture sources (e.g.\ a fixed
+pitch-side camera vs.\ a hand-held recording), and flag this as an open question rather
+than a validated property. The sparse sampling rate used
+for the analytics pass trades exposure-time precision for processing cost; we report the
+resulting worst-case timing error explicitly rather than treat sampling as free.
+Manual annotation, while reduced by the model-assisted loop, remains a real,
+non-eliminated cost when onboarding a new sponsor class, and is the main residual
+barrier to the accessibility claim in this paper (\S\ref{sec:future}). As discussed in
+\S\ref{sec:related-pricing}, our placement-level pricing addresses one specific,
+well-documented weakness of AVE-style valuation (arbitrary multipliers) but not the
+broader critique that such metrics do not capture audience quality, sentiment, or
+brand-recall impact; we do not claim to have solved sponsorship valuation, only to have
+made one component of it less arbitrary and more transparent.
+
+\textbf{Data and ethics statement.} The framework is designed around video that a club
+captures and uploads itself, which removes the third-party broadcaster copyright
+concerns that would apply to processing official broadcast feeds; the club retains
+ownership of its own footage. The system nonetheless processes images of real players,
+so consent/data-handling practice still matters. \TODOnum{state precisely what
+permission or policy governs use of a club's own match footage for this research, and
+for any figures published in the paper.} Players are tracked only as anonymous
+instances for the purpose of kit-slot attribution, not for personal identification; the
+system's output is brand and media-value analytics, not player-performance or
+biometric data.
+
+% ============================================================================
+\section{Future Work}
+\label{sec:future}
+
+The main remaining barrier to full accessibility is the manual annotation effort
+required per sponsor class. We are separately exploring an annotation-free direction
+that exploits a structural property of team sports: a club wears one fixed kit for an
+entire season, and advertising boards are physically static, so each distinct
+logo-bearing surface could, in principle, be identified once — at its clearest
+occurrence in the available footage — and propagated to every other occurrence by
+tracking and geometry rather than by repeated visual classification. Early internal
+results on this direction are encouraging but preliminary, and are explicitly not part
+of the claims made in this paper. Other directions include synthetic data generation for
+rare viewing conditions, and a more detailed, audience-quality-aware model for
+converting measured exposure into media value, directly addressing the deeper AVE
+critique noted in \S\ref{sec:discussion}.
+
+% ============================================================================
+\section{Conclusion}
+\label{sec:conclusion}
+
+We present an open, self-hosted framework for sponsor exposure and media-value
+measurement that addresses two problems left open by prior published work — attribution
+of logos shared between competing teams, and pricing at the level of individual kit
+placements — while remaining deployable without an enterprise vendor contract or an
+in-house machine-learning team. We position our pricing methodology explicitly against
+both the manual AVE/EMV tradition and recent AI-driven valuation systems, and are
+transparent about which part of the well-documented criticism of media-value-equivalency
+metrics our contribution does, and does not, address. The framework is deployed and
+evaluated on a real professional club, which grounds the accessibility claim in an
+actual deployment rather than in argument alone.
+
+% ============================================================================
+\bibliographystyle{IEEEtran}
+\bibliography{refs_accessibility}
+
+\end{document}

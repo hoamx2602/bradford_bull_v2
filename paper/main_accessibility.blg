@@ -1,0 +1,58 @@
+This is BibTeX, Version 0.99e
+Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
+The top-level auxiliary file: main_accessibility.aux
+Reallocating 'name_of_file' (item size: 1) to 9 items.
+The style file: IEEEtran.bst
+Reallocating 'name_of_file' (item size: 1) to 19 items.
+Reallocating 'singl_function' (item size: 4) to 100 items.
+Reallocating 'singl_function' (item size: 4) to 100 items.
+Reallocating 'singl_function' (item size: 4) to 100 items.
+Reallocating 'wiz_functions' (item size: 4) to 6000 items.
+Reallocating 'singl_function' (item size: 4) to 100 items.
+Database file #1: refs_accessibility.bib
+-- IEEEtran.bst version 1.14 (2015/08/26) by Michael Shell.
+-- http://www.michaelshell.org/tex/ieeetran/bibtex/
+-- See the "IEEEtran_bst_HOWTO.pdf" manual for usage information.
+
+Done.
+You've used 14 entries,
+            4087 wiz_defined-function locations,
+            905 strings with 10571 characters,
+and the built_in function-call counts, 8934 in all, are:
+= -- 720
+> -- 202
+< -- 41
++ -- 103
+- -- 41
+* -- 410
+:= -- 1412
+add.period$ -- 30
+call.type$ -- 14
+change.case$ -- 22
+chr.to.int$ -- 87
+cite$ -- 14
+duplicate$ -- 692
+empty$ -- 778
+format.name$ -- 50
+if$ -- 2064
+int.to.chr$ -- 0
+int.to.str$ -- 14
+missing$ -- 141
+newline$ -- 65
+num.names$ -- 14
+pop$ -- 338
+preamble$ -- 1
+purify$ -- 0
+quote$ -- 2
+skip$ -- 705
+stack$ -- 0
+substring$ -- 250
+swap$ -- 494
+text.length$ -- 12
+text.prefix$ -- 0
+top$ -- 5
+type$ -- 14
+warning$ -- 0
+while$ -- 28
+width$ -- 16
+write$ -- 155

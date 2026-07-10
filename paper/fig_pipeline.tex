@@ -1,0 +1,43 @@
+% Fig. 1 — End-to-end pipeline (orchestrated stages, graceful degradation)
+\begin{tikzpicture}[node distance=6mm and 8mm]
+  % input
+  \node[data] (video) {Club-captured\\video upload};
+
+  % bootstrap + detect
+  \node[blk, right=of video] (bootstrap) {Team-reference\\bootstrap\\(3-tier, zero setup)};
+  \node[teach, right=of bootstrap] (detect) {Logo detection\\(fine-tuned,\\open-weight)};
+
+  % team attribution
+  \node[blk, right=of detect, fill=orange!15, text width=22mm]
+       (team) {Team attribution\\(track + colour\\+ embedding, vote\\hysteresis)};
+
+  % pose / body zone
+  \node[blk, below=10mm of team, text width=22mm] (pose) {Pose keypoints\\$\to$ 18 kit slots};
+
+  % exposure + pricing
+  \node[stud, left=of pose] (exposure) {Exposure\\aggregation\\(segments/brand)};
+  \node[stud, left=of exposure, fill=green!15] (pricing) {EMV pricing\\(Visibility$\to$Exposure\\$\to$EMV)};
+
+  % output
+  \node[data, below=10mm of pricing] (dash) {Multi-match\\dashboard};
+
+  % grouping box for the parts a club never has to touch manually
+  \begin{scope}[on background layer]
+    \node[draw=blue!40, dashed, rounded corners, fit=(bootstrap)(detect)(team),
+          inner sep=4pt,
+          label={[font=\scriptsize\bfseries,blue!50!black]above:zero manual setup per match}] {};
+  \end{scope}
+
+  % arrows
+  \draw[arr] (video) -- (bootstrap);
+  \draw[arr] (bootstrap) -- (detect);
+  \draw[arr] (detect) -- (team);
+  \draw[arr] (team) -- (pose);
+  \draw[arr] (pose) -- (exposure);
+  \draw[arr] (exposure) -- (pricing);
+  \draw[arr] (pricing) -- (dash);
+
+  % graceful degradation note — sits in the empty left column of the second row
+  \node[font=\scriptsize\itshape, text width=26mm, align=center]
+       at (video |- pricing) {any optional stage fails $\to$ logged, job still completes};
+\end{tikzpicture}
