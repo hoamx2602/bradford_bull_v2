@@ -24,7 +24,7 @@ import numpy as np
 
 from app.config import get_settings
 from app.models_zoo import registry
-from app.pipeline.teamid.bootstrap import _luminance, _otsu_threshold
+from app.pipeline.teamid.bootstrap import _kmeans, _luminance, _otsu_threshold
 from app.pipeline.teamid.classifier import OTHER, TARGET, learn_weights
 from app.pipeline.teamid.features import color_feature, encode_crops_masked
 from app.pipeline.teamid.jersey import (
@@ -138,12 +138,68 @@ def extract_for_labeling(video_path: Path, kit: str, n_frames: int = 96) -> dict
     }
 
 
+def cluster_crops(extraction: dict, n_clusters: int = 3) -> list[dict]:
+    """Group the extracted crops into kit clusters for fast team picking.
+
+    Web port of the team_detection/ref_build.py auto-cluster step: instead of
+    labelling 100+ crops one by one, the user picks which *cluster* is the
+    target team and which is the opponent. KMeans runs on the SigLIP
+    embeddings when available (semantic kit separation), else on the colour
+    histograms. One cluster is suggested as TARGET — the one whose mean shirt
+    luminance matches the uploaded kit (dark vs light) — so a correct pick is
+    usually a single confirming click.
+
+    Returns clusters sorted largest-first, each:
+        {"id", "members": [crop idx...], "samples": [idx... closest to centroid],
+         "size", "suggested": TARGET|OTHER}
+    """
+    color_feats = extraction["color_feats"]
+    embeddings = extraction["embeddings"]
+    n = len(color_feats)
+    if n < 2:
+        return []
+    # 2 teams + (often) officials/refs; never more clusters than crops.
+    n_clusters = max(2, min(int(n_clusters), 4, n))
+
+    feats = embeddings if embeddings is not None else np.stack(color_feats)
+    feats = np.asarray(feats, dtype=np.float64)
+    labels, centers = _kmeans(feats, n_clusters)
+
+    # Pick the single TARGET cluster by kit luminance, mirroring the auto
+    # bootstrap's 1-D assumption: dark kit -> darkest cluster, light -> lightest.
+    lums = np.array([_luminance(c) for c in color_feats])
+    dark = (extraction.get("kit") or "away").strip().lower() in {
+        x.strip() for x in get_settings().team_dark_kits.split(",")
+    }
+    present = sorted({int(l) for l in labels})
+    cluster_lum = {cid: float(lums[labels == cid].mean()) for cid in present}
+    target_cid = (min if dark else max)(cluster_lum, key=cluster_lum.get)
+
+    clusters = []
+    for cid in present:
+        members = [i for i in range(n) if labels[i] == cid]
+        d = np.linalg.norm(feats[members] - centers[cid], axis=1)
+        order = np.argsort(d)
+        clusters.append({
+            "id": cid,
+            "members": members,
+            "samples": [members[j] for j in order[:6]],
+            "size": len(members),
+            "suggested": TARGET if cid == target_cid else OTHER,
+        })
+    clusters.sort(key=lambda c: -c["size"])
+    return clusters
+
+
 def build_refs_from_labels(
-    extraction: dict, assignments: list[str | None]
+    extraction: dict, assignments: list[str | None], persist: bool = True
 ) -> tuple[dict | None, str]:
-    """Build + persist refs from human-confirmed labels.
+    """Build refs from human-confirmed labels.
 
     `assignments[i]` is TARGET, OTHER, or None (= ignore the crop).
+    When `persist` is True the refs are written to the GLOBAL refs file (every
+    later analysis uses them); when False they are only returned, so the caller
+    can store them per-job (the inline upload team step does this).
     Returns (refs, error_message) — refs is None on validation failure.
     """
     color_feats = extraction["color_feats"]
@@ -176,12 +232,13 @@ def build_refs_from_labels(
                  "n_target": n_target, "n_other": n_other},
     }
 
-    import pickle
+    if persist:
+        import pickle
 
-    out = Path(get_settings().resolved_team_refs())
-    out.parent.mkdir(parents=True, exist_ok=True)
-    with out.open("wb") as f:
-        pickle.dump(refs, f)
-    log.info("manual team refs saved: %s (%d target / %d other, w_color %.2f)",
-             out, n_target, n_other, w_color)
+        out = Path(get_settings().resolved_team_refs())
+        out.parent.mkdir(parents=True, exist_ok=True)
+        with out.open("wb") as f:
+            pickle.dump(refs, f)
+        log.info("manual team refs saved: %s (%d target / %d other, w_color %.2f)",
+                 out, n_target, n_other, w_color)
     return refs, ""

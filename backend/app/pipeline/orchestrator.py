@@ -47,6 +47,7 @@ def run_analysis(job_id: str) -> None:
             "placement_type": job.placement_type,
             "cpm_base": job.cpm_base,
             "kit": getattr(job, "kit", None) or "away",
+            "team_refs_key": getattr(job, "team_refs_key", None),
         }
 
     try:
@@ -81,7 +82,15 @@ def run_analysis(job_id: str) -> None:
                 from app.pipeline.teamid.tracker import TeamTracker
 
                 refs = None
-                if not _Path(settings.resolved_team_refs()).exists() and settings.team_auto_refs:
+                if ctx["team_refs_key"]:
+                    # Teams picked manually for this upload (inline team step) —
+                    # highest priority, overrides global file and auto guess.
+                    import pickle as _pickle
+
+                    _update(job_id, P_TEAM, "team", "Using manually selected teams")
+                    with storage.local_path(ctx["team_refs_key"]).open("rb") as _f:
+                        refs = _pickle.load(_f)
+                elif not _Path(settings.resolved_team_refs()).exists() and settings.team_auto_refs:
                     _update(job_id, P_TEAM, "team",
                             f"Identifying target-team kit ({ctx['kit']})")
                     from app.pipeline.teamid.bootstrap import build_refs_from_video
@@ -150,6 +159,9 @@ def run_analysis(job_id: str) -> None:
                 video_path, meta.fps, meta.width, meta.height, detector.detect_boxes,
                 preview_tmp, max_width=settings.preview_width,
                 max_frames=settings.preview_max_frames, detect_imgsz=settings.preview_imgsz,
+                stabilize=settings.preview_stabilize,
+                coast=settings.preview_stab_coast,
+                min_hits=settings.preview_stab_min_hits,
             )
             if preview_path is not None:
                 # Restore the original upload's audio (OpenCV writes video-only).
@@ -177,7 +189,17 @@ def run_analysis(job_id: str) -> None:
 
             seg_tmp = video_path.parent / f"{video_path.stem}_bodyseg.mp4"
             seg_path = None
-            if settings.bodyseg_engine == "yolo":
+            # DensePose needs detectron2 (CUDA, no MPS) and isn't importable in
+            # every env (e.g. the rfdetr env). Rather than silently skip the whole
+            # stage, fall back to the pure-torch YOLO-seg engine so a bodyseg
+            # video is still produced wherever ultralytics runs.
+            engine = settings.bodyseg_engine
+            if engine == "densepose" and not _reg.densepose_available():
+                log.warning("bodyseg: DensePose not importable in this env — "
+                            "falling back to the YOLO-seg engine")
+                engine = "yolo"
+
+            if engine == "yolo":
                 _update(job_id, P_PRICING, "bodyseg", "Body-part segmentation (YOLO-seg)")
                 from app.pipeline.bodyseg_yolo import render_bodyseg_yolo_video
 
@@ -187,7 +209,7 @@ def run_analysis(job_id: str) -> None:
                     max_frames=settings.bodyseg_max_frames, max_width=settings.bodyseg_width,
                     alpha=settings.bodyseg_alpha, imgsz=min(settings.imgsz, 960), conf=0.4,
                 )
-            elif _reg.densepose_available():
+            else:
                 _update(job_id, P_PRICING, "bodyseg", "Body-part segmentation (DensePose)")
                 from app.pipeline.bodyseg import render_bodyseg_video
 
@@ -197,8 +219,6 @@ def run_analysis(job_id: str) -> None:
                     max_frames=settings.bodyseg_max_frames, max_width=settings.bodyseg_width,
                     alpha=settings.bodyseg_alpha,
                 )
-            else:
-                log.info("bodyseg skipped: densepose engine selected but not available")
 
             if seg_path is not None:
                 from app.pipeline.av import mux_audio

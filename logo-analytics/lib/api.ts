@@ -36,13 +36,38 @@ async function asJson<T>(res: Response): Promise<T> {
   return res.json() as Promise<T>
 }
 
-/** Upload a video + metadata, returns the job id to poll. */
-export async function createJob(
+/** A previously uploaded video + the teams the user picked for it inline. */
+export interface JobSource {
+  storageKey: string
+  videoName?: string
+  teamRefsKey?: string
+}
+
+/** Upload a video WITHOUT starting analysis — returns its storage key so the
+ *  inline team step can run before the job is created. */
+export async function uploadVideo(
   file: File,
+): Promise<{ storageKey: string; videoName: string }> {
+  const form = new FormData()
+  form.append('video', file)
+  const res = await fetch(`${API_BASE}/api/jobs/upload`, { method: 'POST', body: form })
+  return asJson(res)
+}
+
+/** Create + enqueue an analysis job. `source` is either a fresh File (one-shot
+ *  legacy path) or a JobSource referencing an already-uploaded video. */
+export async function createJob(
+  source: File | JobSource,
   meta: UploadMeta,
 ): Promise<{ jobId: string; status: string }> {
   const form = new FormData()
-  form.append('video', file)
+  if (source instanceof File) {
+    form.append('video', source)
+  } else {
+    form.append('storageKey', source.storageKey)
+    if (source.videoName) form.append('videoName', source.videoName)
+    if (source.teamRefsKey) form.append('teamRefsKey', source.teamRefsKey)
+  }
   form.append('eventName', meta.eventName)
   form.append('audienceSize', String(meta.audienceSize))
   form.append('placementType', meta.placementType)
@@ -63,6 +88,19 @@ export async function listAnalyses(): Promise<MatchEntry[]> {
 
 export async function getAnalysis(id: string): Promise<AnalysisResult> {
   return asJson(await fetch(`${API_BASE}/api/analyses/${id}`))
+}
+
+/** Rename an analysis (event and/or video name). Returns the saved values. */
+export async function updateAnalysis(
+  id: string,
+  patch: { eventName?: string; videoName?: string },
+): Promise<{ id: string; eventName: string; videoName: string }> {
+  const res = await fetch(`${API_BASE}/api/analyses/${id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(patch),
+  })
+  return asJson(res)
 }
 
 export function csvUrl(id: string): string {
@@ -133,11 +171,46 @@ export async function extractRefCrops(
   return asJson(res)
 }
 
+export interface RefCluster {
+  id: number
+  members: number[] // crop indices into the extract response
+  samples: number[] // representative crop indices (closest to centroid)
+  size: number
+  suggested: 'target' | 'other'
+}
+
+/** Group extracted crops into kit clusters for fast target/opponent picking. */
+export async function clusterRefCrops(
+  extractId: string,
+  nClusters = 3,
+): Promise<{ clusters: RefCluster[]; nCrops: number }> {
+  const res = await fetch(`${API_BASE}/api/team-refs/cluster`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ extractId, nClusters }),
+  })
+  return asJson(res)
+}
+
 export async function saveTeamRefs(
   extractId: string,
   assignments: (string | null)[],
 ): Promise<{ saved: boolean; nTarget: number; nOther: number; wColor: number }> {
   const res = await fetch(`${API_BASE}/api/team-refs/save`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ extractId, assignments }),
+  })
+  return asJson(res)
+}
+
+/** Build refs from labels and store them per-job (no global overwrite).
+ *  Returns a refsKey to pass to createJob for the inline upload team step. */
+export async function buildTeamRefs(
+  extractId: string,
+  assignments: (string | null)[],
+): Promise<{ refsKey: string; nTarget: number; nOther: number; wColor: number }> {
+  const res = await fetch(`${API_BASE}/api/team-refs/build`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ extractId, assignments }),

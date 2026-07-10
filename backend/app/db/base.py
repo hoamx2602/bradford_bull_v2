@@ -41,6 +41,7 @@ def init_db() -> None:
     with engine.connect() as conn:
         for ddl in (
             "ALTER TABLE jobs ADD COLUMN kit VARCHAR(16) DEFAULT 'away'",
+            "ALTER TABLE jobs ADD COLUMN team_refs_key VARCHAR(512)",
             "ALTER TABLE analyses ADD COLUMN teamdet_key VARCHAR(512)",
         ):
             try:

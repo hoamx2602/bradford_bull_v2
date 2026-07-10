@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Nav from '@/components/nav'
 import MatchSelector from '@/components/dashboard/match-selector'
@@ -12,7 +12,7 @@ import DetectionPlayer from '@/components/dashboard/detection-player'
 import LogoTable from '@/components/dashboard/logo-table'
 import { DonutChart, TrendChart, HeatmapGrid, RadarChart, ScatterChart, colorAt } from '@/components/dashboard/charts'
 import { MOCK_RESULT, MOCK_MATCHES, getBrandColor } from '@/lib/mock-data'
-import { listAnalyses, bodysegVideoUrl, teamdetVideoUrl } from '@/lib/api'
+import { listAnalyses, bodysegVideoUrl, teamdetVideoUrl, updateAnalysis } from '@/lib/api'
 import {
   formatCurrency, formatDate, formatNumber, formatSeconds,
   exportCSV, exportPDF, aggregateBrands, filterMatches,
@@ -137,6 +137,13 @@ export default function DashboardPage() {
   const [vidTo, setVidTo] = useState('')
   const [vidSort, setVidSort] = useState<'date' | 'emv' | 'duration'>('date')
 
+  // Inline rename of the selected match (event + video name)
+  const [editingNames, setEditingNames] = useState(false)
+  const [draftEvent, setDraftEvent] = useState('')
+  const [draftVideo, setDraftVideo] = useState('')
+  const [savingNames, setSavingNames] = useState(false)
+  const [nameError, setNameError] = useState('')
+
   // Brand Insights tab — selected brand key (null = auto: top brand)
   const [insightBrand, setInsightBrand] = useState<string | null>(null)
 
@@ -212,7 +219,23 @@ export default function DashboardPage() {
   }, [matches])
 
   // ── Videos tab ──────────────────────────────────────────────────────
+  // A search or date range is what reveals the back-catalogue; with none
+  // active the gallery shows only the single most recent recording.
+  const hasVidFilter = !!(vidQuery.trim() || vidFrom || vidTo)
   const filteredMatches = useMemo(() => {
+    // Collapse to the latest recording only for REAL data; on demo data show
+    // the whole set so it's obviously the sample, not a stray "latest match".
+    if (!hasVidFilter && usingBackend) {
+      // Default: the newest recording, plus whatever is currently selected (so
+      // jumping here from another tab still shows that match in the gallery).
+      const newest = [...matches].sort(
+        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0]
+      const sel = matches.find(m => m.id === selectedMatchId)
+      const out: MatchEntry[] = []
+      if (newest) out.push(newest)
+      if (sel && sel.id !== newest?.id) out.push(sel)
+      return out
+    }
     const list = filterMatches(matches, vidQuery, vidFrom, vidTo)
     const cmp: Record<typeof vidSort, (a: MatchEntry, b: MatchEntry) => number> = {
       date: (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
@@ -220,8 +243,56 @@ export default function DashboardPage() {
       duration: (a, b) => b.durationSeconds - a.durationSeconds,
     }
     return [...list].sort(cmp[vidSort])
-  }, [matches, vidQuery, vidFrom, vidTo, vidSort])
+  }, [matches, usingBackend, hasVidFilter, vidQuery, vidFrom, vidTo, vidSort, selectedMatchId])
   const selectedMatch = matches.find(m => m.id === selectedMatchId)
+
+  // Picking a video in the gallery should bring its player into view — the
+  // detail (player + timeline) lives below the grid, so scroll to it.
+  const detailRef = useRef<HTMLDivElement>(null)
+  const selectAndView = (id: string) => {
+    setSelectedMatchId(id)
+    requestAnimationFrame(() =>
+      detailRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }))
+  }
+
+  // ── Rename selected match ───────────────────────────────────────────
+  const startEditNames = () => {
+    setDraftEvent(result.eventName)
+    setDraftVideo(result.videoName)
+    setNameError('')
+    setEditingNames(true)
+  }
+  // Shared rename: persists to the backend (when connected) and updates the
+  // match list + the open detail in place. Used by both the detail-header form
+  // and the per-card rename button in the gallery.
+  const renameMatch = async (matchId: string, patch: { eventName?: string; videoName?: string }) => {
+    const target = matches.find(m => m.id === matchId)
+    if (!target) return
+    const ev = patch.eventName?.trim() || ''
+    const vn = patch.videoName?.trim() || ''
+    if (!ev && !vn) return
+    if (usingBackend) await updateAnalysis(target.result.id, { eventName: ev, videoName: vn })
+    const apply = (r: AnalysisResult): AnalysisResult =>
+      ({ ...r, eventName: ev || r.eventName, videoName: vn || r.videoName })
+    setMatches(ms => ms.map(m => m.id === matchId
+      ? { ...m, eventName: ev || m.eventName, videoName: vn || m.videoName, result: apply(m.result) }
+      : m))
+    setResult(r => r.id === target.result.id ? apply(r) : r)
+  }
+
+  const saveNames = async () => {
+    if (!draftEvent.trim() && !draftVideo.trim()) { setEditingNames(false); return }
+    setSavingNames(true)
+    setNameError('')
+    try {
+      await renameMatch(selectedMatchId, { eventName: draftEvent, videoName: draftVideo })
+      setEditingNames(false)
+    } catch (e) {
+      setNameError(e instanceof Error ? e.message : 'Could not save')
+    } finally {
+      setSavingNames(false)
+    }
+  }
 
   // ── Shared chart data ───────────────────────────────────────────────
   // Chronological match order for every trend chart x-axis.
@@ -360,6 +431,31 @@ export default function DashboardPage() {
             New Analysis
           </button>
         </div>
+
+        {/* Backend-not-connected banner — without it the demo data looks like
+            real (unfamiliar) matches with no playable video. */}
+        {!usingBackend && (
+          <div className="no-print" style={{
+            display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24,
+            padding: '12px 16px', borderRadius: 10, fontSize: 13,
+            background: 'rgba(224,133,133,0.08)', border: '1px solid rgba(224,133,133,0.35)',
+            color: 'var(--c-ink)',
+          }}>
+            <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#e08585', flexShrink: 0 }} />
+            <div>
+              <b>Showing demo data.</b> The analysis backend isn’t reachable, so these aren’t your videos.
+              Start the backend (env <code>rfdetr</code>, <code>uvicorn app.main:app</code> at <code>localhost:8000</code>),
+              then reload to see your uploaded matches.
+            </div>
+            <button onClick={() => location.reload()} style={{
+              marginLeft: 'auto', flexShrink: 0, fontSize: 12, fontWeight: 600, padding: '7px 14px',
+              borderRadius: 7, border: '1px solid var(--c-wire)', background: 'transparent',
+              color: 'var(--c-ink)', cursor: 'pointer',
+            }}>
+              Reload
+            </button>
+          </div>
+        )}
 
         {/* Tab navigation */}
         <MatchSelector activeTab={activeTab} onTabChange={setActiveTab} />
@@ -520,6 +616,12 @@ export default function DashboardPage() {
                   )}
                 </div>
 
+                {!hasVidFilter && usingBackend && matches.length > 1 && (
+                  <div className="no-print" style={{ fontSize: 12, color: 'var(--c-ghost)', margin: '-8px 0 14px' }}>
+                    Showing your latest recording — search or pick a date range to find the other {matches.length - 1}.
+                  </div>
+                )}
+
                 {filteredMatches.length === 0 ? (
                   <div style={{
                     padding: '40px 20px', textAlign: 'center', color: 'var(--c-ghost)', fontSize: 13,
@@ -531,28 +633,69 @@ export default function DashboardPage() {
                   <VideoGallery
                     matches={filteredMatches}
                     selectedId={selectedMatchId}
-                    onSelect={setSelectedMatchId}
+                    onSelect={selectAndView}
+                    onRename={(id, name) => renameMatch(id, { eventName: name })}
                   />
                 )}
               </Section>
 
               {/* Selected match — full per-video analysis */}
               {selectedMatch && (
-                <>
+                <div ref={detailRef} style={{ scrollMarginTop: 16 }}>
                   <Section title="Match Analysis">
                     <div style={{ marginBottom: 18 }}>
-                      <h2 style={{ fontSize: 19, fontWeight: 700, margin: '0 0 6px', letterSpacing: '-0.01em' }}>
-                        {result.eventName}
-                      </h2>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 14, color: 'var(--c-dim)', fontSize: 12, flexWrap: 'wrap' }}>
-                        <span className="num" style={{ fontFamily: 'monospace', color: 'var(--c-ghost)' }}>{result.videoName}</span>
-                        <span style={{ color: 'var(--c-wire-s)' }}>·</span>
-                        <span>{formatDate(result.analyzedAt)}</span>
-                        <span style={{ color: 'var(--c-wire-s)' }}>·</span>
-                        <span>{formatNumber(result.metadata.audienceSize)} viewers</span>
-                        <span style={{ color: 'var(--c-wire-s)' }}>·</span>
-                        <span>{result.metadata.placementType}</span>
-                      </div>
+                      {editingNames ? (
+                        <div className="no-print" style={{ display: 'flex', flexDirection: 'column', gap: 8, maxWidth: 520 }}>
+                          <div>
+                            <label style={labelStyle}>Event name</label>
+                            <input value={draftEvent} onChange={e => setDraftEvent(e.target.value)}
+                              placeholder="Event name" style={inputStyle} autoFocus />
+                          </div>
+                          <div>
+                            <label style={labelStyle}>Video name</label>
+                            <input value={draftVideo} onChange={e => setDraftVideo(e.target.value)}
+                              placeholder="Video file name" style={inputStyle} />
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 2 }}>
+                            <button onClick={saveNames} disabled={savingNames} style={{
+                              fontSize: 12, fontWeight: 700, padding: '7px 16px', borderRadius: 7, border: 'none',
+                              background: 'var(--c-spark)', color: '#000', cursor: 'pointer', opacity: savingNames ? 0.6 : 1,
+                            }}>
+                              {savingNames ? 'Saving…' : 'Save'}
+                            </button>
+                            <button onClick={() => setEditingNames(false)} disabled={savingNames} style={{
+                              fontSize: 12, padding: '7px 14px', borderRadius: 7, cursor: 'pointer',
+                              background: 'transparent', color: 'var(--c-dim)', border: '1px solid var(--c-wire)',
+                            }}>
+                              Cancel
+                            </button>
+                            {nameError && <span style={{ fontSize: 12, color: '#e08585' }}>{nameError}</span>}
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                            <h2 style={{ fontSize: 19, fontWeight: 700, margin: '0 0 6px', letterSpacing: '-0.01em' }}>
+                              {result.eventName}
+                            </h2>
+                            <button onClick={startEditNames} title="Rename event / video" className="no-print" style={{
+                              marginBottom: 6, fontSize: 11.5, padding: '3px 10px', borderRadius: 6, cursor: 'pointer',
+                              background: 'transparent', color: 'var(--c-dim)', border: '1px solid var(--c-wire)',
+                            }}>
+                              Edit
+                            </button>
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 14, color: 'var(--c-dim)', fontSize: 12, flexWrap: 'wrap' }}>
+                            <span className="num" style={{ fontFamily: 'monospace', color: 'var(--c-ghost)' }}>{result.videoName}</span>
+                            <span style={{ color: 'var(--c-wire-s)' }}>·</span>
+                            <span>{formatDate(result.analyzedAt)}</span>
+                            <span style={{ color: 'var(--c-wire-s)' }}>·</span>
+                            <span>{formatNumber(result.metadata.audienceSize)} viewers</span>
+                            <span style={{ color: 'var(--c-wire-s)' }}>·</span>
+                            <span>{result.metadata.placementType}</span>
+                          </div>
+                        </>
+                      )}
                       {result.teamFilter?.enabled && (
                         <div style={{
                           display: 'inline-flex', alignItems: 'center', gap: 7,
@@ -641,7 +784,7 @@ export default function DashboardPage() {
                       <span>CPM base ${result.metadata.cpmBase} · {result.metadata.placementType}</span>
                     </div>
                   </Section>
-                </>
+                </div>
               )}
             </>
           )}

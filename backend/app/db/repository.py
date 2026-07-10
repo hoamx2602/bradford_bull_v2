@@ -32,6 +32,7 @@ class JobRepository:
         placement_type: str,
         cpm_base: float,
         kit: str = "away",
+        team_refs_key: str | None = None,
     ) -> Job:
         job = Job(
             id=_new_id(),
@@ -44,6 +45,7 @@ class JobRepository:
             placement_type=placement_type,
             cpm_base=cpm_base,
             kit=kit,
+            team_refs_key=team_refs_key,
         )
         self.s.add(job)
         self.s.commit()
@@ -116,6 +118,27 @@ class AnalysisRepository:
 
     def get(self, analysis_id: str) -> Analysis | None:
         return self.s.get(Analysis, analysis_id)
+
+    def rename(
+        self, analysis_id: str, *,
+        event_name: str | None = None, video_name: str | None = None,
+    ) -> Analysis | None:
+        """Update the event/video name on both the columns (match list) and the
+        result_json blob (detail view). Returns the row, or None if not found."""
+        a = self.s.get(Analysis, analysis_id)
+        if a is None:
+            return None
+        rj = dict(a.result_json or {})
+        if event_name is not None:
+            a.event_name = event_name
+            rj["eventName"] = event_name
+        if video_name is not None:
+            a.video_name = video_name
+            rj["videoName"] = video_name
+        a.result_json = rj  # reassign so the JSON column is flagged dirty
+        self.s.commit()
+        self.s.refresh(a)
+        return a
 
     def list(self) -> list[Analysis]:
         stmt = select(Analysis).order_by(Analysis.analyzed_at.desc())

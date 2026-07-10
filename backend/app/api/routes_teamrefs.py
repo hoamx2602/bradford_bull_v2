@@ -45,6 +45,11 @@ class SaveIn(BaseModel):
     assignments: list[str | None]
 
 
+class ClusterIn(BaseModel):
+    extractId: str
+    nClusters: int = 3
+
+
 @router.get("/status")
 def refs_status() -> dict:
     path = Path(get_settings().resolved_team_refs())
@@ -129,6 +134,31 @@ def extract_crops(body: ExtractIn) -> dict:
     }
 
 
+@router.post("/cluster")
+def cluster_refs(body: ClusterIn) -> dict:
+    """Group the cached extraction's crops into kit clusters for team picking.
+
+    Reuses the crops already extracted by /extract (referenced by extractId);
+    the frontend maps the returned member indices back to the thumbs it holds.
+    Saving still goes through /save with a per-crop assignments array the
+    frontend expands from the chosen cluster -> team mapping.
+    """
+    from app.pipeline.teamid.refbuild import cluster_crops
+
+    extraction = _extractions.get(body.extractId)
+    if extraction is None:
+        raise HTTPException(
+            status_code=410,
+            detail="Extraction expired — extract crops again",
+        )
+    clusters = cluster_crops(extraction, body.nClusters)
+    if not clusters:
+        raise HTTPException(
+            status_code=422, detail="Too few crops to cluster — extract more first"
+        )
+    return {"clusters": clusters, "nCrops": len(extraction["color_feats"])}
+
+
 @router.post("/save")
 def save_refs(body: SaveIn) -> dict:
     from app.pipeline.teamid.refbuild import build_refs_from_labels
@@ -145,6 +175,38 @@ def save_refs(body: SaveIn) -> dict:
     meta = refs["meta"]
     return {
         "saved": True,
+        "nTarget": meta["n_target"],
+        "nOther": meta["n_other"],
+        "wColor": round(meta["w_color"], 2),
+    }
+
+
+@router.post("/build")
+def build_refs(body: SaveIn) -> dict:
+    """Build refs from labels and store them as a per-job blob (NOT global).
+
+    Used by the inline upload team step: the returned `refsKey` is passed to
+    POST /api/jobs so only that one analysis uses these references; the global
+    refs file and other uploads are untouched.
+    """
+    import io
+    import pickle
+
+    from app.pipeline.teamid.refbuild import build_refs_from_labels
+
+    extraction = _extractions.get(body.extractId)
+    if extraction is None:
+        raise HTTPException(
+            status_code=410, detail="Extraction expired — extract crops again"
+        )
+    refs, err = build_refs_from_labels(extraction, body.assignments, persist=False)
+    if refs is None:
+        raise HTTPException(status_code=422, detail=err)
+
+    key = get_storage().save(io.BytesIO(pickle.dumps(refs)), "team_refs.pkl")
+    meta = refs["meta"]
+    return {
+        "refsKey": key,
         "nTarget": meta["n_target"],
         "nOther": meta["n_other"],
         "wColor": round(meta["w_color"], 2),

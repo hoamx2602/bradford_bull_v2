@@ -7,12 +7,18 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import Nav from '@/components/nav'
+import ClusterPicker, {
+  clusterCounts, expandClusterAssignments, initClusterLabels, swapClusterLabels,
+  type ClusterLabel,
+} from '@/components/cluster-picker'
 import {
-  deleteTeamRefs, extractRefCrops, getTeamRefsStatus, listRefVideos,
-  saveTeamRefs, type RefCrop, type RefVideo, type TeamRefsStatus,
+  clusterRefCrops, deleteTeamRefs, extractRefCrops, getTeamRefsStatus,
+  listRefVideos, saveTeamRefs,
+  type RefCluster, type RefCrop, type RefVideo, type TeamRefsStatus,
 } from '@/lib/api'
 
-type Label = 'target' | 'other' | null
+type Label = ClusterLabel
+type Mode = 'cluster' | 'crop'
 
 const LABEL_STYLE: Record<string, { border: string; tag: string; bg: string }> = {
   target: { border: '#FFBE0A', tag: 'BRADFORD', bg: 'rgba(255,190,10,0.14)' },
@@ -25,9 +31,13 @@ export default function TeamRefsPage() {
   const [videos, setVideos] = useState<RefVideo[]>([])
   const [videoKey, setVideoKey] = useState('')
   const [kit, setKit] = useState<'away' | 'home'>('away')
+  const [mode, setMode] = useState<Mode>('cluster')
   const [extractId, setExtractId] = useState('')
   const [crops, setCrops] = useState<RefCrop[]>([])
   const [labels, setLabels] = useState<Label[]>([])
+  // Cluster mode: the kit clusters + the team chosen for each cluster id.
+  const [clusters, setClusters] = useState<RefCluster[]>([])
+  const [clusterLabels, setClusterLabels] = useState<Record<number, Label>>({})
   const [busy, setBusy] = useState<'' | 'extract' | 'save'>('')
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
@@ -41,15 +51,27 @@ export default function TeamRefsPage() {
   }, [])
   useEffect(refresh, [refresh])
 
+  const resetSelection = () => {
+    setCrops([]); setLabels([]); setClusters([]); setClusterLabels({}); setExtractId('')
+  }
+
   const onExtract = async () => {
     if (!videoKey) return
-    setBusy('extract'); setError(''); setMessage(''); setCrops([])
+    setBusy('extract'); setError(''); setMessage(''); resetSelection()
     try {
       const r = await extractRefCrops(videoKey, kit)
       setExtractId(r.extractId)
       setCrops(r.crops)
       setLabels(r.crops.map(c => c.suggested))
-      setMessage(`${r.crops.length} crops extracted in ${r.tookSeconds}s — click any wrong ones to fix, then save.`)
+      if (mode === 'cluster') {
+        const c = await clusterRefCrops(r.extractId)
+        setClusters(c.clusters)
+        setClusterLabels(initClusterLabels(c.clusters))
+        setMessage(`${r.crops.length} crops grouped into ${c.clusters.length} kit clusters in ${r.tookSeconds}s `
+          + `— confirm which cluster is the target team, then save.`)
+      } else {
+        setMessage(`${r.crops.length} crops extracted in ${r.tookSeconds}s — click any wrong ones to fix, then save.`)
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e))
     } finally {
@@ -57,6 +79,7 @@ export default function TeamRefsPage() {
     }
   }
 
+  // ── Per-crop mode ──────────────────────────────────────────────────────────
   // Click cycles: target -> other -> ignore -> target
   const cycle = (i: number) => {
     setLabels(ls => ls.map((l, j) => {
@@ -68,13 +91,22 @@ export default function TeamRefsPage() {
   const swap = () => setLabels(ls => ls.map(l =>
     l === 'target' ? 'other' : l === 'other' ? 'target' : l))
 
+  // ── Cluster mode ───────────────────────────────────────────────────────────
+  const setClusterLabel = (id: number, label: Label) =>
+    setClusterLabels(m => ({ ...m, [id]: label }))
+
+  const swapClusters = () => setClusterLabels(swapClusterLabels)
+
   const onSave = async () => {
     setBusy('save'); setError(''); setMessage('')
     try {
-      const r = await saveTeamRefs(extractId, labels)
+      const assignments = mode === 'cluster'
+        ? expandClusterAssignments(clusters, crops.length, clusterLabels)
+        : labels
+      const r = await saveTeamRefs(extractId, assignments)
       setMessage(`Refs saved — ${r.nTarget} Bradford / ${r.nOther} other crops `
         + `(colour weight ${r.wColor}). All future analyses use these references.`)
-      setCrops([]); setLabels([]); setExtractId('')
+      resetSelection()
       refresh()
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e))
@@ -89,8 +121,11 @@ export default function TeamRefsPage() {
     refresh()
   }
 
-  const nTarget = labels.filter(l => l === 'target').length
-  const nOther = labels.filter(l => l === 'other').length
+  // Crop counts per team — drives the save guard (backend needs >=3 each).
+  const counts = clusterCounts(clusters, clusterLabels)
+  const nTarget = mode === 'cluster' ? counts.target : labels.filter(l => l === 'target').length
+  const nOther = mode === 'cluster' ? counts.other : labels.filter(l => l === 'other').length
+  const hasSelection = mode === 'cluster' ? clusters.length > 0 : crops.length > 0
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--c-canvas)' }}>
@@ -98,10 +133,11 @@ export default function TeamRefsPage() {
       <div style={{ maxWidth: 1280, margin: '0 auto', padding: '28px 24px 80px' }}>
         <h1 style={{ fontSize: 20, fontWeight: 700, margin: '0 0 6px' }}>Team References</h1>
         <p style={{ fontSize: 12.5, color: 'var(--c-dim)', margin: '0 0 20px', maxWidth: 760 }}>
-          Pick a match video, extract player crops, and confirm which crops are the
-          Bradford kit. The saved references drive the team filter for every analysis —
-          more reliable than the automatic per-video guess, especially for clips that
-          only show one team. Rebuild them whenever the kit or opponent changes.
+          Pick a match video and confirm which players are the Bradford kit. <b>By cluster</b> auto-groups
+          the crops by kit — just pick which group is the target team and which is the opponent (one or two
+          clicks); <b>By crop</b> lets you label each crop individually for tricky clips. The saved references
+          drive the team filter for every analysis — more reliable than the automatic per-video guess.
+          Rebuild them whenever the kit or opponent changes.
         </p>
 
         {/* Current refs status */}
@@ -156,6 +192,19 @@ export default function TeamRefsPage() {
           </select>
 
           <div style={{ display: 'flex', border: '1px solid var(--c-wire)', borderRadius: 8, overflow: 'hidden' }}>
+            {([['cluster', 'By cluster'], ['crop', 'By crop']] as const).map(([m, lbl]) => (
+              <button key={m} onClick={() => { setMode(m); resetSelection(); setMessage('') }} style={{
+                fontSize: 12, padding: '8px 14px', cursor: 'pointer', border: 'none',
+                background: mode === m ? 'var(--c-hover)' : 'transparent',
+                color: mode === m ? 'var(--c-ink)' : 'var(--c-dim)',
+                fontWeight: mode === m ? 700 : 500,
+              }}>
+                {lbl}
+              </button>
+            ))}
+          </div>
+
+          <div style={{ display: 'flex', border: '1px solid var(--c-wire)', borderRadius: 8, overflow: 'hidden' }}>
             {(['away', 'home'] as const).map(k => (
               <button key={k} onClick={() => setKit(k)} style={{
                 fontSize: 12, padding: '8px 14px', cursor: 'pointer', border: 'none',
@@ -192,8 +241,8 @@ export default function TeamRefsPage() {
           </div>
         )}
 
-        {/* Crop grid */}
-        {crops.length > 0 && (
+        {/* Selection toolbar (shared by both modes) */}
+        {hasSelection && (
           <>
             <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 12, fontSize: 12.5 }}>
               {(['target', 'other', 'ignore'] as const).map(k => (
@@ -202,8 +251,10 @@ export default function TeamRefsPage() {
                   {k === 'target' ? `Bradford (${nTarget})` : k === 'other' ? `Other (${nOther})` : 'Ignore'}
                 </span>
               ))}
-              <span style={{ color: 'var(--c-ghost)' }}>· click a crop to cycle its label</span>
-              <button onClick={swap} style={{
+              <span style={{ color: 'var(--c-ghost)' }}>
+                {mode === 'cluster' ? '· set each cluster’s team' : '· click a crop to cycle its label'}
+              </span>
+              <button onClick={mode === 'cluster' ? swapClusters : swap} style={{
                 marginLeft: 'auto', fontSize: 12, padding: '6px 12px', borderRadius: 7, cursor: 'pointer',
                 background: 'var(--c-panel)', color: 'var(--c-ink)', border: '1px solid var(--c-wire)',
               }}>
@@ -224,31 +275,42 @@ export default function TeamRefsPage() {
               </button>
             </div>
 
-            <div style={{
-              display: 'grid', gap: 10,
-              gridTemplateColumns: 'repeat(auto-fill, minmax(118px, 1fr))',
-            }}>
-              {crops.map((c, i) => {
-                const st = LABEL_STYLE[labels[i] ?? 'ignore']
-                return (
-                  <button key={i} onClick={() => cycle(i)} style={{
-                    position: 'relative', padding: 0, cursor: 'pointer',
-                    border: `2.5px solid ${st.border}`, borderRadius: 9,
-                    background: st.bg, overflow: 'hidden', lineHeight: 0,
-                  }}>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={c.thumb} alt={`crop ${i}`} style={{ width: '100%', display: 'block' }} />
-                    <span style={{
-                      position: 'absolute', left: 4, bottom: 4, fontSize: 9.5, fontWeight: 700,
-                      letterSpacing: '0.06em', color: '#000', background: st.border,
-                      padding: '1.5px 6px', borderRadius: 5, lineHeight: 1.5,
+            {/* Cluster cards */}
+            {mode === 'cluster' && (
+              <ClusterPicker
+                clusters={clusters} crops={crops}
+                labels={clusterLabels} onSet={setClusterLabel}
+              />
+            )}
+
+            {/* Per-crop grid */}
+            {mode === 'crop' && (
+              <div style={{
+                display: 'grid', gap: 10,
+                gridTemplateColumns: 'repeat(auto-fill, minmax(118px, 1fr))',
+              }}>
+                {crops.map((c, i) => {
+                  const st = LABEL_STYLE[labels[i] ?? 'ignore']
+                  return (
+                    <button key={i} onClick={() => cycle(i)} style={{
+                      position: 'relative', padding: 0, cursor: 'pointer',
+                      border: `2.5px solid ${st.border}`, borderRadius: 9,
+                      background: st.bg, overflow: 'hidden', lineHeight: 0,
                     }}>
-                      {st.tag}
-                    </span>
-                  </button>
-                )
-              })}
-            </div>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={c.thumb} alt={`crop ${i}`} style={{ width: '100%', display: 'block' }} />
+                      <span style={{
+                        position: 'absolute', left: 4, bottom: 4, fontSize: 9.5, fontWeight: 700,
+                        letterSpacing: '0.06em', color: '#000', background: st.border,
+                        padding: '1.5px 6px', borderRadius: 5, lineHeight: 1.5,
+                      }}>
+                        {st.tag}
+                      </span>
+                    </button>
+                  )
+                })}
+              </div>
+            )}
           </>
         )}
       </div>

@@ -50,6 +50,9 @@ class Job(Base):
     # Which target-team kit this match uses (drives the team filter's
     # reference bootstrap): "away" (black) or "home" (white).
     kit: Mapped[str] = mapped_column(String(16), default="away")
+    # Storage key of refs picked manually for THIS upload (inline team step).
+    # When set, the pipeline uses these instead of the global file / auto guess.
+    team_refs_key: Mapped[str | None] = mapped_column(String(512), nullable=True)
 
     analysis_id: Mapped[str | None] = mapped_column(
         ForeignKey("analyses.id"), nullable=True
