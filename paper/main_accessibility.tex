@@ -19,10 +19,10 @@
 %%  Do NOT submit while any \TODOnum remains.
 %%  NOTE ON CLUB IDENTITY: the deploying club's name is intentionally withheld
 %%  throughout for client confidentiality — keep it that way in any edits.
-%%  This includes FIGURES: raw video frames reveal the club instantly
-%%  (scoreboards, crest, kit, club-TV watermark, opponents). Do not add
-%%  qualitative frame figures unless scoreboard/crest/watermark are redacted
-%%  and the user has approved the redaction (decision 2026-07-10).
+%%  FIGURE POLICY (user decisions 2026-07-10/11): sponsor logo crops may be
+%%  shown un-redacted (Fig. 3); the club NAME, crest, scoreboards, and club-TV
+%%  watermarks must never appear in a figure. Fig. 4 timeline keeps sponsors
+%%  anonymized/numbered (text lists names more directly than a small crop).
 %% ============================================================================
 \documentclass[conference]{IEEEtran}
 \IEEEoverridecommandlockouts
@@ -438,22 +438,25 @@ breakdown.
 \begin{figure}[!t]
 \centering
 \includegraphics[width=\linewidth]{hard_examples.jpg}
-\caption{\textbf{What the detector actually faces in self-captured video:}
-correct low-confidence detections (boxes; confidence under each crop) from one
-night and one daylight fixture. Top: floodlit night play — small, dim,
-motion-smeared marks on moving players. Bottom: heavy motion blur, sub-0.1\%-of-frame
-scale, and fold/occlusion deformation. Sponsor marks at these scales are inherently
-illegible, which is precisely why a hard confidence gate would delete genuine
-exposure; the pipeline instead keeps them and lets visibility weighting and the
-minimum-duration rule (\S\ref{sec:emv}) suppress spurious ones. (Jersey text outside
-one detection is pixelated for club anonymity.)}
+\caption{\textbf{The detection-confidence spectrum in self-captured video} (boxes;
+confidence under each crop) from one night and one daylight fixture. Top row:
+representative high-confidence detections (0.87--0.97) — sharp, large, frontal marks;
+in deployment this regime carries 64\% of quality-weighted exposure. Lower rows: the
+hard tail — floodlit night play, heavy motion blur, sub-0.1\%-of-frame scale, and
+fold/occlusion deformation — which is routine in club-captured footage. Marks in the
+hard tail are inherently illegible at capture, which is precisely why a hard
+confidence gate would delete genuine exposure; the pipeline keeps them and lets
+visibility weighting and the minimum-duration rule (\S\ref{sec:emv}) suppress
+spurious ones.}
 \label{fig:hard}
 \end{figure}
 
 Three observations frame whether 0.75 is ``enough.'' First, the operating domain is
-harder than professionally produced broadcast: Fig.~\ref{fig:hard} shows
-representative low-confidence detections — small, motion-blurred, deformed — that
-are routine in club-captured footage. Second, the number is not comparable to
+harder than professionally produced broadcast: Fig.~\ref{fig:hard} spans the
+confidence spectrum the detector produces on this footage — most exposure comes from
+clean, high-confidence detections, but a hard tail of small, motion-blurred, deformed
+marks is routine in club-captured video and drags aggregate mAP in a way that clean
+broadcast benchmarks never see. Second, the number is not comparable to
 published results unless the split protocol is stated: our own detector reaches 0.86
 when near-duplicate frames leak across the split (Table~\ref{tab:split}), so a
 protocol-silent comparison against, e.g., ExposureEngine's
