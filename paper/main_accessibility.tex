@@ -435,13 +435,31 @@ these instance counts and the validation split intentionally holds no instances 
 the rarest classes, so aggregate mAP should be read together with the per-class
 breakdown.
 
-Two observations frame whether 0.75 is ``enough.'' First, it is not comparable to
-published numbers unless the split protocol is stated: our own detector reaches 0.86
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\linewidth]{hard_examples.jpg}
+\caption{\textbf{What the detector actually faces in self-captured video:}
+correct low-confidence detections (boxes; confidence under each crop) from one
+night and one daylight fixture. Top: floodlit night play — small, dim,
+motion-smeared marks on moving players. Bottom: heavy motion blur, sub-0.1\%-of-frame
+scale, and fold/occlusion deformation. Sponsor marks at these scales are inherently
+illegible, which is precisely why a hard confidence gate would delete genuine
+exposure; the pipeline instead keeps them and lets visibility weighting and the
+minimum-duration rule (\S\ref{sec:emv}) suppress spurious ones. (Jersey text outside
+one detection is pixelated for club anonymity.)}
+\label{fig:hard}
+\end{figure}
+
+Three observations frame whether 0.75 is ``enough.'' First, the operating domain is
+harder than professionally produced broadcast: Fig.~\ref{fig:hard} shows
+representative low-confidence detections — small, motion-blurred, deformed — that
+are routine in club-captured footage. Second, the number is not comparable to
+published results unless the split protocol is stated: our own detector reaches 0.86
 when near-duplicate frames leak across the split (Table~\ref{tab:split}), so a
 protocol-silent comparison against, e.g., ExposureEngine's
-0.859~\cite{exposureengine} — reported on professionally produced broadcast footage,
-a different domain from self-captured club video — would be meaningless in either
-direction. Second, per-frame mAP is not the quantity a sponsor report is built from.
+0.859~\cite{exposureengine} — reported on broadcast footage,
+a different domain — would be meaningless in either
+direction. Third, per-frame mAP is not the quantity a sponsor report is built from.
 Exposure is computed from temporally aggregated segments (\S\ref{sec:emv}): the gap
 tolerance bridges isolated per-frame misses within a segment, and the
 minimum-duration rule discards isolated false positives, so moderate per-frame
@@ -521,7 +539,12 @@ which is exactly the structure a single flat placement multiplier cannot express
 \subsection{Exposure and EMV validation}
 Fig.~\ref{fig:timeline} shows the per-sponsor exposure segments the pipeline recovers
 for one full highlight video, which is the intermediate representation all exposure
-and EMV figures are computed from. To validate it,
+and EMV figures are computed from. Beyond confirming end-to-end operation, the sorted
+totals expose a commercially meaningful fact: on the same kit in the same match,
+delivered exposure spans a 27$\times$ range (110\,s for the top sponsor to 4\,s for
+the bottom one), driven largely by which slot each sponsor occupies
+(Fig.~\ref{fig:kitslots}) — evidence that selling kit space at a flat rate
+misprices most of it. To validate the measurement itself,
 we compare system-computed exposure-seconds against an independent manual timing of
 logo appearances for at least one full match. We report EMV as a downstream consequence
 of this validated exposure measurement rather than as independently verified: CPM,
