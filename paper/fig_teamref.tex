@@ -1,0 +1,34 @@
+% Fig — three-tier team-reference bootstrap (illustration on one daylight fixture).
+% Chip strips regenerated with the same detect->crop->cluster procedure
+% (scratchpad gen; pixelated for anonymity). Styles shared with fig_pipeline.
+\begin{tikzpicture}[node distance=3.5mm and 2.5mm]
+  % tier cascade
+  \node[blk, text width=23mm] (t1) {Tier 1\\manual refs /\\official kit image};
+  \node[blk, right=of t1, text width=23mm] (t2) {Tier 2\\kit-anchor\\similarity};
+  \node[blk, right=of t2, text width=23mm] (t3) {Tier 3\\luminance\\heuristic};
+  \draw[arr] (t1) -- node[above, font=\tiny\itshape]{missing} (t2);
+  \draw[arr] (t2) -- node[above, font=\tiny\itshape]{missing} (t3);
+
+  % clustering row
+  \node[data, below=6mm of t2, text width=52mm]
+       (clu) {jersey crops sampled from the video,\\clustered (colour + embedding)};
+  \draw[arr] (t1.south) to[out=-90,in=160] (clu.west);
+
+  % chip strips
+  \node[below=4mm of clu, xshift=-21.5mm, anchor=north, inner sep=0] (tgt)
+       {\includegraphics[width=39mm]{refchips_target.jpg}};
+  \node[below=4mm of clu, xshift=21.5mm, anchor=north, inner sep=0] (oth)
+       {\includegraphics[width=33mm]{refchips_other.jpg}};
+  \node[below=0.5mm of tgt, font=\tiny] {target-cluster reference crops};
+  \node[below=0.5mm of oth, font=\tiny] {opponent-cluster reference crops};
+  \draw[arr] (clu.south) ++(-21.5mm,0) -- (tgt.north);
+  \draw[arr] (clu.south) ++(21.5mm,0) -- (oth.north);
+
+  % output
+  \node[stud, below=13mm of clu, text width=56mm, yshift=-8mm]
+       (refs) {per-team colour histogram $+$ embedding centroid;\\
+               fusion weights learned automatically\\
+               ($w_{\text{colour}} \approx 0.48$--$0.53$ across deployment matches)};
+  \draw[arr] (tgt.south) ++(0,-3.5mm) -- (refs.north -| tgt.south);
+  \draw[arr] (oth.south) ++(0,-3.5mm) -- (refs.north -| oth.south);
+\end{tikzpicture}

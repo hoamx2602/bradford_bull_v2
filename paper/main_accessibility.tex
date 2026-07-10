@@ -335,7 +335,22 @@ classifications are accumulated per track with hysteresis, so that a single blur
 occluded frame cannot flip an already-confident team label. Reference examples for each
 kit are obtained automatically rather than by manual setup: from official kit images
 when available, and otherwise by clustering the video's own early frames and selecting
-the cluster closest to a simple luminance heuristic (e.g.\ a known dark alternate kit).
+the cluster closest to a simple luminance heuristic (e.g.\ a known dark alternate kit);
+Fig.~\ref{fig:teamref} illustrates the cascade and the resulting per-team references.
+
+\begin{figure}[!t]
+\centering
+\input{fig_teamref}
+\caption{\textbf{Zero-manual-setup team-reference bootstrap (C2).} A three-tier
+cascade selects which cluster of jersey crops is the target team; the chosen
+clusters become per-team references (colour histogram $+$ vision-embedding
+centroid) with fusion weights learned automatically. Crops shown are an
+illustrative reconstruction on one daylight fixture using the same
+detect--crop--cluster procedure; they are torso-only and deliberately pixelated,
+since the deployed system stores only the resulting feature centroids, never
+images.}
+\label{fig:teamref}
+\end{figure}
 Each detected logo instance is then attributed to the team of its nearest tracked
 person. When the evidence for opponent ownership is insufficient (a track has not yet
 accumulated enough confident votes), the instance is \emph{kept} rather than dropped —
@@ -418,7 +433,22 @@ under the same clip-aware split policy, the current detector reaches mAP@0.5 = 0
 (mAP@[.5:.95] = 0.44, precision 0.65, recall 0.74). Rare-class AP is unreliable at
 these instance counts and the validation split intentionally holds no instances of
 the rarest classes, so aggregate mAP should be read together with the per-class
-breakdown. \TODOnum{Report per-class average precision and a confusion matrix on a
+breakdown.
+
+Two observations frame whether 0.75 is ``enough.'' First, it is not comparable to
+published numbers unless the split protocol is stated: our own detector reaches 0.86
+when near-duplicate frames leak across the split (Table~\ref{tab:split}), so a
+protocol-silent comparison against, e.g., ExposureEngine's
+0.859~\cite{exposureengine} — reported on professionally produced broadcast footage,
+a different domain from self-captured club video — would be meaningless in either
+direction. Second, per-frame mAP is not the quantity a sponsor report is built from.
+Exposure is computed from temporally aggregated segments (\S\ref{sec:emv}): the gap
+tolerance bridges isolated per-frame misses within a segment, and the
+minimum-duration rule discards isolated false positives, so moderate per-frame
+accuracy on a tracked, repeatedly visible logo can still yield accurate
+exposure-seconds. The operative accuracy metric for the system's end output is
+therefore the exposure-seconds error against manual timing (\S\ref{sec:exp}, EMV
+validation), with mAP reported for completeness and future comparability. \TODOnum{Report per-class average precision and a confusion matrix on a
 held-out clip-disjoint test split (current numbers are validation-split figures used
 for model selection).}
 
@@ -465,7 +495,9 @@ pass, team attribution enabled; this match's attribution overlay was visually au
 and assigns target/opponent correctly, \S\ref{sec:exp-counterfactual}). Each bar marks
 an interval in which the sponsor was
 detected on the target team's kit after attribution; sponsors are sorted by total
-on-screen time (right column). Very short intervals are widened to a minimum drawable
+on-screen time (right column) and numbered rather than named, since sponsor names
+would identify the club whose identity we withhold. Very short intervals are widened
+to a minimum drawable
 width for legibility; totals are computed from the underlying segments, not from the
 drawing.}
 \label{fig:timeline}
