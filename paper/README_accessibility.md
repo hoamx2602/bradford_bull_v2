@@ -1,7 +1,8 @@
 # Paper — Accessibility-framing draft (LaTeX source)
 
-First full draft of *"Sponsor Exposure Analytics for the Rest of Us: An Open,
-Self-Hostable Framework for Small and Mid-Tier Sports Clubs"* (IEEEtran conference).
+First full draft of *"LogoLens: A Vision AI Tool to Measure Kit Sponsor
+Visibility and Value"* (IEEEtran conference; formerly titled "Sponsor Exposure
+Analytics for the Rest of Us").
 This is a **separate paper** from the CyberWorlds/Inventory draft (`main.tex`,
 `refs.bib`) already in this folder — different framing (accessibility/systems, not
 digital-twin/annotation-free), different files, kept side by side intentionally.

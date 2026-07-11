@@ -1,13 +1,13 @@
 % Fig — three-tier team-reference bootstrap (illustration on one daylight fixture).
 % Chip strips regenerated with the same detect->crop->cluster procedure
 % (scratchpad gen; pixelated for anonymity). Styles shared with fig_pipeline.
-\begin{tikzpicture}[node distance=3.5mm and 2.5mm]
+\begin{tikzpicture}[node distance=3.5mm and 9mm]
   % tier cascade
-  \node[blk, text width=23mm] (t1) {Tier 1\\manual refs /\\official kit image};
-  \node[blk, right=of t1, text width=23mm] (t2) {Tier 2\\kit-anchor\\similarity};
-  \node[blk, right=of t2, text width=23mm] (t3) {Tier 3\\luminance\\heuristic};
-  \draw[arr] (t1) -- node[above, font=\tiny\itshape]{missing} (t2);
-  \draw[arr] (t2) -- node[above, font=\tiny\itshape]{missing} (t3);
+  \node[blk, text width=20mm] (t1) {Tier 1\\manual refs /\\official kit image};
+  \node[blk, right=of t1, text width=20mm] (t2) {Tier 2\\kit-anchor\\similarity};
+  \node[blk, right=of t2, text width=20mm] (t3) {Tier 3\\luminance\\heuristic};
+  \draw[arr] (t1) -- node[above=0.4mm, font=\tiny\itshape]{missing} (t2);
+  \draw[arr] (t2) -- node[above=0.4mm, font=\tiny\itshape]{missing} (t3);
 
   % clustering row
   \node[data, below=6mm of t2, text width=52mm]
