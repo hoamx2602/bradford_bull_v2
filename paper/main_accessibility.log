@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (MiKTeX 26.5) (preloaded format=pdflatex 2026.7.9)  11 JUL 2026 01:12
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (MiKTeX 26.5) (preloaded format=pdflatex 2026.7.9)  11 JUL 2026 01:36
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -857,20 +857,17 @@ File: omspcr.fd
 LaTeX Font Info:    Font shape `OMS/pcr/m/n' in size <10> not available
 (Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 67.
 
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 124--146
+Underfull \hbox (badness 10000) in paragraph at lines 110--132
 []\OT1/ptm/m/n/10 A com-mer-cial layer al-ready serves the sponsor-
  []
 
 
-Underfull \hbox (badness 3482) in paragraph at lines 124--146
+Underfull \hbox (badness 3482) in paragraph at lines 110--132
 \OT1/ptm/m/n/10 au-to-mated or semi-automated sponsor-visibility ser-vices.
  []
 
 LaTeX Font Info:    Trying to load font information for TS1+ptm on input line 1
-48.
+34.
 (C:\Program Files\MiKTeX\tex/latex/psnfss\ts1ptm.fd
 File: ts1ptm.fd 2001/06/04 font definitions for TS1/ptm.
 ) [1{C:/Users/nguye/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map}{C:/Progra
@@ -878,35 +875,41 @@ m Files/MiKTeX/fonts/enc/dvips/base/8r.enc}
 
 
 ]
-Underfull \hbox (badness 5519) in paragraph at lines 232--248
+Underfull \hbox (badness 5563) in paragraph at lines 156--163
+\OT1/ptm/m/n/10 around \OT1/ptm/m/it/10 self-service video in-ges-tion \OT1/ptm
+/m/n/10 rather than a
+ []
+
+
+Underfull \hbox (badness 5519) in paragraph at lines 217--233
 []\OT1/ptm/m/n/10 The industry-standard man-ual ap-proach is Ad-ver-tis-
  []
 
 [2] (fig_pipeline.tex) (fig_teamref.tex
-<refchips_target.jpg, id=167, 457.71pt x 92.345pt>
+<refchips_target.jpg, id=170, 457.71pt x 92.345pt>
 File: refchips_target.jpg Graphic file (type jpg)
 <use refchips_target.jpg>
 Package pdftex.def Info: refchips_target.jpg  used on input line 19.
 (pdftex.def)             Requested size: 110.96574pt x 22.38728pt.
-<refchips_other.jpg, id=168, 381.425pt x 92.345pt>
+<refchips_other.jpg, id=171, 381.425pt x 92.345pt>
 File: refchips_other.jpg Graphic file (type jpg)
 <use refchips_other.jpg>
 Package pdftex.def Info: refchips_other.jpg  used on input line 21.
 (pdftex.def)             Requested size: 93.89409pt x 22.7311pt.
-) [3]
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
- [4 <./refchips_target.jpg> <./refchips_other.jpg>]
-<hard_examples.jpg, id=191, 718.685pt x 455.7025pt>
+) [3] [4 <./refchips_target.jpg> <./refchips_other.jpg>]
+<hard_examples.jpg, id=192, 718.685pt x 455.7025pt>
 File: hard_examples.jpg Graphic file (type jpg)
 <use hard_examples.jpg>
-Package pdftex.def Info: hard_examples.jpg  used on input line 439.
+Package pdftex.def Info: hard_examples.jpg  used on input line 429.
 (pdftex.def)             Requested size: 252.0pt x 159.78334pt.
- (fig_timeline.tex) (fig_kitslots.tex
+
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+
+(fig_timeline.tex) (fig_kitslots.tex
 Package pgfplots info on input line 22: Using 'lua backend=false' for axis: x c
 oord trafo unsupported.
-)
-[5 <./hard_examples.jpg>]
+) [5 <./hard_examples.jpg>]
 
 LaTeX Warning: Text page 6 contains only floats.
 
@@ -945,11 +948,11 @@ Package rerunfilecheck Info: File `main_accessibility.out' has not changed.
 (rerunfilecheck)             Checksum: C1DBE57BCFB1BAB3E8782DD34749241C;4492.
  ) 
 Here is how much of TeX's memory you used:
- 33075 strings out of 467510
- 777296 string characters out of 5418904
- 1433469 words of memory out of 5000000
- 61734 multiletter control sequences out of 15000+600000
- 677292 words of font info for 136 fonts, out of 8000000 for 9000
+ 33086 strings out of 467510
+ 777410 string characters out of 5418904
+ 1434144 words of memory out of 5000000
+ 61741 multiletter control sequences out of 15000+600000
+ 678837 words of font info for 142 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  84i,12n,94p,2184b,2387s stack positions out of 10000i,1000n,20000p,200000b,200000s
 <C:/Program Files/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi5.pfb><C:/Program
@@ -959,13 +962,14 @@ ublic/amsfonts/cm/cmr7.pfb><C:/Program Files/MiKTeX/fonts/type1/public/amsfonts
 /cm/cmr8.pfb><C:/Program Files/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy10.pfb
 ><C:/Program Files/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy7.pfb><C:/Program 
 Files/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy8.pfb><C:/Program Files/MiKTeX/
-fonts/type1/urw/courier/ucrr8a.pfb><C:/Program Files/MiKTeX/fonts/type1/urw/tim
-es/utmb8a.pfb><C:/Program Files/MiKTeX/fonts/type1/urw/times/utmbi8a.pfb><C:/Pr
-ogram Files/MiKTeX/fonts/type1/urw/times/utmr8a.pfb><C:/Program Files/MiKTeX/fo
-nts/type1/urw/times/utmri8a.pfb>
-Output written on main_accessibility.pdf (8 pages, 349127 bytes).
+fonts/type1/public/amsfonts/cm/cmsy9.pfb><C:/Program Files/MiKTeX/fonts/type1/u
+rw/courier/ucrr8a.pfb><C:/Program Files/MiKTeX/fonts/type1/urw/times/utmb8a.pfb
+><C:/Program Files/MiKTeX/fonts/type1/urw/times/utmbi8a.pfb><C:/Program Files/M
+iKTeX/fonts/type1/urw/times/utmr8a.pfb><C:/Program Files/MiKTeX/fonts/type1/urw
+/times/utmri8a.pfb>
+Output written on main_accessibility.pdf (8 pages, 359047 bytes).
 PDF statistics:
- 307 PDF objects out of 1000 (max. 8388607)
+ 315 PDF objects out of 1000 (max. 8388607)
  55 named destinations out of 1000 (max. 500000)
  236 words of extra memory for PDF output out of 10000 (max. 10000000)
 
