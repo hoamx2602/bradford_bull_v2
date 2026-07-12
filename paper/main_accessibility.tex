@@ -1,36 +1,8 @@
 %% ============================================================================
-%%  LogoLens: A Vision AI Tool to Measure Kit Sponsor Visibility and Value
-%%  (formerly: "Sponsor Exposure Analytics for the Rest of Us")
-%%
-%%  Target venue : TBD (IEEE CyberWorlds / ACM MMSports workshop / CVsports
-%%                 workshop — decide with advisor, see paper_outline_for_advisor.md)
-%%  Format       : IEEEtran conference, 2-column. Compile on Overleaf or:
-%%                   latexmk -pdf main_accessibility.tex
-%%
-%%  NOTE ON NUMBERS: detection mAP verified vs logo_detection/runs/*/results.csv
-%%  (random-frame 0.862; clip-disjoint 0.702; extended 0.745, P.65 R.74). The
-%%  deployment conf floor was 0.20 (facts_json min clarity = 0.200), NOT 0.25.
-%%  RF-DETR run (training-result/, 0.778) used a RANDOM split -> not citable.
-%%  STATUS 2026-07-12: all \TODOnum removed. Nothing is fabricated. Items not
-%%  measured (exposure MAE vs manual timing; per-class held-out TEST split;
-%%  per-sponsor counterfactual; per-class annotation wall-clock time) are stated
-%%  as explicit open items / future work, NOT as results. Real, verified numbers:
-%%  detection mAP (split table), 41% attribution drop, 91.8% track-label audit
-%%  (paper/track_label_audit.csv), 1.0x throughput (job log), +63% sampling bias,
-%%  visibility-floor sensitivity sweep, confusion-matrix finding (clipsplit run).
-%%  DOUBLE-BLIND (paper-rules.md): author block anonymized; PDF metadata author
-%%  cleared; A4 set; body has no Bradford/funding/acknowledgment/self-citation.
-%%  Real (corrected) names for CAMERA-READY are in the comment above \author.
-%%  SUBMIT THE PDF for review, not the .tex (the comment holds the real names).
-%%  8 pages incl. refs = the full-paper limit; A4 confirmed (MediaBox 595x842).
-%%  USER STILL MUST: (1) confirm ethics/consent wording matches the club's actual
-%%  agreement; (2) fill corresponding-author email in the camera-ready block;
-%%  (3) note club may be identifiable from sponsor logos -- advisor to weigh.
-%%  NOTE ON CLUB IDENTITY: the deploying club's name is intentionally withheld
-%%  throughout for client confidentiality — keep it that way in any edits.
-%%  FIGURE POLICY (user decisions 2026-07-10/11): sponsor logos and sponsor
-%%  NAMES may appear in figures (Figs. 3-4); the club NAME, crest, scoreboards,
-%%  and club-TV watermarks must never appear in a figure.
+%%  LogoLens: A Vision AI System to Measure Kit Sponsor Visibility and Value
+%%  IEEEtran conference, A4, double-blind (CW26). Compile: latexmk -pdf, or on
+%%  Overleaf. Author list, camera-ready block, and submission checklist are in
+%%  SUBMISSION_NOTES.md (kept out of this file for anonymity).
 %% ============================================================================
 \documentclass[conference,a4paper]{IEEEtran}
 \IEEEoverridecommandlockouts
@@ -43,7 +15,7 @@
 \usepackage{url}
 \usepackage[colorlinks=true,allcolors=blue]{hyperref}
 % double-blind: keep author identity out of the PDF document properties
-\hypersetup{pdfauthor={},pdftitle={LogoLens: Kit Sponsor Visibility and Value}}
+\hypersetup{pdfauthor={},pdftitle={LogoLens: A Vision AI System to Measure Kit Sponsor Visibility and Value}}
 \usepackage{tikz}
 \usepackage{pgfplots}
 \pgfplotsset{compat=1.18}
@@ -66,18 +38,11 @@
 
 \begin{document}
 
-\title{LogoLens: Kit Sponsor Visibility and Value}
+\title{LogoLens: A Vision AI System to Measure Kit\\
+Sponsor Visibility and Value}
 
-% ===========================================================================
-% CW26 reviewing is DOUBLE-BLIND (see paper-rules.md): the SUBMISSION must carry
-% no author names/affiliation. The block below is anonymized. For the CAMERA-READY
-% version (after acceptance), replace it with the real author block:
-%
-%   \author{\IEEEauthorblockN{Xuan Hoa Mai, Ezichi Abel, Jason Akhuemokhan,
-%   Rashmi Yatawara, Simranjit Kaur, Tabby Mungai, Tillal Eldabi, and Irfan Mehmood}
-%   \IEEEauthorblockA{University of Bradford, Bradford, United Kingdom\\
-%   \texttt{x.mai@bradford.ac.uk}}}
-% ===========================================================================
+% Double-blind: anonymous for review. Camera-ready author block is in
+% SUBMISSION_NOTES.md (paste it here after acceptance).
 \author{\IEEEauthorblockN{Anonymous Author(s)}
 \IEEEauthorblockA{Affiliation withheld for double-blind review}}
 
@@ -91,8 +56,8 @@ open: when the same sponsor appears on both teams' kits, boards, or officials, r
 detection overcounts exposure unless each instance is attributed to its owner; and
 sponsors are priced by placement, yet no published system measures exposure at that
 granularity. We present \emph{LogoLens}, an open, self-hosted vision pipeline a club
-can run on video it captures itself, with no broadcast feed, vendor contract, or
-in-house ML team. LogoLens contributes (i) a training-free \emph{team attribution}
+can run on its own match video, with no enterprise broadcast integration, vendor
+contract, or in-house ML team. LogoLens contributes (i) a training-free \emph{team attribution}
 method combining a zero-setup reference bootstrap, colour--embedding fusion, and
 track-level temporal voting, and (ii) \emph{placement-level pricing}, attributing
 exposure to eighteen kit slots via pose estimation. On a production deployment at a
@@ -134,8 +99,8 @@ club with the budget and a broadcast deal this is reasonable, but it leaves thre
 structural costs for everyone else: vendor lock-in and recurring fees; handing raw
 video and commercial data to an external party; and a dependency on broadcast access
 that many clubs outside the top leagues simply do not have, regardless of budget. Our framework instead is built around \emph{self-service ingestion}: a club
-uploads whatever match video it is able to capture itself, a fixed pitch-side camera,
-a livestream recording, footage from a coach's or media officer's own filming, and the
+uploads its own match video, whatever it already has, such as its own match stream or
+publicly posted uploads, a livestream recording, or a fixed pitch-side camera, and the
 system produces exposure and EMV reports from that, with no dependency on an official
 broadcast feed or a vendor integration. We target clubs for whom these costs, not
 detection accuracy, are the binding constraint. By ``accessible'' we mean clubs with
@@ -398,8 +363,8 @@ signals as future work (Section~\ref{sec:discussion}).
 \label{sec:exp}
 
 \subsection{Setup}
-We evaluate on match video self-ingested by our partner club (identity withheld),
-video the club captured and uploaded itself, not an official broadcast feed. The
+We evaluate on our partner club's own match video (identity withheld), taken from the
+club's publicly available match uploads, not an official top-tier broadcast feed. The
 annotated detection dataset covers seventeen sponsor classes and is severely
 imbalanced, from roughly 200 instances for the most frequent kit sponsor down to
 single digits for the rarest, a property of real kit sponsorship, not of our
@@ -449,12 +414,12 @@ breakdown.
 \begin{figure}[!t]
 \centering
 \includegraphics[width=\linewidth]{hard_examples.jpg}
-\caption{\textbf{The detection-confidence spectrum in self-captured video} (boxes;
-confidence under each crop) from one night and one daylight fixture. Top row:
+\caption{\textbf{The detection-confidence spectrum in club-provided match video}
+(boxes; confidence under each crop) from one night and one daylight fixture. Top row:
 representative high-confidence detections (0.87--0.97), sharp, large, frontal marks;
 in deployment this regime carries 64\% of quality-weighted exposure. Lower rows: the
 hard tail, floodlit night play, heavy motion blur, sub-0.1\%-of-frame scale, and
-fold/occlusion deformation, which is routine in club-captured footage. Marks in the
+fold/occlusion deformation, routine in a lower-tier club stream. Marks in the
 hard tail are inherently illegible at capture, which is precisely why a hard
 confidence gate would delete genuine exposure; the pipeline keeps them and lets
 visibility weighting and the minimum-duration rule (Section~\ref{sec:emv}) suppress
@@ -615,7 +580,7 @@ attributed exposure, while sleeve, sock, and back-centre slots individually carr
 under 2\% each, supporting the practice of pricing slots differently, but from
 measurement rather than convention. Second, the ordering is not the conventional
 price ordering: in this deployment the shorts-back slot outranks chest-centre,
-an artefact of how the club's own pitch-side camera views play, and precisely the
+an artefact of how the club's own match camera views play, and precisely the
 kind of deployment-specific evidence a flat industry multiplier cannot anticipate.
 
 \subsection{Accessibility evidence}
@@ -661,10 +626,10 @@ target/opponent reference set should grow a third, explicit officials class. Bec
 the dominant failure direction is revenue-critical, a
 deployment should monitor the per-match exclusion rate and treat an outlier (here,
 78\% against a fleet median near 40\%) as a signal for human review, not a
-valid measurement. Targeting self-captured video also means tolerating a wider range of camera
-stability, framing, and quality than broadcast-only systems; we have not yet
-characterized robustness across capture sources (fixed pitch-side vs.\ hand-held), and
-flag it as an open question. The sparse sampling rate used
+valid measurement. Targeting a club's own lower-tier match video also means tolerating a
+wider range of camera stability, framing, and production quality than top-tier broadcast
+systems; we have not yet characterized robustness across capture sources (a produced club
+stream vs.\ a fixed pitch-side camera), and flag it as an open question. The sparse sampling rate used
 for the analytics pass trades exposure-time precision for processing cost, at a measured
 $+63\%$ over-measurement (Section~\ref{sec:exp}) concentrated on marginal,
 flicker-exposed brands. Since this bias is sponsor-favourable, a deployment should
@@ -678,20 +643,17 @@ broader critique that such metrics do not capture audience quality, sentiment, o
 brand-recall impact; we do not claim to have solved sponsorship valuation, only to have
 made one component of it less arbitrary and more transparent.
 
-\textbf{Data and ethics statement.} The framework is designed around video that a club
-captures and owns itself, which removes the third-party broadcaster copyright concerns
-that would apply to processing official broadcast feeds. The match footage used in this
-study is the partner club's own property and was made available to the authors by the
-club for this research; it depicts professional players in the course of publicly
-staged fixtures. The system nonetheless processes images of real people, and we
-constrain what it does with them by design: players are tracked only as transient,
+\textbf{Data and ethics statement.} The footage used in this study is publicly
+available match video, obtained from YouTube and provided to us by our partner club;
+it depicts professional players during public fixtures and involves no new collection
+of personal data. The system nonetheless processes images of real people, and
+constrains what it does with them by design: players are tracked only as transient,
 anonymous instances for kit-slot attribution, with no facial recognition and no
 jersey-number or player identification in the deployed pipeline, and its output is
-brand- and media-value analytics rather than player-performance or biometric data. All
+brand- and media-value analytics, not player-performance or biometric data. All
 figures in this paper withhold the club's identifying marks (name, crest, scoreboards,
-broadcast watermarks) accordingly. A club deploying the framework should nonetheless
-apply the player-media consent terms already governing its own match footage, which
-this design is intended to respect rather than replace.
+broadcast watermarks). A club deploying the framework should apply the player-media
+consent terms already governing its own footage.
 
 % ============================================================================
 \section{Future Work}

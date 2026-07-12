@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (MiKTeX 26.5) (preloaded format=pdflatex 2026.7.9)  12 JUL 2026 19:37
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (MiKTeX 26.5) (preloaded format=pdflatex 2026.7.9)  12 JUL 2026 20:30
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -116,7 +116,7 @@ LaTeX Font Info:    Font shape `OT1/ptm/bx/it' in size <24> not available
 \c@IEEEbiography=\count290
 \@IEEEtranrubishbin=\box54
 )
-** ATTENTION: Overriding command lockouts (line 36).
+** ATTENTION: Overriding command lockouts (line 8).
 (C:\Program Files\MiKTeX\tex/latex/cite\cite.sty
 LaTeX Info: Redefining \cite on input line 302.
 LaTeX Info: Redefining \nocite on input line 332.
@@ -779,24 +779,24 @@ File: l3backend-pdftex.def 2026-02-18 L3 backend support: PDF output (pdfTeX)
 (main_accessibility.aux)
 \openout1 = `main_accessibility.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 67.
-LaTeX Font Info:    ... okay on input line 67.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 67.
-LaTeX Font Info:    ... okay on input line 67.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 67.
-LaTeX Font Info:    ... okay on input line 67.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 67.
-LaTeX Font Info:    ... okay on input line 67.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 67.
-LaTeX Font Info:    ... okay on input line 67.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 67.
-LaTeX Font Info:    ... okay on input line 67.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 67.
-LaTeX Font Info:    ... okay on input line 67.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 67.
-LaTeX Font Info:    ... okay on input line 67.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 67.
-LaTeX Font Info:    ... okay on input line 67.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 39.
+LaTeX Font Info:    ... okay on input line 39.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 39.
+LaTeX Font Info:    ... okay on input line 39.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 39.
+LaTeX Font Info:    ... okay on input line 39.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 39.
+LaTeX Font Info:    ... okay on input line 39.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 39.
+LaTeX Font Info:    ... okay on input line 39.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 39.
+LaTeX Font Info:    ... okay on input line 39.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 39.
+LaTeX Font Info:    ... okay on input line 39.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 39.
+LaTeX Font Info:    ... okay on input line 39.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 39.
+LaTeX Font Info:    ... okay on input line 39.
 
 -- Lines per column: 56 (exact).
 (C:\Program Files\MiKTeX\tex/context/base/mkii\supp-pdf.mkii
@@ -820,7 +820,7 @@ Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 4
 (C:\Program Files\MiKTeX\tex/latex/00miktex\epstopdf-sys.cfg
 File: epstopdf-sys.cfg 2021/03/18 v2.0 Configuration of epstopdf for MiKTeX
 ))
-Package hyperref Info: Link coloring ON on input line 67.
+Package hyperref Info: Link coloring ON on input line 39.
 
 (main_accessibility.out) (main_accessibility.out)
 \@outlinefile=\write4
@@ -830,41 +830,38 @@ Package hyperref Info: Link coloring ON on input line 67.
 Package pgfplots notification 'compat/show suggested version=true': document ha
 s been generated with the most recent feature set (\pgfplotsset{compat=1.18}).
 
-LaTeX Font Info:    Trying to load font information for U+msa on input line 105
-.
+LaTeX Font Info:    Trying to load font information for U+msa on input line 70.
+
 (C:\Program Files\MiKTeX\tex/latex/amsfonts\umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Trying to load font information for U+msb on input line 105
-.
+LaTeX Font Info:    Trying to load font information for U+msb on input line 70.
+
 
 (C:\Program Files\MiKTeX\tex/latex/amsfonts\umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 )
-Underfull \hbox (badness 10000) in paragraph at lines 127--144
+Underfull \hbox (badness 10000) in paragraph at lines 92--109
 []\OT1/ptm/m/n/10 A com-mer-cial layer al-ready serves the sponsor-
  []
 
 
-Underfull \hbox (badness 3482) in paragraph at lines 127--144
+Underfull \hbox (badness 3482) in paragraph at lines 92--109
 \OT1/ptm/m/n/10 au-to-mated or semi-automated sponsor-visibility ser-vices.
  []
 
 
-Underfull \hbox (badness 5563) in paragraph at lines 168--175
+Underfull \hbox (badness 5563) in paragraph at lines 133--140
 \OT1/ptm/m/n/10 around \OT1/ptm/m/it/10 self-service video in-ges-tion \OT1/ptm
 /m/n/10 rather than a
  []
 
-
-Underfull \vbox (badness 1968) has occurred while \output is active []
-
- [1{C:/Users/nguye/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map}{C:/Program
- Files/MiKTeX/fonts/enc/dvips/base/8r.enc}
+[1{C:/Users/nguye/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map}{C:/Program 
+Files/MiKTeX/fonts/enc/dvips/base/8r.enc}
 
 
 ]
-Underfull \hbox (badness 5519) in paragraph at lines 226--240
+Underfull \hbox (badness 5519) in paragraph at lines 191--205
 []\OT1/ptm/m/n/10 The industry-standard man-ual ap-proach is Ad-ver-tis-
  []
 
@@ -883,7 +880,7 @@ Package pdftex.def Info: refchips_other.jpg  used on input line 21.
 <hard_examples.jpg, id=170, 728.7225pt x 455.7025pt>
 File: hard_examples.jpg Graphic file (type jpg)
 <use hard_examples.jpg>
-Package pdftex.def Info: hard_examples.jpg  used on input line 451.
+Package pdftex.def Info: hard_examples.jpg  used on input line 416.
 (pdftex.def)             Requested size: 252.0pt x 157.58606pt.
  [4 <./refchips_target.jpg> <./refchips_other.jpg>]
 Underfull \vbox (badness 3019) has occurred while \output is active []
@@ -933,7 +930,7 @@ Package rerunfilecheck Info: File `main_accessibility.out' has not changed.
 Here is how much of TeX's memory you used:
  32972 strings out of 467510
  775719 string characters out of 5418904
- 1424879 words of memory out of 5000000
+ 1425276 words of memory out of 5000000
  61643 multiletter control sequences out of 15000+600000
  674041 words of font info for 124 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
@@ -952,7 +949,7 @@ pfb><C:/Program Files/MiKTeX/fonts/type1/urw/times/utmb8a.pfb><C:/Program Files
 /MiKTeX/fonts/type1/urw/times/utmbi8a.pfb><C:/Program Files/MiKTeX/fonts/type1/
 urw/times/utmr8a.pfb><C:/Program Files/MiKTeX/fonts/type1/urw/times/utmri8a.pfb
 >
-Output written on main_accessibility.pdf (8 pages, 385960 bytes).
+Output written on main_accessibility.pdf (8 pages, 386077 bytes).
 PDF statistics:
  310 PDF objects out of 1000 (max. 8388607)
  52 named destinations out of 1000 (max. 500000)
