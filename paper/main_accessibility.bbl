@@ -43,6 +43,14 @@ S.~Hou, J.~Li, W.~Min, Q.~Hou, Y.~Zhao, Y.~Zheng, and S.~Jiang, ``Deep learning
   Computing, Communications, and Applications}, vol.~20, no.~3, pp.
   72:1--72:23, 2023, also available as arXiv:2210.04399.
 
+\bibitem{soccernet_v2}
+A.~Deli{\`e}ge, A.~Cioppa, S.~Giancola, M.~J. Seikavandi, J.~V. Dueholm,
+  K.~Nasrollahi, B.~Ghanem, T.~B. Moeslund, and M.~Van~Droogenbroeck,
+  ``{SoccerNet-v2}: A dataset and benchmarks for holistic understanding of
+  broadcast soccer videos,'' in \emph{Proc.\ IEEE/CVF Conference on Computer
+  Vision and Pattern Recognition Workshops (CVPRW, CVSports)}, 2021, also
+  available as arXiv:2011.13367.
+
 \bibitem{team_reid_roles}
 A.~M. Mansourian, V.~Somers, C.~De~Vleeschouwer, and S.~Kasaei, ``Multi-task
   learning for joint re-identification, team affiliation, and role
