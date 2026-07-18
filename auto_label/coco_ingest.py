@@ -18,10 +18,77 @@ from __future__ import annotations
 import argparse
 import json
 import random
-from collections import Counter
+import re
+from collections import Counter, defaultdict
 from pathlib import Path
 
 import cv2
+
+# clip/match key: "M01_white_1080p", "clip_014" — everything before the frame index
+_CLIP_RE = re.compile(r"(M\d+_[a-z]+_\d+p|clip_\d+)", re.I)
+
+
+def _clip_key(file_name: str) -> str:
+    m = _CLIP_RE.match(Path(file_name).name)
+    return m.group(1) if m else Path(file_name).stem.split("_")[0]
+
+
+def _clip_disjoint_split(by_img, imgs, cats, target_gallery_frac, seed):
+    """Assign whole clips to gallery/test so no clip straddles the split
+    (frames of one clip are near-duplicates → random split leaks). Greedy:
+    grow TEST with clips that add the most *new* brands first, until the test
+    crop fraction is reached, while guaranteeing every brand keeps >=1 gallery
+    crop. Returns {image_id: 'gallery'|'test'}."""
+    clip_imgs: dict[str, list[int]] = defaultdict(list)
+    clip_brands: dict[str, Counter] = defaultdict(Counter)
+    total_crops = 0
+    for img_id, anns in by_img.items():
+        k = _clip_key(imgs[img_id]["file_name"])
+        clip_imgs[k].append(img_id)
+        for ann in anns:
+            clip_brands[k][cats[ann["category_id"]]] += 1
+            total_crops += 1
+    brand_total = Counter()
+    for c in clip_brands.values():
+        brand_total.update(c)
+
+    target_test = total_crops * (1.0 - target_gallery_frac)
+    rng = random.Random(seed)
+    clips = sorted(clip_imgs, key=lambda k: (-sum(clip_brands[k].values()), k))
+    test_clips: set[str] = set()
+    test_crops = 0
+    test_brands: set[str] = set()
+    gallery_brand = Counter(brand_total)  # crops left in gallery per brand
+    # pass 1: greedily add clips that introduce the most new brands to test
+    while test_crops < target_test:
+        best, best_gain = None, -1
+        for k in clips:
+            if k in test_clips:
+                continue
+            # don't move a clip if it would zero-out a brand's gallery presence
+            if any(gallery_brand[b] - clip_brands[k][b] <= 0 for b in clip_brands[k]):
+                continue
+            gain = len(set(clip_brands[k]) - test_brands)
+            size = sum(clip_brands[k].values())
+            score = gain * 1000 - size  # prefer new-brand coverage, then smaller
+            if score > best_gain:
+                best_gain, best = score, k
+        if best is None:
+            break
+        test_clips.add(best)
+        test_crops += sum(clip_brands[best].values())
+        test_brands |= set(clip_brands[best])
+        for b, n in clip_brands[best].items():
+            gallery_brand[b] -= n
+    split = {}
+    for k, ids_ in clip_imgs.items():
+        where = "test" if k in test_clips else "gallery"
+        for i in ids_:
+            split[i] = where
+    print(f"[split] clip-disjoint: {len(test_clips)}/{len(clip_imgs)} clips -> test "
+          f"({test_crops}/{total_crops} crops, {len(test_brands)}/{len(brand_total)} brands)")
+    print(f"[split] test clips: {sorted(test_clips)}")
+    return split
 
 
 def run(a) -> None:
@@ -33,10 +100,14 @@ def run(a) -> None:
     for ann in js["annotations"]:
         by_img.setdefault(ann["image_id"], []).append(ann)
 
-    ids = sorted(by_img)
-    random.seed(a.seed); random.shuffle(ids)
-    n_train = int(len(ids) * a.split)
-    split = {i: ("gallery" if k < n_train else "test") for k, i in enumerate(ids)}
+    if a.split_by == "clip":
+        split = _clip_disjoint_split(by_img, imgs, cats, a.split, a.seed)
+        n_train = sum(1 for v in split.values() if v == "gallery")
+    else:
+        ids = sorted(by_img)
+        random.seed(a.seed); random.shuffle(ids)
+        n_train = int(len(ids) * a.split)
+        split = {i: ("gallery" if k < n_train else "test") for k, i in enumerate(ids)}
 
     out = Path(a.out)
     cnt: Counter = Counter()
@@ -70,7 +141,8 @@ def run(a) -> None:
 
     g = sum(v for (wq, _), v in cnt.items() if wq == "gallery")
     t = sum(v for (wq, _), v in cnt.items() if wq == "test")
-    print(f"[coco] {len(ids)} ảnh → gallery {n_train} / test {len(ids)-n_train}")
+    n_test_img = sum(1 for v in split.values() if v == "test")
+    print(f"[coco] {len(split)} ảnh → gallery {len(split)-n_test_img} / test {n_test_img}")
     print(f"  crops: gallery {g}, test {t}, brands {len({b for _,b in cnt})}")
     per = Counter()
     for (wq, b), v in cnt.items():
@@ -83,7 +155,9 @@ def main() -> None:
     ap = argparse.ArgumentParser(description="COCO → gallery/test crops + YOLO")
     ap.add_argument("--coco", required=True, help="thư mục chứa _annotations.coco.json + ảnh")
     ap.add_argument("--out", default="data/real/coco")
-    ap.add_argument("--split", type=float, default=0.6, help="tỉ lệ ảnh cho gallery")
+    ap.add_argument("--split", type=float, default=0.6, help="tỉ lệ crop cho gallery")
+    ap.add_argument("--split-by", choices=["image", "clip"], default="clip",
+                    help="clip = disjoint theo trận/clip (tránh leak, mặc định); image = random")
     ap.add_argument("--pad", type=float, default=0.08)
     ap.add_argument("--yolo", action="store_true", help="xuất nhãn YOLO HBB")
     ap.add_argument("--seed", type=int, default=0)
