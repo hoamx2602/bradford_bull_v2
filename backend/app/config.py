@@ -63,18 +63,6 @@ class Settings(BaseSettings):
     worker_concurrency: int = 1
 
     # ── Logo detector backend ───────────────────────────────────────────
-    # "yolo"   = fine-tuned YOLO26m (.pt) via ultralytics (default).
-    # "rfdetr" = fine-tuned RF-DETR (.pth) via the `rfdetr` package +
-    #            supervision ByteTrack. Set DETECTOR_BACKEND=rfdetr and (opt.)
-    #            RFDETR_MODEL_PATH. Install deps: pip install -e ".[rfdetr]"
-    detector_backend: str = "yolo"
-    rfdetr_model_path: str = ""      # path to checkpoint_best_ema.pth (auto if empty)
-    rfdetr_variant: str = "large"    # nano|small|medium|base|large|2xlarge
-    rfdetr_resolution: int = 0       # 0 = variant default (recommended; override has bugs)
-    # Predicted class_id - offset indexes RFDETR_BRAND_ORDER. The training COCO
-    # had a placeholder category at id 0 with brands at 1..17, so offset = 1.
-    rfdetr_class_offset: int = 1
-
     # ── Models ───────────────────────────────────────────────────────────
     # Logo detector backend: "yolo" = fine-tuned YOLO26m (ultralytics, built-in
     # ByteTrack), "rfdetr" = RF-DETR .pth checkpoint (no NMS; tracking added via

@@ -36,6 +36,8 @@ export interface AnalysisResult {
     audienceSize: number
     placementType: string
     cpmBase: number
+    referenceSpotSeconds?: number
+    emvModelVersion?: string
     placementMultiplier: number
   }
   logos: LogoResult[]

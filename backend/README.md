@@ -10,7 +10,7 @@ architecture in `../Production-System-Design.MD`.
 ## Pipeline
 
 ```
-upload ─▶ ingest ─▶ sample frames (2fps) ─▶ YOLO26 logo detect + ByteTrack ─┐
+upload ─▶ ingest ─▶ sample frames (2fps) ─▶ logo detect + tracking ─────────┐
                                             YOLO11-pose person + keypoints ──┤
                                                                             ▼
         EMV pricing ◀─ exposure aggregation ◀─ visibility scoring   body-zone attribution
@@ -18,27 +18,25 @@ upload ─▶ ingest ─▶ sample frames (2fps) ─▶ YOLO26 logo detect + Byt
               └──────────────────────▶ AnalysisResult (JSON) ◀──────────────┘
 ```
 
-Stage code lives in `app/pipeline/`. **Logo detection uses your fine-tuned
-YOLO26m** at `../logo_detection/runs/logo_yolo26m/weights/best.pt` (auto-discovered;
-retrain at a different size and it's picked up automatically).
+Stage code lives in `app/pipeline/`. Logo detection is selected with
+`LOGO_BACKEND=yolo|rfdetr`; both backends return the same internal detection
+records to the rest of the pipeline.
 
 Body-zone attribution uses a **separate** stock **YOLO11-pose** model for human
 keypoints — the logo model is detect-only and can't produce a skeleton, and
 YOLO26 has no pose variant in ultralytics yet. Set `POSE_MODEL` /
 `ENABLE_POSE=false` to change or disable it; it never touches logo detection.
 
-## ⚠️ ultralytics version is pinned to 8.3.40
+## Legacy YOLO checkpoint compatibility
 
-The fine-tuned `best.pt` was trained against a **pre-release** YOLO26 architecture
-that only loads correctly on **ultralytics 8.3.40**. On 8.4.x (the official YOLO26
-release) the weights load without error but **detect nothing** (silent break) —
-verified on both 8.4.33 and 8.4.62. Keep this env on 8.3.40 until the logo model
-is retrained on 8.4.x. (Retraining on 8.4.x is also the prerequisite for using
-`yolo26*-pose.pt`; see the pose note above.)
+Some early pre-release YOLO26 checkpoints require Ultralytics 8.3.40. The
+current `bradford_bulls` environment uses 8.4.x, so verify any selected `.pt`
+checkpoint with a known frame before processing a full match. RF-DETR does not
+depend on Ultralytics for logo detection, although the pose/person helpers do.
 
 ## Logo detector backend — YOLO (.pt) or RF-DETR (.pth)
 
-Stage 3 is pluggable via `DETECTOR_BACKEND`:
+Stage 3 is pluggable via `LOGO_BACKEND`:
 
 - `yolo` (default) — fine-tuned YOLO26m `best.pt` via ultralytics ByteTrack.
 - `rfdetr` — fine-tuned RF-DETR `checkpoint_best_ema.pth` (from
@@ -48,7 +46,7 @@ Stage 3 is pluggable via `DETECTOR_BACKEND`:
 Switch by adding to `.env`:
 
 ```env
-DETECTOR_BACKEND=rfdetr
+LOGO_BACKEND=rfdetr
 RFDETR_MODEL_PATH=/path/to/checkpoint_best_ema.pth   # optional; auto-detects newest *.pth under logo_detection/runs
 RFDETR_VARIANT=large                                 # must match how it was trained: nano|small|medium|base|large|2xlarge
 ```
@@ -68,23 +66,23 @@ path — on Apple Silicon RF-DETR runs on CPU.
 
 ## Run locally
 
-The project uses a dedicated conda env `bradford_bulls_logo` (a clone of
-`bradford_bulls` with ultralytics pinned to 8.3.40 + the web deps):
+The verified backend environment on this workstation is `bradford_bulls`. It
+contains FastAPI, SQLAlchemy, CUDA-enabled Torch and RF-DETR 1.8.3:
 
 ```bash
-conda activate bradford_bulls_logo
+conda activate bradford_bulls
 cd backend
 cp .env.example .env             # optional; defaults work out of the box
+# Set LOGO_BACKEND=rfdetr in backend/.env to use the RF-DETR checkpoint.
 python -m uvicorn app.main:app --reload --port 8000
 ```
 
-To recreate that env from scratch:
+To recreate a separate environment from the verified one:
 
 ```bash
-conda create --clone bradford_bulls -n bradford_bulls_logo -y
-conda activate bradford_bulls_logo
-pip install "ultralytics==8.3.40" fastapi "uvicorn[standard]" python-multipart \
-            pydantic-settings SQLAlchemy lapx
+conda create --clone bradford_bulls -n bradford_bulls_backend -y
+conda activate bradford_bulls_backend
+pip install -e ".[rfdetr]"
 ```
 
 API docs at http://localhost:8000/docs. Then run the frontend with

@@ -1,0 +1,174 @@
+{
+  "formula": "(qualityExposureSeconds / 30) * (CPM / 1000) * audience * placementMultiplier",
+  "modelVersion": "time-normalised-v2",
+  "referenceSpotSeconds": 30.0,
+  "applied": false,
+  "database": "D:\\bradford_bull_v2\\backend\\data\\app.db",
+  "backup": null,
+  "analysisCount": 23,
+  "oldPortfolioEmvUsd": 3490388.01,
+  "newPortfolioEmvUsd": 116346.29,
+  "analyses": [
+    {
+      "id": "b85bb01f9b34",
+      "eventName": "Match-15-17-06-2025",
+      "oldTotalEmvUsd": 1629.67,
+      "newTotalEmvUsd": 54.32,
+      "ratio": 0.033332
+    },
+    {
+      "id": "98587417c2c0",
+      "eventName": "Match-14-17-06-2025",
+      "oldTotalEmvUsd": 5276.61,
+      "newTotalEmvUsd": 175.89,
+      "ratio": 0.033334
+    },
+    {
+      "id": "05efee614896",
+      "eventName": "Match-13-18-06-2025",
+      "oldTotalEmvUsd": 40648.36,
+      "newTotalEmvUsd": 1354.93,
+      "ratio": 0.033333
+    },
+    {
+      "id": "d2c51feb66c0",
+      "eventName": "Match-10-18-03-2025",
+      "oldTotalEmvUsd": 28703.12,
+      "newTotalEmvUsd": 956.77,
+      "ratio": 0.033333
+    },
+    {
+      "id": "80fa2e181051",
+      "eventName": "Match-22-21-04-2025",
+      "oldTotalEmvUsd": 635.31,
+      "newTotalEmvUsd": 21.18,
+      "ratio": 0.033338
+    },
+    {
+      "id": "de7ef3b66df5",
+      "eventName": "Match-11-08-09-2025",
+      "oldTotalEmvUsd": 1040.38,
+      "newTotalEmvUsd": 34.68,
+      "ratio": 0.033334
+    },
+    {
+      "id": "7f83484cf333",
+      "eventName": "Match-20-21-06-2025",
+      "oldTotalEmvUsd": 5977.97,
+      "newTotalEmvUsd": 199.27,
+      "ratio": 0.033334
+    },
+    {
+      "id": "0846444aa7aa",
+      "eventName": "Match-11-12-09-2025",
+      "oldTotalEmvUsd": 5977.97,
+      "newTotalEmvUsd": 199.27,
+      "ratio": 0.033334
+    },
+    {
+      "id": "65bdf824a8c7",
+      "eventName": "Match-11-12-08-2025",
+      "oldTotalEmvUsd": 7721.84,
+      "newTotalEmvUsd": 257.4,
+      "ratio": 0.033334
+    },
+    {
+      "id": "a6ece42e3094",
+      "eventName": "Match-14-17-09-2025",
+      "oldTotalEmvUsd": 57976.21,
+      "newTotalEmvUsd": 1932.54,
+      "ratio": 0.033333
+    },
+    {
+      "id": "8007f2432e34",
+      "eventName": "Match-19-21-06-2025",
+      "oldTotalEmvUsd": 4184.29,
+      "newTotalEmvUsd": 139.47,
+      "ratio": 0.033332
+    },
+    {
+      "id": "aa5d3bacf6d2",
+      "eventName": "Match-16-17-06-2025",
+      "oldTotalEmvUsd": 45538.31,
+      "newTotalEmvUsd": 1517.94,
+      "ratio": 0.033333
+    },
+    {
+      "id": "2699732a7200",
+      "eventName": "Match-14-27-03-2026",
+      "oldTotalEmvUsd": 13190.4,
+      "newTotalEmvUsd": 439.68,
+      "ratio": 0.033333
+    },
+    {
+      "id": "7e1d6b0b74c2",
+      "eventName": "Match-16-20-05-2025",
+      "oldTotalEmvUsd": 114236.14,
+      "newTotalEmvUsd": 3807.87,
+      "ratio": 0.033333
+    },
+    {
+      "id": "69159b46ffc7",
+      "eventName": "M01_white_1080p_full_highlight",
+      "oldTotalEmvUsd": 488828.02,
+      "newTotalEmvUsd": 16294.27,
+      "ratio": 0.033333
+    },
+    {
+      "id": "d35cf1610ccf",
+      "eventName": "M02_white_1440p_full_highlight",
+      "oldTotalEmvUsd": 92083.41,
+      "newTotalEmvUsd": 3069.46,
+      "ratio": 0.033333
+    },
+    {
+      "id": "88ef6e7818b4",
+      "eventName": "M03_black_1080p_full_highlight",
+      "oldTotalEmvUsd": 105726.03,
+      "newTotalEmvUsd": 3524.2,
+      "ratio": 0.033333
+    },
+    {
+      "id": "e6d8bf5d7eb8",
+      "eventName": "M04_black_1080p_full_highlight",
+      "oldTotalEmvUsd": 671468.41,
+      "newTotalEmvUsd": 22382.3,
+      "ratio": 0.033333
+    },
+    {
+      "id": "d07164e65cce",
+      "eventName": "M05_white_1080p_full_highlight",
+      "oldTotalEmvUsd": 164060.71,
+      "newTotalEmvUsd": 5468.67,
+      "ratio": 0.033333
+    },
+    {
+      "id": "1e25d6071d51",
+      "eventName": "M06_black_1080p_full_highlight",
+      "oldTotalEmvUsd": 563125.65,
+      "newTotalEmvUsd": 18770.86,
+      "ratio": 0.033333
+    },
+    {
+      "id": "26d77afc03c9",
+      "eventName": "M07_white_1080p_full_highlight",
+      "oldTotalEmvUsd": 450609.0,
+      "newTotalEmvUsd": 15020.3,
+      "ratio": 0.033333
+    },
+    {
+      "id": "826125836b9e",
+      "eventName": "M08_white_1080p_full_highlight",
+      "oldTotalEmvUsd": 258589.35,
+      "newTotalEmvUsd": 8619.65,
+      "ratio": 0.033333
+    },
+    {
+      "id": "45b501484df5",
+      "eventName": "M11_black_1080p_full_highlight",
+      "oldTotalEmvUsd": 363160.85,
+      "newTotalEmvUsd": 12105.37,
+      "ratio": 0.033333
+    }
+  ]
+}

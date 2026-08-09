@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 
-from app.pipeline.pricing import placement_multiplier
+from app.pipeline.pricing import REFERENCE_SPOT_SECONDS, placement_multiplier
 
 
 def build_analysis_result(
@@ -47,6 +47,8 @@ def build_analysis_result(
             "audienceSize": audience_size,
             "placementType": placement_type,
             "cpmBase": cpm_base,
+            "referenceSpotSeconds": REFERENCE_SPOT_SECONDS,
+            "emvModelVersion": "time-normalised-v2",
             "placementMultiplier": placement_multiplier(placement_type),
             "framesAnalyzed": frames_analyzed,
         },

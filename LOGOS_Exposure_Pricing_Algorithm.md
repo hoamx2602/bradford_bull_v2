@@ -92,16 +92,33 @@ Kết quả: **tổng giây exposure đã được quality-weighted** cho mỗi 
 
 ## Tầng 3 — Media Value / EMV (per logo per event)
 
-### Công thức gốc (chuẩn industry — Relo Metrics, USPTO Patent)
+### Công thức time-normalised
 
 ```
-EMV = Exposure_Score × (CPM_base / 1000) × Audience_Size
+EMV = (Quality_Exposure_Seconds / Reference_Spot_Seconds)
+    × (CPM_base / 1000) × Audience_Size
     × Placement_Multiplier
     × Category_Multiplier
     × Prime_Time_Multiplier
 ```
 
+`Reference_Spot_Seconds = 30` trong implementation hiện tại. CPM là chi phí cho
+1.000 impressions, không phải chi phí cho mỗi giây. Vì vậy quality-exposure
+seconds phải được quy đổi thành số 30-second equivalent spots trước khi nhân
+với CPM và audience. US Patent 12,124,509 mô tả media-cost equivalent dựa trên
+giá commercial 30 giây, audience và phần trăm attribution theo duration,
+prominence, size, clarity và position; Nielsen cũng mô tả QI Media Value là sự
+kết hợp giữa quality-weighted exposure, audience data và advertising rates.
+
+Ví dụ: 120 quality-exposure seconds, CPM US$22, audience 40.000 và multiplier
+1,0 cho kết quả `(120/30) × (22/1000) × 40.000 = US$3.520`, không phải
+US$105.600.
+
 ### Placement Multiplier
+
+Các giá trị dưới đây là **scenario assumptions của project**, không phải một
+rate card phổ quát. Nếu có CPM riêng cho từng broadcaster/channel thì nên dùng
+CPM đó và đặt multiplier bằng 1,0.
 
 | Loại phát sóng | Multiplier |
 |---------------|------------|
@@ -112,6 +129,9 @@ EMV = Exposure_Score × (CPM_base / 1000) × Audience_Size
 
 ### Category Multiplier (Share of Voice)
 
+Các multiplier này hiện là extension points và chưa được bật trong backend;
+giá trị mặc định là 1,0.
+
 | Tình huống | Multiplier |
 |-----------|------------|
 | Logo duy nhất trong ngành (exclusivity) | 1.25 |
@@ -120,22 +140,21 @@ EMV = Exposure_Score × (CPM_base / 1000) × Audience_Size
 
 ### Prime Time Multiplier
 
+Các multiplier này hiện là extension points và chưa được bật trong backend;
+giá trị mặc định là 1,0.
+
 | Thời điểm trong sự kiện | Multiplier |
 |------------------------|------------|
 | 15 phút đầu / cuối trận | 1.30 |
 | Giữa trận | 1.00 |
 | Ngoài giờ chính (pre/post match) | 0.70 |
 
-### CPM Benchmark tham khảo
+### CPM input
 
-| Loại sự kiện | CPM_base gợi ý |
-|-------------|----------------|
-| Thể thao đại chúng (bóng đá, bóng bầu dục) | $15 – $25 |
-| Thể thao cao cấp (golf, tennis, F1) | $35 – $60 |
-| Esports / Gaming event | $8 – $15 |
-| Local / regional event | $5 – $12 |
-
-> Điều chỉnh CPM_base theo dữ liệu thực tế của broadcaster/event organizer.
+Không có một CPM đúng cho mọi sự kiện. CPM phải lấy từ broadcaster, media buyer
+hoặc rate card của event/channel và lưu cùng analysis. Giá trị US$22 trong dữ
+liệu hiện tại được xem là scenario input của project, không phải market benchmark
+được luận văn chứng minh.
 
 ---
 
@@ -163,7 +182,7 @@ EMV = Exposure_Score × (CPM_base / 1000) × Audience_Size
 | Đếm số frame xuất hiện | Quality-weighted exposure seconds |
 | Diện tích HBB thẳng | OBB Penalty hiệu chỉnh logo nghiêng |
 | Duration đơn giản | Phân segment + Duration Weight |
-| CPM × giây | EMV × 3 multipliers (Placement, Category, Prime Time) |
+| CPM × giây | Quy về 30-second equivalent rồi mới nhân CPM và các scenario multipliers |
 | Không phân biệt vị trí | Gaussian Position Score (tâm > góc) |
 
 ---
@@ -180,8 +199,7 @@ EMV = Exposure_Score × (CPM_base / 1000) × Audience_Size
 
 ## Nguồn tham khảo
 
-- [ExposureEngine — arxiv 2510.04739](https://arxiv.org/abs/2510.04739)
-- [Sponsorship ROI with Logo Tracking — API4AI](https://medium.com/@API4AI/sponsorship-roi-from-live-sports-feeds-bd9b686038f9)
-- [The Benefits of Sponsor Media Value — Relo Metrics](https://blog.relometrics.com/the-benefits-of-sponsor-media-value-and-how-it-is-calculated)
-- [What is Media Value — Shikenso](https://shikenso.com/blog/understanding-media-value-the-key-to-sponsorship-success)
-- [Automated media analysis for sponsor valuation — USPTO Patent 12124509](https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/12124509)
+- [Google Ads — Cost-per-thousand impressions (CPM): Definition](https://support.google.com/google-ads/answer/6310?hl=en)
+- [Nielsen — Sponsorship Media Value Benchmarking Report and QI methodology](https://www.nielsen.com/report/sponsorship-media-value-benchmarking-report/)
+- Katz, J. B., Carter, C. N., & Kim, B. J. (2024). *Automated media analysis for sponsor valuation*. U.S. Patent No. 12,124,509. [USPTO PDF](https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/12124509)
+- [ExposureEngine — arXiv:2510.04739](https://arxiv.org/abs/2510.04739) (visibility measurement only; it does not publish an EMV formula)

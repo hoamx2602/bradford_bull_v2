@@ -8,7 +8,7 @@ import { getJob } from '@/lib/api'
 const STEPS = [
   { label: 'Frame extraction',       detail: (n: string) => n || 'Frames extracted' },
   { label: 'Target-team identification', detail: (n: string) => n || 'Kit references + player tracking' },
-  { label: 'YOLO26 logo detection',  detail: (n: string) => n || 'Brands identified across frames' },
+  { label: 'Sponsor-logo detection', detail: (n: string) => n || 'Brands identified across frames' },
   { label: 'Computing exposure scores', detail: (n: string) => n || 'Quality-weighted segments calculated' },
   { label: 'Calculating media value',   detail: (n: string) => n || 'EMV computed per brand' },
 ]

@@ -64,3 +64,9 @@ team_detection/output
 Auto\ Label\ White.coco/
 /training-result
 /logo_detection/synthetic
+
+outputs/*
+dissertation/*
+
+# Large models
+*mobileclip_blt.ts*

@@ -12,9 +12,9 @@ router = APIRouter(prefix="/api", tags=["health"])
 @router.get("/health")
 def health() -> dict:
     settings = get_settings()
-    backend = (settings.detector_backend or "yolo").lower()
+    backend = (settings.logo_backend or "yolo").lower()
     model_path = (
-        settings.resolved_rfdetr_path()
+        settings.resolved_rfdetr_model_path()
         if backend == "rfdetr"
         else settings.resolved_model_path()
     )

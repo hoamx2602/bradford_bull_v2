@@ -14,11 +14,26 @@ def test_placement_multipliers():
 
 def test_emv_formula():
     # 10 quality-seconds, $20 CPM, 1,000,000 viewers, live (x1.0)
-    # EMV = 10 * (20/1000) * 1_000_000 * 1.0 = 200_000
+    # EMV = (10/30) * (20/1000) * 1_000_000 * 1.0 = 6,666.67
     emv = pricing.emv_for_logo(
         10.0, cpm_base=20.0, audience_size=1_000_000, placement_mult=1.0
     )
-    assert emv == 200_000.0
+    assert abs(emv - (20_000.0 / 3.0)) < 1e-9
+
+
+def test_emv_formula_rejects_invalid_reference_slot():
+    try:
+        pricing.emv_for_logo(
+            10.0,
+            cpm_base=20.0,
+            audience_size=1_000_000,
+            placement_mult=1.0,
+            reference_spot_seconds=0.0,
+        )
+    except ValueError as exc:
+        assert "reference_spot_seconds" in str(exc)
+    else:
+        raise AssertionError("zero-length reference spot should be rejected")
 
 
 def test_price_logos_fills_emv():
@@ -27,5 +42,5 @@ def test_price_logos_fills_emv():
         logos, cpm_base=22.0, audience_size=2_000_000, placement_type="Live Stream"
     )
     assert mult == 0.85
-    assert logos[0]["emvUsd"] == round(5.0 * 0.022 * 2_000_000 * 0.85, 2)
+    assert logos[0]["emvUsd"] == round((5.0 / 30.0) * 0.022 * 2_000_000 * 0.85, 2)
     assert logos[1]["emvUsd"] == 0.0

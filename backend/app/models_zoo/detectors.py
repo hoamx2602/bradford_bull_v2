@@ -17,6 +17,8 @@ from __future__ import annotations
 import logging
 from typing import NamedTuple
 
+from app.config import RFDETR_CLASS_NAMES
+
 log = logging.getLogger("app.models")
 
 
@@ -126,7 +128,7 @@ class RFDetrBackend(LogoBackend):
             )
         ModelCls = getattr(rfdetr, cls_name)
 
-        path = settings.resolved_rfdetr_path()
+        path = settings.resolved_rfdetr_model_path()
         # rfdetr auto-uses CUDA when present; the DINOv2 backbone has no MPS path,
         # so anything that isn't CUDA falls back to CPU.
         rf_device = "cuda" if device in ("0", "cuda") or device.isdigit() else "cpu"
@@ -146,7 +148,7 @@ class RFDetrBackend(LogoBackend):
         # COCO categories were [placeholder(id 0), brand_1 .. brand_17]; the model
         # emits the category id, so class_id - offset indexes RFDETR_BRAND_ORDER.
         off = settings.rfdetr_class_offset
-        self.names = {i + off: b for i, b in enumerate(settings.rfdetr_brand_order)}
+        self.names = {i + off: b for i, b in enumerate(RFDETR_CLASS_NAMES)}
         self.tracker = sv.ByteTrack()
 
     def reset(self) -> None:
@@ -154,8 +156,10 @@ class RFDetrBackend(LogoBackend):
 
     def _predict(self, frame):
         # rfdetr expects RGB; OpenCV frames are BGR.
-        rgb = frame[:, :, ::-1]
-        return self.model.predict(rgb, threshold=self.settings.conf)
+        # Channel reversal creates a negative-stride NumPy view; torchvision's
+        # to_tensor cannot consume that layout, so materialise a contiguous copy.
+        rgb = frame[:, :, ::-1].copy()
+        return self.model.predict(rgb, threshold=self.settings.rfdetr_conf)
 
     def detect(self, frame, imgsz: int | None = None) -> list[RawBox]:
         # RF-DETR resizes internally to the variant resolution; imgsz is ignored.
@@ -179,7 +183,7 @@ class RFDetrBackend(LogoBackend):
 
 
 def load_logo_backend(settings, device: str) -> LogoBackend:
-    backend = (settings.detector_backend or "yolo").lower()
+    backend = (settings.logo_backend or "yolo").lower()
     if backend == "rfdetr":
         return RFDetrBackend(settings, device)
     if backend == "yolo":
