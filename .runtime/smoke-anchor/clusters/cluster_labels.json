@@ -1,0 +1,767 @@
+[
+ {
+  "cid": 114,
+  "n": 175,
+  "slot": "chest",
+  "label": "unlabeled",
+  "sim": 0.632,
+  "sims": {
+   "klg": 0.611,
+   "paints_laquers": 0.332,
+   "mcp": 0.632,
+   "aon": 0.457,
+   "chadlaw": 0.347,
+   "acs": 0.192
+  }
+ },
+ {
+  "cid": 102,
+  "n": 110,
+  "slot": "chest",
+  "label": "unlabeled",
+  "sim": 0.512,
+  "sims": {
+   "klg": 0.512,
+   "paints_laquers": 0.232,
+   "mcp": 0.481,
+   "aon": 0.338,
+   "chadlaw": 0.253,
+   "acs": 0.098
+  }
+ },
+ {
+  "cid": 107,
+  "n": 103,
+  "slot": "chest",
+  "label": "mcp",
+  "sim": 0.658,
+  "sims": {
+   "klg": 0.507,
+   "paints_laquers": 0.245,
+   "mcp": 0.658,
+   "aon": 0.358,
+   "chadlaw": 0.275,
+   "acs": 0.139
+  }
+ },
+ {
+  "cid": 67,
+  "n": 89,
+  "slot": "chest",
+  "label": "unlabeled",
+  "sim": 0.527,
+  "sims": {
+   "klg": 0.527,
+   "paints_laquers": 0.232,
+   "mcp": 0.526,
+   "aon": 0.404,
+   "chadlaw": 0.286,
+   "acs": 0.153
+  }
+ },
+ {
+  "cid": 87,
+  "n": 88,
+  "slot": "chest",
+  "label": "unlabeled",
+  "sim": 0.489,
+  "sims": {
+   "klg": 0.48,
+   "paints_laquers": 0.177,
+   "mcp": 0.489,
+   "aon": 0.347,
+   "chadlaw": 0.2,
+   "acs": 0.089
+  }
+ },
+ {
+  "cid": 47,
+  "n": 83,
+  "slot": "abdomen",
+  "label": "unlabeled",
+  "sim": 0.431,
+  "sims": {
+   "klg": 0.42,
+   "paints_laquers": 0.16,
+   "mcp": 0.431,
+   "aon": 0.325,
+   "chadlaw": 0.179,
+   "acs": 0.103
+  }
+ },
+ {
+  "cid": 61,
+  "n": 82,
+  "slot": "abdomen",
+  "label": "unlabeled",
+  "sim": 0.541,
+  "sims": {
+   "klg": 0.541,
+   "paints_laquers": 0.163,
+   "mcp": 0.479,
+   "aon": 0.368,
+   "chadlaw": 0.281,
+   "acs": 0.156
+  }
+ },
+ {
+  "cid": 132,
+  "n": 78,
+  "slot": "shorts",
+  "label": "klg",
+  "sim": 0.614,
+  "sims": {
+   "klg": 0.614,
+   "paints_laquers": 0.379,
+   "mcp": 0.582,
+   "aon": 0.465,
+   "chadlaw": 0.311,
+   "acs": 0.214
+  }
+ },
+ {
+  "cid": 63,
+  "n": 75,
+  "slot": "chest",
+  "label": "unlabeled",
+  "sim": 0.503,
+  "sims": {
+   "klg": 0.488,
+   "paints_laquers": 0.187,
+   "mcp": 0.503,
+   "aon": 0.382,
+   "chadlaw": 0.204,
+   "acs": 0.112
+  }
+ },
+ {
+  "cid": 222,
+  "n": 75,
+  "slot": "chest",
+  "label": "unlabeled",
+  "sim": 0.518,
+  "sims": {
+   "klg": 0.518,
+   "paints_laquers": 0.325,
+   "mcp": 0.476,
+   "aon": 0.339,
+   "chadlaw": 0.264,
+   "acs": 0.134
+  }
+ },
+ {
+  "cid": 234,
+  "n": 71,
+  "slot": "chest",
+  "label": "mcp",
+  "sim": 0.655,
+  "sims": {
+   "klg": 0.534,
+   "paints_laquers": 0.307,
+   "mcp": 0.655,
+   "aon": 0.42,
+   "chadlaw": 0.376,
+   "acs": 0.194
+  }
+ },
+ {
+  "cid": 146,
+  "n": 64,
+  "slot": "chest",
+  "label": "mcp",
+  "sim": 0.655,
+  "sims": {
+   "klg": 0.415,
+   "paints_laquers": 0.229,
+   "mcp": 0.655,
+   "aon": 0.314,
+   "chadlaw": 0.29,
+   "acs": 0.16
+  }
+ },
+ {
+  "cid": 158,
+  "n": 61,
+  "slot": "shorts",
+  "label": "unlabeled",
+  "sim": 0.517,
+  "sims": {
+   "klg": 0.517,
+   "paints_laquers": 0.281,
+   "mcp": 0.513,
+   "aon": 0.375,
+   "chadlaw": 0.283,
+   "acs": 0.17
+  }
+ },
+ {
+  "cid": 148,
+  "n": 59,
+  "slot": "chest",
+  "label": "unlabeled",
+  "sim": 0.438,
+  "sims": {
+   "klg": 0.438,
+   "paints_laquers": 0.246,
+   "mcp": 0.438,
+   "aon": 0.343,
+   "chadlaw": 0.233,
+   "acs": 0.12
+  }
+ },
+ {
+  "cid": 103,
+  "n": 58,
+  "slot": "legs",
+  "label": "unlabeled",
+  "sim": 0.54,
+  "sims": {
+   "klg": 0.536,
+   "paints_laquers": 0.32,
+   "mcp": 0.54,
+   "aon": 0.432,
+   "chadlaw": 0.301,
+   "acs": 0.188
+  }
+ },
+ {
+  "cid": 81,
+  "n": 54,
+  "slot": "abdomen",
+  "label": "unlabeled",
+  "sim": 0.58,
+  "sims": {
+   "klg": 0.58,
+   "paints_laquers": 0.258,
+   "mcp": 0.555,
+   "aon": 0.44,
+   "chadlaw": 0.313,
+   "acs": 0.174
+  }
+ },
+ {
+  "cid": 179,
+  "n": 52,
+  "slot": "abdomen",
+  "label": "unlabeled",
+  "sim": 0.593,
+  "sims": {
+   "klg": 0.588,
+   "paints_laquers": 0.34,
+   "mcp": 0.593,
+   "aon": 0.488,
+   "chadlaw": 0.33,
+   "acs": 0.197
+  }
+ },
+ {
+  "cid": 112,
+  "n": 51,
+  "slot": "chest",
+  "label": "unlabeled",
+  "sim": 0.478,
+  "sims": {
+   "klg": 0.478,
+   "paints_laquers": 0.244,
+   "mcp": 0.474,
+   "aon": 0.386,
+   "chadlaw": 0.265,
+   "acs": 0.107
+  }
+ },
+ {
+  "cid": 50,
+  "n": 48,
+  "slot": "abdomen",
+  "label": "mcp",
+  "sim": 0.654,
+  "sims": {
+   "klg": 0.62,
+   "paints_laquers": 0.264,
+   "mcp": 0.654,
+   "aon": 0.466,
+   "chadlaw": 0.287,
+   "acs": 0.212
+  }
+ },
+ {
+  "cid": 95,
+  "n": 48,
+  "slot": "abdomen",
+  "label": "unlabeled",
+  "sim": 0.453,
+  "sims": {
+   "klg": 0.453,
+   "paints_laquers": 0.238,
+   "mcp": 0.43,
+   "aon": 0.371,
+   "chadlaw": 0.179,
+   "acs": 0.117
+  }
+ },
+ {
+  "cid": 218,
+  "n": 46,
+  "slot": "chest",
+  "label": "mcp",
+  "sim": 0.616,
+  "sims": {
+   "klg": 0.486,
+   "paints_laquers": 0.287,
+   "mcp": 0.616,
+   "aon": 0.337,
+   "chadlaw": 0.331,
+   "acs": 0.144
+  }
+ },
+ {
+  "cid": 80,
+  "n": 44,
+  "slot": "chest",
+  "label": "unlabeled",
+  "sim": 0.566,
+  "sims": {
+   "klg": 0.398,
+   "paints_laquers": 0.138,
+   "mcp": 0.566,
+   "aon": 0.278,
+   "chadlaw": 0.182,
+   "acs": 0.081
+  }
+ },
+ {
+  "cid": 141,
+  "n": 44,
+  "slot": "shorts",
+  "label": "unlabeled",
+  "sim": 0.517,
+  "sims": {
+   "klg": 0.517,
+   "paints_laquers": 0.33,
+   "mcp": 0.493,
+   "aon": 0.4,
+   "chadlaw": 0.296,
+   "acs": 0.194
+  }
+ },
+ {
+  "cid": 197,
+  "n": 44,
+  "slot": "abdomen",
+  "label": "unlabeled",
+  "sim": 0.542,
+  "sims": {
+   "klg": 0.542,
+   "paints_laquers": 0.32,
+   "mcp": 0.517,
+   "aon": 0.409,
+   "chadlaw": 0.265,
+   "acs": 0.191
+  }
+ },
+ {
+  "cid": 84,
+  "n": 43,
+  "slot": "chest",
+  "label": "mcp",
+  "sim": 0.689,
+  "sims": {
+   "klg": 0.567,
+   "paints_laquers": 0.309,
+   "mcp": 0.689,
+   "aon": 0.426,
+   "chadlaw": 0.341,
+   "acs": 0.184
+  }
+ },
+ {
+  "cid": 161,
+  "n": 41,
+  "slot": "chest",
+  "label": "unlabeled",
+  "sim": 0.466,
+  "sims": {
+   "klg": 0.466,
+   "paints_laquers": 0.246,
+   "mcp": 0.456,
+   "aon": 0.35,
+   "chadlaw": 0.229,
+   "acs": 0.114
+  }
+ },
+ {
+  "cid": 210,
+  "n": 41,
+  "slot": "abdomen",
+  "label": "unlabeled",
+  "sim": 0.547,
+  "sims": {
+   "klg": 0.541,
+   "paints_laquers": 0.279,
+   "mcp": 0.547,
+   "aon": 0.412,
+   "chadlaw": 0.227,
+   "acs": 0.165
+  }
+ },
+ {
+  "cid": 62,
+  "n": 40,
+  "slot": "abdomen",
+  "label": "unlabeled",
+  "sim": 0.446,
+  "sims": {
+   "klg": 0.446,
+   "paints_laquers": 0.118,
+   "mcp": 0.392,
+   "aon": 0.312,
+   "chadlaw": 0.208,
+   "acs": 0.086
+  }
+ },
+ {
+  "cid": 202,
+  "n": 38,
+  "slot": "chest",
+  "label": "unlabeled",
+  "sim": 0.57,
+  "sims": {
+   "klg": 0.563,
+   "paints_laquers": 0.312,
+   "mcp": 0.57,
+   "aon": 0.359,
+   "chadlaw": 0.316,
+   "acs": 0.144
+  }
+ },
+ {
+  "cid": 77,
+  "n": 35,
+  "slot": "chest",
+  "label": "unlabeled",
+  "sim": 0.475,
+  "sims": {
+   "klg": 0.475,
+   "paints_laquers": 0.179,
+   "mcp": 0.466,
+   "aon": 0.357,
+   "chadlaw": 0.22,
+   "acs": 0.09
+  }
+ },
+ {
+  "cid": 38,
+  "n": 34,
+  "slot": "legs",
+  "label": "unlabeled",
+  "sim": 0.258,
+  "sims": {
+   "klg": 0.221,
+   "paints_laquers": 0.164,
+   "mcp": 0.258,
+   "aon": 0.138,
+   "chadlaw": 0.219,
+   "acs": 0.091
+  }
+ },
+ {
+  "cid": 128,
+  "n": 33,
+  "slot": "shorts",
+  "label": "mcp",
+  "sim": 0.697,
+  "sims": {
+   "klg": 0.609,
+   "paints_laquers": 0.367,
+   "mcp": 0.697,
+   "aon": 0.428,
+   "chadlaw": 0.341,
+   "acs": 0.21
+  }
+ },
+ {
+  "cid": 157,
+  "n": 33,
+  "slot": "chest",
+  "label": "unlabeled",
+  "sim": 0.53,
+  "sims": {
+   "klg": 0.53,
+   "paints_laquers": 0.296,
+   "mcp": 0.525,
+   "aon": 0.379,
+   "chadlaw": 0.309,
+   "acs": 0.149
+  }
+ },
+ {
+  "cid": 93,
+  "n": 32,
+  "slot": "abdomen",
+  "label": "unlabeled",
+  "sim": 0.497,
+  "sims": {
+   "klg": 0.477,
+   "paints_laquers": 0.246,
+   "mcp": 0.497,
+   "aon": 0.362,
+   "chadlaw": 0.22,
+   "acs": 0.143
+  }
+ },
+ {
+  "cid": 177,
+  "n": 30,
+  "slot": "chest",
+  "label": "unlabeled",
+  "sim": 0.535,
+  "sims": {
+   "klg": 0.377,
+   "paints_laquers": 0.169,
+   "mcp": 0.535,
+   "aon": 0.262,
+   "chadlaw": 0.208,
+   "acs": 0.102
+  }
+ },
+ {
+  "cid": 263,
+  "n": 30,
+  "slot": "chest",
+  "label": "mcp",
+  "sim": 0.714,
+  "sims": {
+   "klg": 0.526,
+   "paints_laquers": 0.298,
+   "mcp": 0.714,
+   "aon": 0.399,
+   "chadlaw": 0.408,
+   "acs": 0.185
+  }
+ },
+ {
+  "cid": 23,
+  "n": 29,
+  "slot": "legs",
+  "label": "unlabeled",
+  "sim": 0.258,
+  "sims": {
+   "klg": 0.206,
+   "paints_laquers": 0.115,
+   "mcp": 0.251,
+   "aon": 0.109,
+   "chadlaw": 0.258,
+   "acs": 0.0
+  }
+ },
+ {
+  "cid": 143,
+  "n": 28,
+  "slot": "legs",
+  "label": "unlabeled",
+  "sim": 0.5,
+  "sims": {
+   "klg": 0.493,
+   "paints_laquers": 0.267,
+   "mcp": 0.5,
+   "aon": 0.372,
+   "chadlaw": 0.251,
+   "acs": 0.151
+  }
+ },
+ {
+  "cid": 17,
+  "n": 27,
+  "slot": "legs",
+  "label": "unlabeled",
+  "sim": 0.504,
+  "sims": {
+   "klg": 0.352,
+   "paints_laquers": 0.245,
+   "mcp": 0.504,
+   "aon": 0.178,
+   "chadlaw": 0.23,
+   "acs": 0.125
+  }
+ },
+ {
+  "cid": 117,
+  "n": 27,
+  "slot": "chest",
+  "label": "unlabeled",
+  "sim": 0.417,
+  "sims": {
+   "klg": 0.382,
+   "paints_laquers": 0.182,
+   "mcp": 0.417,
+   "aon": 0.277,
+   "chadlaw": 0.102,
+   "acs": 0.065
+  }
+ },
+ {
+  "cid": 121,
+  "n": 25,
+  "slot": "legs",
+  "label": "unlabeled",
+  "sim": 0.548,
+  "sims": {
+   "klg": 0.548,
+   "paints_laquers": 0.318,
+   "mcp": 0.517,
+   "aon": 0.419,
+   "chadlaw": 0.289,
+   "acs": 0.183
+  }
+ },
+ {
+  "cid": 129,
+  "n": 25,
+  "slot": "chest",
+  "label": "unlabeled",
+  "sim": 0.413,
+  "sims": {
+   "klg": 0.413,
+   "paints_laquers": 0.247,
+   "mcp": 0.393,
+   "aon": 0.345,
+   "chadlaw": 0.213,
+   "acs": 0.12
+  }
+ },
+ {
+  "cid": 35,
+  "n": 24,
+  "slot": "chest",
+  "label": "mcp",
+  "sim": 0.691,
+  "sims": {
+   "klg": 0.63,
+   "paints_laquers": 0.368,
+   "mcp": 0.691,
+   "aon": 0.52,
+   "chadlaw": 0.38,
+   "acs": 0.238
+  }
+ },
+ {
+  "cid": 55,
+  "n": 24,
+  "slot": "chest",
+  "label": "unlabeled",
+  "sim": 0.417,
+  "sims": {
+   "klg": 0.417,
+   "paints_laquers": 0.125,
+   "mcp": 0.37,
+   "aon": 0.294,
+   "chadlaw": 0.164,
+   "acs": 0.073
+  }
+ },
+ {
+  "cid": 69,
+  "n": 24,
+  "slot": "chest",
+  "label": "mcp",
+  "sim": 0.735,
+  "sims": {
+   "klg": 0.571,
+   "paints_laquers": 0.291,
+   "mcp": 0.735,
+   "aon": 0.405,
+   "chadlaw": 0.439,
+   "acs": 0.208
+  }
+ },
+ {
+  "cid": 176,
+  "n": 23,
+  "slot": "chest",
+  "label": "mcp",
+  "sim": 0.632,
+  "sims": {
+   "klg": 0.563,
+   "paints_laquers": 0.32,
+   "mcp": 0.632,
+   "aon": 0.438,
+   "chadlaw": 0.389,
+   "acs": 0.171
+  }
+ },
+ {
+  "cid": 136,
+  "n": 21,
+  "slot": "shorts",
+  "label": "unlabeled",
+  "sim": 0.563,
+  "sims": {
+   "klg": 0.458,
+   "paints_laquers": 0.269,
+   "mcp": 0.563,
+   "aon": 0.376,
+   "chadlaw": 0.311,
+   "acs": 0.161
+  }
+ },
+ {
+  "cid": 219,
+  "n": 21,
+  "slot": "shorts",
+  "label": "mcp",
+  "sim": 0.625,
+  "sims": {
+   "klg": 0.554,
+   "paints_laquers": 0.351,
+   "mcp": 0.625,
+   "aon": 0.458,
+   "chadlaw": 0.335,
+   "acs": 0.203
+  }
+ },
+ {
+  "cid": 162,
+  "n": 20,
+  "slot": "abdomen",
+  "label": "unlabeled",
+  "sim": 0.438,
+  "sims": {
+   "klg": 0.438,
+   "paints_laquers": 0.253,
+   "mcp": 0.408,
+   "aon": 0.331,
+   "chadlaw": 0.191,
+   "acs": 0.134
+  }
+ },
+ {
+  "cid": 187,
+  "n": 20,
+  "slot": "chest",
+  "label": "unlabeled",
+  "sim": 0.502,
+  "sims": {
+   "klg": 0.502,
+   "paints_laquers": 0.302,
+   "mcp": 0.492,
+   "aon": 0.376,
+   "chadlaw": 0.281,
+   "acs": 0.125
+  }
+ },
+ {
+  "cid": 204,
+  "n": 20,
+  "slot": "chest",
+  "label": "unlabeled",
+  "sim": 0.599,
+  "sims": {
+   "klg": 0.482,
+   "paints_laquers": 0.315,
+   "mcp": 0.599,
+   "aon": 0.36,
+   "chadlaw": 0.319,
+   "acs": 0.169
+  }
+ }
+]

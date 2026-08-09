@@ -36,6 +36,8 @@ def main() -> None:
     ap.add_argument("--every-n", type=int, default=6,
                     help="mỗi track chỉ mine 1/N detection đạt chuẩn")
     ap.add_argument("--conf", type=float, default=0.3)
+    ap.add_argument("--quantize", type=int, default=16,
+                    help="SAM3 weight quantization bits; 16 reduces VRAM use")
     ap.add_argument("--margin", type=float, default=0.06)
     a = ap.parse_args()
     crop_dir = a.out / "crops"; crop_dir.mkdir(parents=True, exist_ok=True)
@@ -64,7 +66,7 @@ def main() -> None:
     from ultralytics.models.sam import SAM3SemanticPredictor
     P = SAM3SemanticPredictor(overrides=dict(
         conf=a.conf, task="segment", mode="predict", model=a.weights,
-        save=False, verbose=False, device="cuda", imgsz=644))
+        save=False, verbose=False, device="cuda", imgsz=644, quantize=a.quantize))
 
     cap = cv2.VideoCapture(a.video)
     meta = []

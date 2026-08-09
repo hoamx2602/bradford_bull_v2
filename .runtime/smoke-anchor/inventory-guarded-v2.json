@@ -1,0 +1,292 @@
+[
+ {
+  "brand": "klg",
+  "slot": "abdomen",
+  "status": "CONFIRMED",
+  "reads": 93,
+  "target_reads": 69,
+  "target_ratio": 0.74,
+  "n_tracks": 50,
+  "sample_texts": [
+   "KLG",
+   "KLG",
+   "KlG",
+   "KlG"
+  ]
+ },
+ {
+  "brand": "mcp",
+  "slot": "chest",
+  "status": "CONFIRMED",
+  "reads": 36,
+  "target_reads": 36,
+  "target_ratio": 1.0,
+  "n_tracks": 23,
+  "sample_texts": [
+   "MCP",
+   "Mcp",
+   "Mcp",
+   "Mcp"
+  ]
+ },
+ {
+  "brand": "klg",
+  "slot": "legs",
+  "status": "WEAK_NON_TARGET",
+  "reads": 15,
+  "target_reads": 8,
+  "target_ratio": 0.53,
+  "n_tracks": 11,
+  "sample_texts": [
+   "KlG",
+   "KlG",
+   "KLG",
+   "KlG"
+  ]
+ },
+ {
+  "brand": "chadlaw",
+  "slot": "chest",
+  "status": "SUSPECT_PLAYER_NAME",
+  "reads": 13,
+  "target_reads": 13,
+  "target_ratio": 1.0,
+  "n_tracks": 5,
+  "sample_texts": [
+   "LAWRENce",
+   "LAWRENCE",
+   "LAWRENCE",
+   "AWRENCE"
+  ]
+ },
+ {
+  "brand": "klg",
+  "slot": "shorts",
+  "status": "CONFIRMED",
+  "reads": 12,
+  "target_reads": 8,
+  "target_ratio": 0.67,
+  "n_tracks": 11,
+  "sample_texts": [
+   "Klg",
+   "KlG",
+   "KLG",
+   "KLG"
+  ]
+ },
+ {
+  "brand": "klg",
+  "slot": "chest",
+  "status": "WEAK_NON_TARGET",
+  "reads": 11,
+  "target_reads": 6,
+  "target_ratio": 0.55,
+  "n_tracks": 8,
+  "sample_texts": [
+   "KLG",
+   "KLG",
+   "Klg",
+   "KlG"
+  ]
+ },
+ {
+  "brand": "mcp",
+  "slot": "shorts",
+  "status": "WEAK_NON_TARGET",
+  "reads": 7,
+  "target_reads": 4,
+  "target_ratio": 0.57,
+  "n_tracks": 7,
+  "sample_texts": [
+   "MCP",
+   "Mcp",
+   "Mcp",
+   "Mcp"
+  ]
+ },
+ {
+  "brand": "mcp",
+  "slot": "sleeve",
+  "status": "CONFIRMED",
+  "reads": 4,
+  "target_reads": 4,
+  "target_ratio": 1.0,
+  "n_tracks": 4,
+  "sample_texts": [
+   "Mcp",
+   "mcp",
+   "Mcp",
+   "Mcp"
+  ]
+ },
+ {
+  "brand": "klg",
+  "slot": "sleeve",
+  "status": "WEAK_NON_TARGET",
+  "reads": 4,
+  "target_reads": 1,
+  "target_ratio": 0.25,
+  "n_tracks": 4,
+  "sample_texts": [
+   "Klg",
+   "KlG",
+   "Klg",
+   "KLG"
+  ]
+ },
+ {
+  "brand": "mcp",
+  "slot": "collar",
+  "status": "SUSPECT_PLAYER_NAME",
+  "reads": 4,
+  "target_reads": 3,
+  "target_ratio": 0.75,
+  "n_tracks": 3,
+  "sample_texts": [
+   "Mcp",
+   "Mcp",
+   "mcp",
+   "Mcp"
+  ]
+ },
+ {
+  "brand": "klg",
+  "slot": "collar",
+  "status": "SUSPECT_PLAYER_NAME",
+  "reads": 3,
+  "target_reads": 3,
+  "target_ratio": 1.0,
+  "n_tracks": 2,
+  "sample_texts": [
+   "KLG",
+   "KLG",
+   "Klg"
+  ]
+ },
+ {
+  "brand": "mcp",
+  "slot": "legs",
+  "status": "WEAK",
+  "reads": 3,
+  "target_reads": 1,
+  "target_ratio": 0.33,
+  "n_tracks": 3,
+  "sample_texts": [
+   "Mcp",
+   "Mcp",
+   "Mcp"
+  ]
+ },
+ {
+  "brand": "mcp",
+  "slot": "abdomen",
+  "status": "WEAK",
+  "reads": 3,
+  "target_reads": 2,
+  "target_ratio": 0.67,
+  "n_tracks": 3,
+  "sample_texts": [
+   "Mcp",
+   "Mcp",
+   "Mcp"
+  ]
+ },
+ {
+  "brand": "chadlaw",
+  "slot": "sleeve",
+  "status": "SUSPECT_PLAYER_NAME",
+  "reads": 2,
+  "target_reads": 1,
+  "target_ratio": 0.5,
+  "n_tracks": 2,
+  "sample_texts": [
+   "Lawrerce",
+   "LAWRENGE"
+  ]
+ },
+ {
+  "brand": "chadlaw",
+  "slot": "abdomen",
+  "status": "SUSPECT_PLAYER_NAME",
+  "reads": 2,
+  "target_reads": 0,
+  "target_ratio": 0.0,
+  "n_tracks": 2,
+  "sample_texts": [
+   "Awrence",
+   "Lawence"
+  ]
+ },
+ {
+  "brand": "paints_laquers",
+  "slot": "sleeve",
+  "status": "SUSPECT_PLAYER_NAME",
+  "reads": 1,
+  "target_reads": 1,
+  "target_ratio": 1.0,
+  "n_tracks": 1,
+  "sample_texts": [
+   "STRE"
+  ]
+ },
+ {
+  "brand": "aon",
+  "slot": "abdomen",
+  "status": "SUSPECT_PLAYER_NAME",
+  "reads": 1,
+  "target_reads": 0,
+  "target_ratio": 0.0,
+  "n_tracks": 1,
+  "sample_texts": [
+   "AONS"
+  ]
+ },
+ {
+  "brand": "acs",
+  "slot": "legs",
+  "status": "SUSPECT_PLAYER_NAME",
+  "reads": 1,
+  "target_reads": 1,
+  "target_ratio": 1.0,
+  "n_tracks": 1,
+  "sample_texts": [
+   "ACNS"
+  ]
+ },
+ {
+  "brand": "acs",
+  "slot": "abdomen",
+  "status": "SUSPECT_PLAYER_NAME",
+  "reads": 1,
+  "target_reads": 0,
+  "target_ratio": 0.0,
+  "n_tracks": 1,
+  "sample_texts": [
+   "ACNS"
+  ]
+ },
+ {
+  "brand": "aon",
+  "slot": "legs",
+  "status": "SUSPECT_PLAYER_NAME",
+  "reads": 1,
+  "target_reads": 0,
+  "target_ratio": 0.0,
+  "n_tracks": 1,
+  "sample_texts": [
+   "Acon"
+  ]
+ },
+ {
+  "brand": "chadlaw",
+  "slot": "collar",
+  "status": "SUSPECT_PLAYER_NAME",
+  "reads": 1,
+  "target_reads": 1,
+  "target_ratio": 1.0,
+  "n_tracks": 1,
+  "sample_texts": [
+   "Lawence"
+  ]
+ }
+]

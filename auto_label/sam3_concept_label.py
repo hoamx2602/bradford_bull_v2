@@ -35,8 +35,11 @@ def run(a) -> None:
     for d in (img_dir, lbl_dir, crop_dir, viz_dir):
         d.mkdir(parents=True, exist_ok=True)
 
+    # SAM3 attention scales badly with image size.  Keep the smoke/data-engine
+    # path inside a 16 GB GPU budget and make the setting visible in the CLI.
     ov = dict(conf=a.conf, task="segment", mode="predict", model=a.weights,
-              save=False, verbose=False, device=a.device)
+              save=False, verbose=False, device=a.device, imgsz=a.imgsz,
+              quantize=a.quantize)
     P = SAM3SemanticPredictor(overrides=ov)
 
     cap = cv2.VideoCapture(a.video)
@@ -96,6 +99,10 @@ def main() -> None:
     ap.add_argument("--text", default="logo")
     ap.add_argument("--every", type=int, default=25)
     ap.add_argument("--conf", type=float, default=0.5)
+    ap.add_argument("--imgsz", type=int, default=644,
+                    help="SAM3 inference size; 644 is safe on a 16 GB GPU")
+    ap.add_argument("--quantize", type=int, default=16,
+                    help="SAM3 weight quantization bits; 16 reduces VRAM use")
     ap.add_argument("--max-frames", dest="max_frames", type=int, default=0,
                     help="giới hạn số frame gán nhãn (0 = hết video)")
     ap.add_argument("--viz", type=int, default=4, help="số frame lưu ảnh annotate")

@@ -81,19 +81,36 @@ def cmd_build_lex(a):
 
 
 def classify(text: str, lex: dict, thr=0.82, min_len=3):
-    """fuzzy-match token OCR crop vào lexicon. Trả (brand|'unknown', score)."""
+    """Match OCR text to a brand without accepting a lone auxiliary word.
+
+    The canonical brand key (for example ``chadlaw``) is safe as a single-word
+    match.  Extra words obtained by OCRing a clean logo are useful for recall
+    (``cedar court hotels`` -> ``cch``), but a single extra word can also be a
+    player's surname in a broadcast.  Require two distinct auxiliary words in
+    that case so ``LAWRENCE`` cannot label a player as ``chadlaw``.
+    """
     qs = [t for t in tok(text) if len(t) >= min_len]
     if not qs:
         return "unknown", 0.0
     best, bs = "unknown", 0.0
     for brand, d in lex.items():
-        for q in qs:
+        primary = set(tok(brand))
+        aux_queries: set[str] = set()
+        candidate = 0.0
+        for q in set(qs):
             for t in d["tokens"]:
                 if len(t) < min_len:
                     continue
                 r = SequenceMatcher(None, q, t).ratio()
-                if r >= thr and r > bs:
-                    best, bs = brand, r
+                if r < thr:
+                    continue
+                if t in primary:
+                    candidate = max(candidate, r)
+                else:
+                    aux_queries.add(q)
+                    candidate = max(candidate, r) if len(aux_queries) >= 2 else candidate
+        if candidate > bs:
+            best, bs = brand, candidate
     return best, round(bs, 3)
 
 

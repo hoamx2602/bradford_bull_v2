@@ -15,11 +15,18 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 from collections import defaultdict
 from pathlib import Path
 
 NAME_ZONE_V = 0.24        # vùng in tên cầu thủ (lưng trên)
 MIN_READS_CONFIRM = 4     # số lần đọc tối thiểu để CONFIRMED
+MIN_TARGET_READS_CONFIRM = 4
+# A full-frame OCR box may overlap two player boxes during contact shots, so
+# target support is not exclusive.  Keep a majority requirement rather than a
+# near-perfect ratio; the independent kit-sheet/review gate still protects the
+# final inventory label.
+MIN_TARGET_RATIO_CONFIRM = 0.60
 
 
 def slot_name(u: float, v: float) -> str:
@@ -30,6 +37,19 @@ def slot_name(u: float, v: float) -> str:
     return "legs"
 
 
+def _is_suspect_player_name(brand: str, slot: str, texts: list[str], vs: list[float]) -> bool:
+    """Reject a player surname that was fuzzy-matched to an auxiliary brand word."""
+    name_zone = all(x < NAME_ZONE_V for x in vs) and slot in ("chest", "collar")
+    single_token = bool(texts) and all(len(t.split()) <= 1 for t in texts)
+    brand_words = set(re.findall(r"[a-z]+", brand.lower()))
+    has_canonical_word = any(
+        token in brand_words
+        for text in texts
+        for token in re.findall(r"[a-z]+", text.lower())
+    )
+    return single_token and (name_zone or not has_canonical_word)
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--tracks", required=True, type=Path)
@@ -37,6 +57,10 @@ def main() -> None:
     ap.add_argument("--out", required=True, type=Path)
     ap.add_argument("--team-file", default=None,
                     help="JSON list tid đội target (mặc định: bradford_strict.json cạnh tracks)")
+    ap.add_argument("--min-target-reads", type=int, default=MIN_TARGET_READS_CONFIRM,
+                    help="minimum OCR reads that overlap a target-team track")
+    ap.add_argument("--min-target-ratio", type=float, default=MIN_TARGET_RATIO_CONFIRM,
+                    help="minimum target_reads / all_reads for a confirmed anchor")
     a = ap.parse_args()
 
     dets = [json.loads(l) for l in open(a.dets, encoding="utf-8")]
@@ -67,26 +91,30 @@ def main() -> None:
 
     inventory = []
     for (brand, slot), v in sorted(agg.items(), key=lambda x: -x[1]["reads"]):
-        # nghi tên cầu thủ: 1-token đọc được nằm vùng tên áo
-        name_zone = all(x < NAME_ZONE_V for x in v["vs"]) and slot in ("chest", "collar")
-        single_token = all(len(t.split()) <= 1 for t in v["texts"])
-        suspect_name = name_zone and single_token
-        if v["reads"] >= MIN_READS_CONFIRM and not suspect_name:
+        suspect_name = _is_suspect_player_name(brand, slot, v["texts"], v["vs"])
+        target_ratio = v["target_reads"] / max(v["reads"], 1)
+        if (v["reads"] >= MIN_READS_CONFIRM
+                and v["target_reads"] >= a.min_target_reads
+                and target_ratio >= a.min_target_ratio
+                and not suspect_name):
             status = "CONFIRMED"
         elif suspect_name:
             status = "SUSPECT_PLAYER_NAME"
+        elif v["reads"] >= MIN_READS_CONFIRM and target_ratio < a.min_target_ratio:
+            status = "WEAK_NON_TARGET"
         else:
             status = "WEAK"
         inventory.append({"brand": brand, "slot": slot, "status": status,
                           "reads": v["reads"], "target_reads": v["target_reads"],
+                          "target_ratio": round(target_ratio, 2),
                           "n_tracks": len(v["tids"]),
                           "sample_texts": v["texts"][:4]})
     a.out.write_text(json.dumps(inventory, ensure_ascii=False, indent=1),
                      encoding="utf-8")
-    print(f"{'brand':10s} {'slot':8s} {'status':22s} reads(target) tracks")
+    print(f"{'brand':10s} {'slot':8s} {'status':22s} reads(target) ratio tracks")
     for i in inventory:
         print(f"{i['brand']:10s} {i['slot']:8s} {i['status']:22s} "
-              f"{i['reads']}({i['target_reads']})        {i['n_tracks']}")
+              f"{i['reads']}({i['target_reads']}) {i['target_ratio']:.2f}  {i['n_tracks']}")
     print(f"\n[inventory] -> {a.out}")
 
 

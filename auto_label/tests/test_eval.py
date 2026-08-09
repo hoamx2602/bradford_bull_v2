@@ -27,6 +27,7 @@ import synth_diffusion   # noqa: E402
 import coco_ingest       # noqa: E402
 import eval_map          # noqa: E402
 import run_pipeline      # noqa: E402
+import signage_ocr       # noqa: E402
 
 
 # --------------------------- OBB --------------------------------------------- #
@@ -102,6 +103,13 @@ def test_recognition_threshold_rejects_low_score():
     rows = [{"id": "1", "gt": "pepsi", "pred": "pepsi", "score": 0.4}]
     res = eval_recognition.evaluate(rows, tau=0.6)
     assert res["top1_acc"] == 0.0
+
+
+def test_ocr_rejects_single_auxiliary_brand_word():
+    lex = {"chadlaw": {"tokens": ["chadlaw", "chadwick", "lawrence"]}}
+    assert signage_ocr.classify("LAWRENCE", lex) == ("unknown", 0.0)
+    assert signage_ocr.classify("CHADLAW", lex)[0] == "chadlaw"
+    assert signage_ocr.classify("Chadwick Lawrence", lex)[0] == "chadlaw"
 
 
 # --------------------------- Exposure ---------------------------------------- #
