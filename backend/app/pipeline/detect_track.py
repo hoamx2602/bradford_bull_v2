@@ -200,6 +200,9 @@ class _RFDETRBackend:
         self.settings = get_settings()
         self.model = registry.get_rfdetr_logo_model()
         self.offset = self.settings.rfdetr_class_offset
+        # Brand names for class ids, chosen when the model was loaded (the run's
+        # own training_config.json, or the legacy config list + offset).
+        self.class_names = getattr(self.model, "logolens_class_names", None)
         self._tracker = _IoUTracker()
 
     def reset_tracker(self) -> None:
@@ -222,7 +225,10 @@ class _RFDETRBackend:
         rows: list[RawBox] = []
         for i in range(n):
             track_id, cls_id = tracked[i]            # cls_id = voted brand on the tracked path
-            raw = rfdetr_class_name(cls_id, self.offset)
+            if self.class_names is not None and 0 <= cls_id < len(self.class_names):
+                raw = self.class_names[cls_id]
+            else:
+                raw = rfdetr_class_name(cls_id, self.offset)
             conf = float(dets.confidence[i]) if dets.confidence is not None else 0.0
             rows.append((cls_id, raw, boxes[i], conf, track_id))
         return rows

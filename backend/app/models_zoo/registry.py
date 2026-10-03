@@ -74,17 +74,49 @@ def _rfdetr_class(variant: str):
 def get_rfdetr_logo_model():
     """Load the fine-tuned RF-DETR logo detector from its .pth checkpoint.
 
-    RF-DETR auto-selects CUDA when available. We optimise for inference once
-    (best-effort) to speed up the per-frame predict calls.
+    Device follows the DEVICE toggle (auto | cuda | 0 | mps | cpu); rfdetr
+    >=1.9 runs on Apple MPS. Variant / resolution / class names come from the
+    run's training_config.json when the settings leave them on auto (see
+    Settings.rfdetr_*). We optimise for inference once (best-effort).
     """
+    import os
+
+    from app.config import RFDETR_CLASS_NAMES, rfdetr_checkpoint_meta
+
     settings = get_settings()
     path = settings.resolved_rfdetr_model_path()
-    cls = _rfdetr_class(settings.rfdetr_variant)
+    meta = rfdetr_checkpoint_meta(path)
+
+    variant = settings.rfdetr_variant
+    if variant.lower() == "auto":
+        variant = meta.get("variant", "large")
+    cls = _rfdetr_class(variant)
+
     kwargs = {"pretrain_weights": path}
-    if settings.rfdetr_resolution:
-        kwargs["resolution"] = settings.rfdetr_resolution
-    log.info("loading RF-DETR logo model (%s): %s", settings.rfdetr_variant, path)
+    resolution = settings.rfdetr_resolution or meta.get("resolution")
+    if resolution:
+        kwargs["resolution"] = int(resolution)
+
+    dev = device()
+    rf_device = f"cuda:{dev}" if dev.isdigit() else dev  # 'mps' / 'cpu' / 'cuda:N'
+    if rf_device == "mps":
+        # Let the odd op without an MPS kernel fall back to CPU instead of failing.
+        os.environ.setdefault("PYTORCH_ENABLE_MPS_FALLBACK", "1")
+    kwargs["device"] = rf_device
+
+    log.info(
+        "loading RF-DETR logo model (%s, res=%s, device=%s): %s",
+        variant, kwargs.get("resolution", "default"), rf_device, path,
+    )
     model = cls(**kwargs)
+
+    source = settings.rfdetr_class_names_source.lower()
+    if source == "auto" and meta.get("class_names"):
+        model.logolens_class_names = meta["class_names"]  # class_id indexes directly
+        log.info("RF-DETR class names from %s", meta["source"])
+    else:
+        off = settings.rfdetr_class_offset
+        model.logolens_class_names = ["?"] * off + list(RFDETR_CLASS_NAMES)
     try:
         model.optimize_for_inference()
     except Exception as exc:  # pragma: no cover - optional fast path

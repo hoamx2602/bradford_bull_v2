@@ -64,7 +64,7 @@ Notes: RF-DETR resizes internally to the variant's default resolution, so
 class id → brand mapping comes from `RFDETR_BRAND_ORDER` in `config.py` (the
 COCO category order used at train time); `RFDETR_CLASS_OFFSET=1` because the
 training COCO had a placeholder category at id 0. The DINOv2 backbone has no MPS
-path — on Apple Silicon RF-DETR runs on CPU.
+path — on Apple Silicon RF-DETR (rfdetr >= 1.9) runs on MPS; see docs/14-mac-migration.md.
 
 ## Run locally
 

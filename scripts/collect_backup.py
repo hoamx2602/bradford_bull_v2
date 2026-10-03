@@ -31,7 +31,9 @@ REQUIRED = [
     "backend/data/output",
     "backend/data/uploads/*.pkl",
     "backend/data/uploads/c775d9975e3047a19eca8268a5825f3f.mp4",  # M08 — nguồn của demo/showcase
-    "runs/yolo26/matchsplit_896_m/weights/best.pt",                # model dùng trong deck
+    "runs/yolo26/matchsplit_896_m/weights/best.pt",                # YOLO dùng cho video demo
+    "runs/rfdetr_matchsplit_r896/checkpoint_best_ema.pth",         # MODEL TỐT NHẤT (RF-DETR Small 896)
+    "runs/rfdetr_matchsplit_r896/training_config.json",            # bắt buộc đi kèm: variant/res/class names
     "yolo11m.pt", "yolo11x-pose.pt", "yolo11n-seg.pt", "backend/yolo11x-seg.pt",
     "artifacts/deck_media",
     "artifacts/bradford_review",

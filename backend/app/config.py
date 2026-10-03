@@ -41,6 +41,59 @@ def _default_rfdetr_model() -> str:
     return str(runs / "rfdetr_large" / "weights" / "checkpoint_best_ema.pth")
 
 
+def resolve_repo_path(p: str) -> str:
+    """Resolve a possibly-relative path from .env so the same value works on
+    every machine: absolute paths are kept; relative ones are tried against the
+    current dir, then the repo root, then backend/."""
+    if not p:
+        return p
+    path = Path(p).expanduser()
+    if path.is_absolute():
+        return str(path)
+    for base in (Path.cwd(), REPO_ROOT, BACKEND_DIR):
+        if (base / path).exists():
+            return str((base / path).resolve())
+    return str(path)
+
+
+_RFDETR_CONFIG_TYPES = {
+    "RFDETRNanoConfig": "nano", "RFDETRSmallConfig": "small",
+    "RFDETRMediumConfig": "medium", "RFDETRBaseConfig": "base",
+    "RFDETRLargeConfig": "large", "RFDETR2XLargeConfig": "2xlarge",
+}
+
+
+def rfdetr_checkpoint_meta(checkpoint: str) -> dict:
+    """Read the `training_config.json` that rfdetr writes next to a run's
+    checkpoints (same folder, or the parent of a `weights/` folder).
+
+    Returns {variant, resolution, class_names} for whatever is known, or {}
+    when there is no such file (older runs) — callers then keep their
+    configured defaults, so nothing changes for those checkpoints.
+    """
+    import json
+
+    ck = Path(checkpoint)
+    for cand in (ck.parent / "training_config.json", ck.parent.parent / "training_config.json"):
+        if cand.is_file():
+            try:
+                cfg = json.loads(cand.read_text(encoding="utf-8"))
+            except Exception:  # pragma: no cover - unreadable file -> no meta
+                return {}
+            meta: dict = {"source": str(cand)}
+            variant = _RFDETR_CONFIG_TYPES.get(cfg.get("model_config_type", ""))
+            if variant:
+                meta["variant"] = variant
+            res = (cfg.get("model_config") or {}).get("resolution")
+            if res:
+                meta["resolution"] = int(res)
+            names = cfg.get("class_names")
+            if isinstance(names, list) and names:
+                meta["class_names"] = [str(n) for n in names]
+            return meta
+    return {}
+
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_file=str(BACKEND_DIR / ".env"),
@@ -87,8 +140,17 @@ class Settings(BaseSettings):
     # (must match the training class order). resolution=0 -> use the variant's
     # native size (don't override; RF-DETR has an interpolation bug otherwise).
     rfdetr_model_path: str = ""     # filled by _default_rfdetr_model() if empty
-    rfdetr_variant: str = "large"   # large | 2xlarge | base | nano | small | medium
-    rfdetr_resolution: int = 0      # 0 = model default (Large 704 / 2XLarge 880)
+    #   Relative paths resolve against the repo root, so one .env value works on
+    #   Windows and macOS, e.g. runs/rfdetr_matchsplit_r896/checkpoint_best_ema.pth
+    rfdetr_variant: str = "large"   # large | 2xlarge | base | nano | small | medium | auto
+    #   auto = read the variant from the run's training_config.json
+    rfdetr_resolution: int = 0      # 0 = training resolution from training_config.json
+    #   when present (e.g. 896 for rfdetr_matchsplit_r896), else the variant default
+    # Where brand names for RF-DETR class ids come from:
+    #   auto   = the run's training_config.json class_names when present, else
+    #            RFDETR_CLASS_NAMES + rfdetr_class_offset (legacy behaviour)
+    #   config = always RFDETR_CLASS_NAMES + rfdetr_class_offset
+    rfdetr_class_names_source: str = "auto"
     # RF-DETR confidence floor — SEPARATE from `conf` (which is tuned for YOLO).
     # DETR sigmoid-focal scores run much lower than YOLO's; real logos score
     # ~0.1-0.3. 0.10 maximises recall but lets weak, flickery boxes through
@@ -207,7 +269,7 @@ class Settings(BaseSettings):
         return self.model_path or _default_logo_model()
 
     def resolved_rfdetr_model_path(self) -> str:
-        return self.rfdetr_model_path or _default_rfdetr_model()
+        return resolve_repo_path(self.rfdetr_model_path) or _default_rfdetr_model()
 
     def resolved_team_refs(self) -> str:
         return self.team_refs_path or str(BACKEND_DIR / "data" / "team_refs.pkl")

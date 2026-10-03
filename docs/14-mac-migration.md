@@ -23,7 +23,8 @@ Upload cả thư mục `D:/bradford_backup` lên Drive. Script giữ nguyên đ�
 - `.env`, `backend/.env` (token HF / W&B — bí mật, đừng chia sẻ thư mục Drive này)
 - `backend/data/` trừ video: `app.db` (+ bản backup), `team_refs.pkl`, `auto_refs/`, `kit_anchors/`, `output/`, `uploads/*.pkl`
 - `backend/data/uploads/c775d9975e3047a19eca8268a5825f3f.mp4` — trận M08, nguồn của demo/showcase
-- `runs/yolo26/matchsplit_896_m/weights/best.pt` — model dùng trong deck
+- `runs/rfdetr_matchsplit_r896/checkpoint_best_ema.pth` + `training_config.json` — **model tốt nhất** (RF-DETR Small 896, slide 13)
+- `runs/yolo26/matchsplit_896_m/weights/best.pt` — YOLO dùng để render các video demo trong deck
 - `yolo11m.pt`, `yolo11x-pose.pt`, `yolo11n-seg.pt`, `backend/yolo11x-seg.pt`
 - `artifacts/deck_media`, `artifacts/bradford_review`, `artifacts/bradford_showcase` (ảnh/video của deck)
 
@@ -39,8 +40,7 @@ git checkout feat/full-match-report
 # copy nội dung thư mục backup từ Drive đè vào repo (cấu trúc đã khớp)
 
 python3.11 -m venv .venv && source .venv/bin/activate
-pip install -e "./backend[dev,team]" python-pptx
-# tuỳ chọn RF-DETR (chỉ chạy CPU trên Mac): pip install -e "./backend[rfdetr]"
+pip install -e "./backend[dev,team,rfdetr]" python-pptx
 cd logo-analytics && npm install && cd ..
 ```
 
@@ -62,11 +62,37 @@ DEVICE=mps python backend/scripts/render_showcase.py     # Mac
 DEVICE=cuda python backend/scripts/render_showcase.py    # máy Windows CUDA (giống hành vi cũ)
 ```
 
-## 5. Lưu ý riêng cho Mac
+## 5. Model tốt nhất trên Mac
 
-- **`backend/.env` đang đặt `LOGO_BACKEND=rfdetr`.** RF-DETR không có đường MPS → chạy CPU, rất chậm. Trên Mac nên đặt `LOGO_BACKEND=yolo` (và `DETECTOR_BACKEND=yolo`).
-- **Ghim model:** app tự chọn `best.pt` *mới nhất theo ngày sửa* trong `logo_detection/runs/*`. Copy qua Drive có thể làm đổi ngày → đổi model. Đặt rõ:
-  `MODEL_PATH=runs/yolo26/matchsplit_896_m/weights/best.pt` (đường dẫn tuyệt đối trên Mac).
+Model tốt nhất là **RF-DETR Small 896** — `runs/rfdetr_matchsplit_r896/checkpoint_best_ema.pth`
+(mAP@0.50 = 0.933 trên 3 trận chưa thấy, slide 13). `rfdetr` ≥ 1.9 chạy được trên Apple MPS,
+nên Mac dùng **đúng model này**, không phải lùi về YOLO.
+
+`backend/.env` (giống nhau trên Windows và Mac — chỉ khác máy tự chọn GPU):
+
+```ini
+DEVICE=auto                      # Windows -> CUDA, Mac -> MPS
+LOGO_BACKEND=rfdetr
+RFDETR_MODEL_PATH=runs/rfdetr_matchsplit_r896/checkpoint_best_ema.pth
+RFDETR_VARIANT=auto              # đọc 'small' từ training_config.json
+RFDETR_RESOLUTION=0              # = 896 từ training_config.json
+RFDETR_CLASS_NAMES_SOURCE=auto   # tên nhãn hiệu từ training_config.json
+```
+
+Vì sao phải ghim như trên (đã kiểm chứng bằng cách chạy model thật):
+- Không ghim đường dẫn -> app tự chọn `logo_detection/runs/rfdetr_large` (bản tháng 6), không phải model tốt nhất.
+- Chạy ở resolution mặc định 512 thay vì 896 -> bỏ sót logo (frame 272/284 mất 1–2 nhãn hiệu).
+- Thứ tự class của model này khác danh sách cũ trong `config.py` -> nếu dùng `RFDETR_CLASS_NAMES_SOURCE=config`
+  thì MCP bị gắn tên "floor_tonic", Paints & Lacquers thành "mna_support_service", Aon thành "acs_group".
+- `training_config.json` **phải nằm cạnh checkpoint**.
+
+Kiểm tra sau khi khởi động backend: log phải có
+`loading RF-DETR logo model (small, res=896, device=mps)` và `RF-DETR class names from …training_config.json`.
+
+## 6. Lưu ý khác cho Mac
+
+- `BODYSEG_ENGINE=densepose` không chạy được trên MPS (CPU-only, phải build detectron2). Trên Mac đặt
+  `BODYSEG_ENGINE=yolo` — đây cũng là engine đã dùng cho các video demo trong deck.
 - `scripts/merge_home_away.py`, `scripts/resplit_data.py`: đặt `LOGO_DATA_DIR` nếu dữ liệu train không nằm ở `logo_detection/data`.
 - Train lại model: nên dùng máy CUDA hoặc Colab; MPS train được nhưng chậm.
-- DensePose/detectron2 khó build trên Mac — pipeline đã dùng `bodyseg_yolo` thay thế.
+- Muốn nhanh hơn nữa: rfdetr có thể export sang CoreML (`model.export(format="coreml")`) — chưa tích hợp vào pipeline.
