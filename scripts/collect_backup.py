@@ -40,10 +40,6 @@ REQUIRED = [
 
 # Tier 2 — thêm nếu muốn xem/chạy lại toàn bộ các trận cũ và giữ đủ model của app.
 RECOMMENDED = REQUIRED + [
-    "LogoLens_Bradford_Bulls_Findings.pptx",
-    "LogoLens_Bradford_Bulls_Findings_v2.pptx",
-    "LogoLens_Bradford_Bulls_Findings_v3.pptx",
-    "LogoLens_Bradford_Bulls_Findings_v4.pptx",
     "backend/data/uploads",                           # toàn bộ video đã upload (~8.8 GB)
     "logo_detection/runs/*/weights/best.pt",          # weights YOLO mà app tự chọn
     "logo_detection/runs/rfdetr_large/weights/checkpoint_best_ema.pth",  # LOGO_BACKEND=rfdetr

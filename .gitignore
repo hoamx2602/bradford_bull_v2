@@ -63,12 +63,12 @@ match_reports/
 /training-result/
 /logo_detection/meshes/
 /backend/data/
-/*.pptx
 # Presentation build outputs: keep scripts/notes/manifests, drop heavy media
 /artifacts/**/node_modules
 /artifacts/**/.chart-data-*/
+# Presentations ARE tracked; only intermediate build drafts are not
+/artifacts/**/build/*.pptx
 /artifacts/**/*.mp4
-/artifacts/**/*.pptx
 /artifacts/**/*.zip
 /artifacts/**/*.jpg
 /artifacts/**/*.jpeg
@@ -78,7 +78,6 @@ match_reports/
 /artifacts/**/*.ndjson
 # Dissertation: keep markdown + scripts, drop binaries/exports
 /dissertation/**/*.docx
-/dissertation/**/*.pptx
 /dissertation/**/*.pdf
 /dissertation/**/*.png
 /dissertation/**/*.jpg

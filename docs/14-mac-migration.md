@@ -4,8 +4,8 @@
 
 | Nơi lưu | Nội dung |
 |---|---|
-| **Git** (`hoamx2602/bradford_bull_v2`) | Code backend/frontend, script, docs, json/md bằng chứng của demo, markdown + script của luận văn |
-| **Google Drive** | Dữ liệu, weights, video, file pptx, secrets — gom bằng `scripts/collect_backup.py` |
+| **Git** (`hoamx2602/bradford_bull_v2`) | Code backend/frontend, script, docs, **các file presentation** (`LogoLens_Bradford_Bulls_Findings*.pptx` v1–v5, `artifacts/bradford_review/presentation/Bradford_Bulls_Findings_Final.pptx`, `dissertation/LogoLens_WP1_Summary.pptx`), json/md bằng chứng của demo, markdown + script của luận văn |
+| **Google Drive** | Dữ liệu, weights, video, secrets — gom bằng `scripts/collect_backup.py` |
 | **Không mang** | `.venv-app`, `.venv-rfdetr`, `node_modules`, `.next` (cài lại trên Mac) |
 
 ## 2. Backup lên Drive
@@ -19,7 +19,7 @@ python scripts/collect_backup.py --dest D:/bradford_backup --tier recommended  #
 Upload cả thư mục `D:/bradford_backup` lên Drive. Script giữ nguyên đường dẫn tương đối, chạy lại an toàn (bỏ qua file đã copy).
 
 **required (~1.5 GB)** — đủ để sửa slide, mở dashboard với các phân tích đã lưu, chạy lại demo/showcase:
-- `LogoLens_Bradford_Bulls_Findings_v5.pptx`
+- `LogoLens_Bradford_Bulls_Findings_v5.pptx` (đã có trong git — giữ trong backup cho chắc)
 - `.env`, `backend/.env` (token HF / W&B — bí mật, đừng chia sẻ thư mục Drive này)
 - `backend/data/` trừ video: `app.db` (+ bản backup), `team_refs.pkl`, `auto_refs/`, `kit_anchors/`, `output/`, `uploads/*.pkl`
 - `backend/data/uploads/c775d9975e3047a19eca8268a5825f3f.mp4` — trận M08, nguồn của demo/showcase
@@ -27,7 +27,7 @@ Upload cả thư mục `D:/bradford_backup` lên Drive. Script giữ nguyên đ�
 - `yolo11m.pt`, `yolo11x-pose.pt`, `yolo11n-seg.pt`, `backend/yolo11x-seg.pt`
 - `artifacts/deck_media`, `artifacts/bradford_review`, `artifacts/bradford_showcase` (ảnh/video của deck)
 
-**recommended (~12 GB)** — thêm: toàn bộ `backend/data/uploads` (~8.8 GB video các trận), weights trong `logo_detection/runs/*/weights/best.pt` + `rfdetr_large`, các checkpoint `runs/yolo26/*`, `runs/rfdetr_matchsplit_r896` (ema), file docx/hình của `dissertation/`, các video demo ở thư mục gốc, deck v1–v4.
+**recommended (~12 GB)** — thêm: toàn bộ `backend/data/uploads` (~8.8 GB video các trận), weights trong `logo_detection/runs/*/weights/best.pt` + `rfdetr_large`, các checkpoint `runs/yolo26/*`, `runs/rfdetr_matchsplit_r896` (ema), file docx/hình của `dissertation/`, các video demo ở thư mục gốc.
 
 **Không cần nếu không train lại:** `datasets/` (5.8 GB), `training-result/` (3.2 GB), `logo_detection/data`, phần còn lại của `runs/` (checkpoint regular/total, rfdetr_small…), `logo_detection/meshes`.
 
