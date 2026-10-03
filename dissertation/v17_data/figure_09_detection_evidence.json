@@ -1,0 +1,730 @@
+{
+  "model": "RF-DETR Small",
+  "weights": "D:\\bradford_bull_v2\\runs\\rfdetr_matchsplit_r896\\checkpoint_best_total.pth",
+  "selected_epoch": 36,
+  "split": "D:\\bradford_bull_v2\\datasets\\auto_label_white_matchsplit\\test",
+  "test_images": 61,
+  "confidence": 0.35,
+  "iou_threshold": 0.5,
+  "selection_rules": {
+    "clear_success": "Perfect frame with the strongest maximum confidence.",
+    "multi_logo": "Largest matched-object count among the remaining perfect frames.",
+    "difficult_miss": "Smallest visually verified in-scope kit-logo miss from a frame without an invalid missed annotation.",
+    "false_positive": "Highest-confidence frame among visually verified model errors after auditing every unmatched prediction."
+  },
+  "false_positive_audit": "D:\\bradford_bull_v2\\dissertation\\v17_data\\figure_09_false_positive_audit.json",
+  "missed_ground_truth_audit": "D:\\bradford_bull_v2\\dissertation\\v17_data\\figure_09_missed_ground_truth_audit.json",
+  "visual_encoding": {
+    "colour": "Sponsor class, using the fixed BRAND_COLOURS palette in the generator.",
+    "correct_prediction": "Solid box and class-coloured label.",
+    "false_positive": "Short-dashed box and label prefixed FP.",
+    "missed_ground_truth": "Long-dashed box and label prefixed Missed."
+  },
+  "aggregate_operating_point": {
+    "tp": 146,
+    "fp": 14,
+    "fn": 19
+  },
+  "cases": [
+    {
+      "case": "clear_success",
+      "image_id": 12,
+      "file_name": "M_CAS__kit-home__lt-floodlit__bc-bullstv__cam-medium__shot0010__t00021000ms_jpg.rf.1AFpU9TjVelcHLY7U7Fa.jpg",
+      "ground_truth_count": 7,
+      "tp": 7,
+      "fp": 0,
+      "fn": 0,
+      "maximum_prediction_confidence": 0.9248661398887634,
+      "highest_false_positive_score": null,
+      "smallest_missed_relative_area": null,
+      "ground_truth": [
+        {
+          "id": 76,
+          "image_id": 12,
+          "category_id": 16,
+          "bbox": [
+            651.47,
+            181.37,
+            89.91,
+            58.8
+          ],
+          "area": 5286.708,
+          "iscrowd": 0
+        },
+        {
+          "id": 77,
+          "image_id": 12,
+          "category_id": 10,
+          "bbox": [
+            1483.44,
+            414.65,
+            90.3,
+            57.51
+          ],
+          "area": 5193.152999999999,
+          "iscrowd": 0
+        },
+        {
+          "id": 78,
+          "image_id": 12,
+          "category_id": 15,
+          "bbox": [
+            637.7,
+            126.71,
+            47.05,
+            29.55
+          ],
+          "area": 1390.3274999999999,
+          "iscrowd": 0
+        },
+        {
+          "id": 79,
+          "image_id": 12,
+          "category_id": 11,
+          "bbox": [
+            1498.06,
+            224.13,
+            52.31,
+            36.51
+          ],
+          "area": 1909.8381,
+          "iscrowd": 0
+        },
+        {
+          "id": 80,
+          "image_id": 12,
+          "category_id": 16,
+          "bbox": [
+            34.89,
+            243.1,
+            52.99,
+            47.98
+          ],
+          "area": 2542.4602,
+          "iscrowd": 0
+        },
+        {
+          "id": 81,
+          "image_id": 12,
+          "category_id": 14,
+          "bbox": [
+            1457.98,
+            477.42,
+            37.98,
+            37.36
+          ],
+          "area": 1418.9327999999998,
+          "iscrowd": 0
+        },
+        {
+          "id": 82,
+          "image_id": 12,
+          "category_id": 7,
+          "bbox": [
+            688.37,
+            160.56,
+            28.75,
+            26.89
+          ],
+          "area": 773.0875,
+          "iscrowd": 0
+        }
+      ],
+      "predictions": [
+        {
+          "image_id": 12,
+          "category_id": 10,
+          "bbox": [
+            1487.086181640625,
+            417.10528564453125,
+            85.8560791015625,
+            51.49951171875
+          ],
+          "score": 0.9248661398887634
+        },
+        {
+          "image_id": 12,
+          "category_id": 16,
+          "bbox": [
+            652.9160766601562,
+            184.29823303222656,
+            86.5704345703125,
+            53.83760070800781
+          ],
+          "score": 0.8916295766830444
+        },
+        {
+          "image_id": 12,
+          "category_id": 11,
+          "bbox": [
+            1497.50537109375,
+            223.4755401611328,
+            52.74169921875,
+            37.00163269042969
+          ],
+          "score": 0.7576166391372681
+        },
+        {
+          "image_id": 12,
+          "category_id": 7,
+          "bbox": [
+            689.358154296875,
+            159.0585174560547,
+            29.152099609375,
+            27.833404541015625
+          ],
+          "score": 0.612252950668335
+        },
+        {
+          "image_id": 12,
+          "category_id": 15,
+          "bbox": [
+            639.99462890625,
+            128.64431762695312,
+            43.02923583984375,
+            27.020065307617188
+          ],
+          "score": 0.465482234954834
+        },
+        {
+          "image_id": 12,
+          "category_id": 16,
+          "bbox": [
+            35.09283447265625,
+            246.9473876953125,
+            52.40779113769531,
+            43.54510498046875
+          ],
+          "score": 0.4011254906654358
+        },
+        {
+          "image_id": 12,
+          "category_id": 14,
+          "bbox": [
+            1456.47119140625,
+            479.3009033203125,
+            39.284423828125,
+            34.4805908203125
+          ],
+          "score": 0.3975304365158081
+        }
+      ],
+      "matching": {
+        "matches": [
+          {
+            "prediction_index": 0,
+            "ground_truth_index": 1,
+            "iou": 0.8514184257263351
+          },
+          {
+            "prediction_index": 1,
+            "ground_truth_index": 0,
+            "iou": 0.8815967308038044
+          },
+          {
+            "prediction_index": 2,
+            "ground_truth_index": 3,
+            "iou": 0.9655578274363296
+          },
+          {
+            "prediction_index": 3,
+            "ground_truth_index": 6,
+            "iou": 0.8565331979417686
+          },
+          {
+            "prediction_index": 4,
+            "ground_truth_index": 2,
+            "iou": 0.8362438076845953
+          },
+          {
+            "prediction_index": 5,
+            "ground_truth_index": 4,
+            "iou": 0.8975962600651625
+          },
+          {
+            "prediction_index": 6,
+            "ground_truth_index": 5,
+            "iou": 0.8854950670080699
+          }
+        ],
+        "matched_prediction_indices": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "false_positive_indices": [],
+        "missed_ground_truth_indices": []
+      }
+    },
+    {
+      "case": "multi_logo",
+      "image_id": 10,
+      "file_name": "M_CAS__kit-home__lt-floodlit__bc-bullstv__cam-closeup__shot0151__t00501000ms_jpg.rf.QWbF1j6EPWLZ5A7iJMh1.jpg",
+      "ground_truth_count": 12,
+      "tp": 12,
+      "fp": 0,
+      "fn": 0,
+      "maximum_prediction_confidence": 0.903748095035553,
+      "highest_false_positive_score": null,
+      "smallest_missed_relative_area": null,
+      "ground_truth": [
+        {
+          "id": 63,
+          "image_id": 10,
+          "category_id": 2,
+          "bbox": [
+            644.46,
+            603.65,
+            84.18,
+            59.2
+          ],
+          "area": 4983.456000000001,
+          "iscrowd": 0
+        },
+        {
+          "id": 64,
+          "image_id": 10,
+          "category_id": 10,
+          "bbox": [
+            642.18,
+            696.01,
+            99.69,
+            49.29
+          ],
+          "area": 4913.7201,
+          "iscrowd": 0
+        },
+        {
+          "id": 65,
+          "image_id": 10,
+          "category_id": 2,
+          "bbox": [
+            1154.02,
+            471.98,
+            78.76,
+            45.56
+          ],
+          "area": 3588.3056000000006,
+          "iscrowd": 0
+        },
+        {
+          "id": 66,
+          "image_id": 10,
+          "category_id": 14,
+          "bbox": [
+            1110.78,
+            590.54,
+            32.61,
+            41.17
+          ],
+          "area": 1342.5537,
+          "iscrowd": 0
+        },
+        {
+          "id": 67,
+          "image_id": 10,
+          "category_id": 11,
+          "bbox": [
+            628.75,
+            431.38,
+            69.06,
+            30.29
+          ],
+          "area": 2091.8274,
+          "iscrowd": 0
+        },
+        {
+          "id": 68,
+          "image_id": 10,
+          "category_id": 10,
+          "bbox": [
+            1144.58,
+            539.57,
+            91.63,
+            39.55
+          ],
+          "area": 3623.9664999999995,
+          "iscrowd": 0
+        },
+        {
+          "id": 69,
+          "image_id": 10,
+          "category_id": 11,
+          "bbox": [
+            1190.74,
+            323.68,
+            73.25,
+            30.65
+          ],
+          "area": 2245.1124999999997,
+          "iscrowd": 0
+        },
+        {
+          "id": 70,
+          "image_id": 10,
+          "category_id": 8,
+          "bbox": [
+            1126.65,
+            775.67,
+            45.49,
+            32.36
+          ],
+          "area": 1472.0564,
+          "iscrowd": 0
+        },
+        {
+          "id": 71,
+          "image_id": 10,
+          "category_id": 1,
+          "bbox": [
+            1220.06,
+            606.14,
+            59.91,
+            30.75
+          ],
+          "area": 1842.2324999999998,
+          "iscrowd": 0
+        },
+        {
+          "id": 72,
+          "image_id": 10,
+          "category_id": 8,
+          "bbox": [
+            1080.71,
+            825.33,
+            33.44,
+            30.88
+          ],
+          "area": 1032.6272,
+          "iscrowd": 0
+        },
+        {
+          "id": 73,
+          "image_id": 10,
+          "category_id": 14,
+          "bbox": [
+            609.44,
+            764.82,
+            31.16,
+            39.64
+          ],
+          "area": 1235.1824,
+          "iscrowd": 0
+        },
+        {
+          "id": 74,
+          "image_id": 10,
+          "category_id": 1,
+          "bbox": [
+            745.73,
+            765.21,
+            54.32,
+            36.77
+          ],
+          "area": 1997.3464000000001,
+          "iscrowd": 0
+        }
+      ],
+      "predictions": [
+        {
+          "image_id": 10,
+          "category_id": 10,
+          "bbox": [
+            1146.8612060546875,
+            538.4776611328125,
+            90.3343505859375,
+            45.2303466796875
+          ],
+          "score": 0.903748095035553
+        },
+        {
+          "image_id": 10,
+          "category_id": 10,
+          "bbox": [
+            641.5756225585938,
+            697.4028930664062,
+            100.9150390625,
+            48.30078125
+          ],
+          "score": 0.9034411907196045
+        },
+        {
+          "image_id": 10,
+          "category_id": 14,
+          "bbox": [
+            1110.3798828125,
+            589.2437744140625,
+            31.828369140625,
+            41.5872802734375
+          ],
+          "score": 0.8937186002731323
+        },
+        {
+          "image_id": 10,
+          "category_id": 2,
+          "bbox": [
+            647.0653686523438,
+            603.43408203125,
+            80.10577392578125,
+            58.427001953125
+          ],
+          "score": 0.8878128528594971
+        },
+        {
+          "image_id": 10,
+          "category_id": 2,
+          "bbox": [
+            1151.68994140625,
+            473.4027404785156,
+            82.235595703125,
+            44.204437255859375
+          ],
+          "score": 0.8783453106880188
+        },
+        {
+          "image_id": 10,
+          "category_id": 11,
+          "bbox": [
+            1191.1878662109375,
+            323.28741455078125,
+            71.710693359375,
+            30.89111328125
+          ],
+          "score": 0.8716155886650085
+        },
+        {
+          "image_id": 10,
+          "category_id": 11,
+          "bbox": [
+            629.7041015625,
+            431.4287414550781,
+            65.17767333984375,
+            31.16192626953125
+          ],
+          "score": 0.8654600977897644
+        },
+        {
+          "image_id": 10,
+          "category_id": 1,
+          "bbox": [
+            1221.0325927734375,
+            604.4445190429688,
+            59.17626953125,
+            33.38641357421875
+          ],
+          "score": 0.8583889007568359
+        },
+        {
+          "image_id": 10,
+          "category_id": 1,
+          "bbox": [
+            744.4807739257812,
+            762.8312377929688,
+            61.04681396484375,
+            40.68157958984375
+          ],
+          "score": 0.8553574681282043
+        },
+        {
+          "image_id": 10,
+          "category_id": 14,
+          "bbox": [
+            608.53173828125,
+            762.784912109375,
+            33.237548828125,
+            40.72607421875
+          ],
+          "score": 0.7730377912521362
+        },
+        {
+          "image_id": 10,
+          "category_id": 8,
+          "bbox": [
+            1127.933837890625,
+            775.224609375,
+            42.2283935546875,
+            32.07781982421875
+          ],
+          "score": 0.6212188601493835
+        },
+        {
+          "image_id": 10,
+          "category_id": 8,
+          "bbox": [
+            1071.071533203125,
+            824.0479736328125,
+            43.352783203125,
+            33.96051025390625
+          ],
+          "score": 0.5216771364212036
+        }
+      ],
+      "matching": {
+        "matches": [
+          {
+            "prediction_index": 0,
+            "ground_truth_index": 5,
+            "iou": 0.8461879189581701
+          },
+          {
+            "prediction_index": 1,
+            "ground_truth_index": 1,
+            "iou": 0.9524708084338553
+          },
+          {
+            "prediction_index": 2,
+            "ground_truth_index": 3,
+            "iou": 0.9045280692935864
+          },
+          {
+            "prediction_index": 3,
+            "ground_truth_index": 0,
+            "iou": 0.9324684919933999
+          },
+          {
+            "prediction_index": 4,
+            "ground_truth_index": 2,
+            "iou": 0.9276845899176382
+          },
+          {
+            "prediction_index": 5,
+            "ground_truth_index": 6,
+            "iou": 0.962083393419949
+          },
+          {
+            "prediction_index": 6,
+            "ground_truth_index": 4,
+            "iou": 0.9159881861512986
+          },
+          {
+            "prediction_index": 7,
+            "ground_truth_index": 8,
+            "iou": 0.9036366841591851
+          },
+          {
+            "prediction_index": 8,
+            "ground_truth_index": 11,
+            "iou": 0.8042527983691576
+          },
+          {
+            "prediction_index": 9,
+            "ground_truth_index": 10,
+            "iou": 0.8716062584649
+          },
+          {
+            "prediction_index": 10,
+            "ground_truth_index": 7,
+            "iou": 0.8959812524204644
+          },
+          {
+            "prediction_index": 11,
+            "ground_truth_index": 9,
+            "iou": 0.701378371918989
+          }
+        ],
+        "matched_prediction_indices": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11
+        ],
+        "false_positive_indices": [],
+        "missed_ground_truth_indices": []
+      }
+    },
+    {
+      "case": "difficult_miss",
+      "image_id": 21,
+      "file_name": "M_CAS__kit-home__lt-floodlit__bc-bullstv__cam-wide__shot0063__t00183000ms_jpg.rf.gGIem2AIDBxvU5wJsMgI.jpg",
+      "ground_truth_count": 1,
+      "tp": 0,
+      "fp": 0,
+      "fn": 1,
+      "maximum_prediction_confidence": null,
+      "highest_false_positive_score": null,
+      "smallest_missed_relative_area": 0.00032306404320987656,
+      "ground_truth": [
+        {
+          "id": 101,
+          "image_id": 21,
+          "category_id": 10,
+          "bbox": [
+            1535.35,
+            817.65,
+            29.96,
+            22.36
+          ],
+          "area": 669.9056,
+          "iscrowd": 0
+        }
+      ],
+      "predictions": [],
+      "matching": {
+        "matches": [],
+        "matched_prediction_indices": [],
+        "false_positive_indices": [],
+        "missed_ground_truth_indices": [
+          0
+        ]
+      }
+    },
+    {
+      "case": "false_positive",
+      "image_id": 60,
+      "file_name": "M_HKR__kit-home__lt-day__bc-bullstv__cam-closeup__shot0068__t00321000ms_jpg.rf.t6qsONYgyVIpBedeWtcv.jpg",
+      "ground_truth_count": 0,
+      "tp": 0,
+      "fp": 2,
+      "fn": 0,
+      "maximum_prediction_confidence": 0.5975436568260193,
+      "highest_false_positive_score": 0.5975436568260193,
+      "smallest_missed_relative_area": null,
+      "ground_truth": [],
+      "predictions": [
+        {
+          "image_id": 60,
+          "category_id": 16,
+          "bbox": [
+            1646.66748046875,
+            892.1084594726562,
+            85.871826171875,
+            53.333984375
+          ],
+          "score": 0.5975436568260193
+        },
+        {
+          "image_id": 60,
+          "category_id": 16,
+          "bbox": [
+            1605.209228515625,
+            948.73681640625,
+            66.496826171875,
+            54.06011962890625
+          ],
+          "score": 0.3734135925769806
+        }
+      ],
+      "matching": {
+        "matches": [],
+        "matched_prediction_indices": [],
+        "false_positive_indices": [
+          0,
+          1
+        ],
+        "missed_ground_truth_indices": []
+      }
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+[
+  {
+    "file": "wide_no_split.mp4",
+    "decoded_frames": 250,
+    "fps": 25.0,
+    "codec": "H.264"
+  },
+  {
+    "file": "wide_team_split.mp4",
+    "decoded_frames": 250,
+    "fps": 25.0,
+    "codec": "H.264"
+  },
+  {
+    "file": "wide_body.mp4",
+    "decoded_frames": 250,
+    "fps": 25.0,
+    "codec": "H.264"
+  },
+  {
+    "file": "tackle_no_split.mp4",
+    "decoded_frames": 300,
+    "fps": 25.0,
+    "codec": "H.264"
+  },
+  {
+    "file": "tackle_team_split.mp4",
+    "decoded_frames": 300,
+    "fps": 25.0,
+    "codec": "H.264"
+  },
+  {
+    "file": "tackle_body.mp4",
+    "decoded_frames": 300,
+    "fps": 25.0,
+    "codec": "H.264"
+  }
+]

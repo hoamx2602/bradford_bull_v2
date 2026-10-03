@@ -252,9 +252,14 @@ is*, *where it comes from*, *its typical range*, and *what pushes it up or down*
   if it shares its anchor with other locations (even split) or if other zones get more
   exposure. Changing enabled criteria in Settings recomputes it instantly.
 
-### 6.5 `Quality exposure`
+### 6.5 `Quality (whole zone)` and `Quality (this location)`
 - **What:** `quality_zone` — the engine's core measure of *how much valuable screen time*
-  this zone got. **This is the number AI % is the share of.**
+  this zone got — and the slice of it attributed to this one location.
+- **Why two columns:** several locations can map to the same anchor (COCO-17 cannot
+  separate the neck/upper-back slots), and the zone's quality is then split evenly
+  between them — see `Locations on anchor`. **AI % is the share of
+  `Quality (this location)`**, so reading it against the whole-zone figure makes the
+  two columns look contradictory for any shared anchor.
 - **Source / formula (§4):** `Σ_segments ( mean(frame_weight) × duration_weight × duration )`.
 - **Unit:** quality-weighted seconds (a segment of 2 s at frame_weight 0.1 and dw 1.0 → 0.2).
 - **Up/down:** more on-screen time, higher per-frame weight (big/central/clear logo), and
@@ -262,7 +267,9 @@ is*, *where it comes from*, *its typical range*, and *what pushes it up or down*
   not sum to 100 — it is the raw fuel that §5 turns into the percentage.
 
 ### 6.6 `Detections`
-- **What:** how many sampled frames contained a logo in this zone.
+- **What:** how many sampled frames contained a logo in this zone. Zone-level: locations
+  sharing an anchor report the same count (as they do for `Segments`, `On-screen (s)`
+  and every `Mean *` column).
 - **Source:** count of facts for the anchor.
 - **Unit:** frames at the sample rate (2 fps → 100 detections ≈ 50 s of *frames*, but not
   necessarily 50 continuous seconds).

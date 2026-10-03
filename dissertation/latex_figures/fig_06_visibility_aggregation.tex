@@ -1,0 +1,109 @@
+% Visibility quality and duration measurement: editable TikZ source.
+% A deliberately linear reading path avoids ambiguous branches and crossings.
+\begin{tikzpicture}[x=1mm,y=1mm]
+  \tikzset{
+    vispanel/.style={
+      draw=LLGrid,
+      line width=0.55pt,
+      rounded corners=1.5pt,
+      fill=black!1
+    },
+    visbox/.style={
+      draw=LLNavy!55,
+      line width=0.6pt,
+      rounded corners=1.5pt,
+      fill=white,
+      align=center,
+      inner sep=2.2mm,
+      font=\scriptsize
+    },
+    vismodel/.style={visbox,draw=LLNavy!55,fill=black!3},
+    visrule/.style={visbox,draw=LLOrange,fill=LLOrange!6},
+    visoutput/.style={visbox,draw=LLBlue,fill=LLBlue!8},
+    visarrow/.style={
+      -{Stealth[length=2.0mm,width=1.25mm]},
+      draw=LLNavy!75,
+      line width=0.7pt
+    },
+    vistitle/.style={font=\small\bfseries,text=LLNavy,anchor=west},
+    vissubtitle/.style={font=\tiny,text=LLMuted,anchor=west}
+  }
+
+  % ------------------------------------------------------------------
+  % Panel A: one linear frame-level path
+  % ------------------------------------------------------------------
+  \node[vistitle] at (0,96) {(a) Frame-level visibility quality};
+  \node[vissubtitle,anchor=east] at (160,96)
+    {one auditable score for each retained detection};
+  \node[vispanel,minimum width=160mm,minimum height=46mm,anchor=north west]
+    at (0,92) {};
+
+  \node[vismodel,text width=25mm,minimum height=24mm,anchor=west] (record) at (4,69)
+    {\textbf{Detection record}\\[1.2mm]
+     bounding box\\confidence\\timestamp};
+
+  \node[visbox,draw=LLNavy!55,text width=42mm,minimum height=32mm,anchor=west]
+    (inputs) at (38,69)
+    {\textbf{Quality inputs}\\[1.3mm]
+     \textcolor{LLBlue}{\textbf{Screen coverage}}\\[-0.2mm]
+     \textcolor{LLMuted}{\tiny relative logo area}\\[0.7mm]
+     \textcolor{LLBlue}{\textbf{Frame position}}\\[-0.2mm]
+     \textcolor{LLMuted}{\tiny distance to screen centre}\\[0.7mm]
+     \textcolor{LLNavy!70}{\textbf{Detection certainty}}\\[-0.2mm]
+     \textcolor{LLMuted}{\tiny model confidence}};
+
+  \node[visrule,text width=35mm,minimum height=28mm,anchor=west] (score) at (90,69)
+    {\textbf{Quality heuristic}\\[1.3mm]
+     combines coverage,\\position and confidence\\[1mm]
+     \textcolor{LLMuted}{\tiny defined by the researcher; details in the method text}};
+
+  \node[visoutput,text width=20mm,minimum height=28mm,anchor=west] (frameout) at (135,69)
+    {\textbf{Frame result}\\[1.2mm]
+     quality score\\+ timestamp};
+
+  \draw[visarrow] (record.east) -- (inputs.west);
+  \draw[visarrow] (inputs.east) -- (score.west);
+  \draw[visarrow] (score.east) -- (frameout.west);
+
+  % ------------------------------------------------------------------
+  % Panel B: one linear temporal path
+  % ------------------------------------------------------------------
+  \node[vistitle] at (0,37) {(b) Temporal duration and aggregation};
+  \node[vissubtitle,anchor=east] at (160,37)
+    {frame evidence accumulated within each brand and track};
+  \node[vispanel,minimum width=160mm,minimum height=34mm,anchor=north west]
+    at (0,33) {};
+
+  \node[vismodel,text width=24mm,minimum height=20mm,anchor=west] (sequence) at (4,16)
+    {\textbf{Evidence sequence}\\[0.8mm]
+     sampled scores\\and timestamps};
+  \node[visrule,text width=23mm,minimum height=20mm,anchor=west] (floor) at (35,16)
+    {\textbf{Visibility filter}\\[0.8mm]
+     discard weak scores};
+  \node[visrule,text width=25mm,minimum height=20mm,anchor=west] (segment) at (66,16)
+    {\textbf{Segment formation}\\[0.8mm]
+     split at long gaps};
+  \node[visrule,text width=22mm,minimum height=20mm,anchor=west] (flicker) at (99,16)
+    {\textbf{Flicker removal}\\[0.8mm]
+     discard brief segments};
+  \node[visoutput,text width=26mm,minimum height=24mm,anchor=west] (outputs) at (130,16)
+    {\textbf{Reporting outputs}\\[1.1mm]
+     raw visible time\\[0.7mm]
+     quality-weighted exposure};
+
+  \draw[visarrow] (sequence.east) -- (floor.west);
+  \draw[visarrow] (floor.east) -- (segment.west);
+  \draw[visarrow] (segment.east) -- (flicker.west);
+  \draw[visarrow] (flicker.east) -- (outputs.west);
+
+  \node[vissubtitle,anchor=center] at (80,2)
+    {Exact thresholds and duration weights are stated in the method text.};
+
+  % Evidence-status key.
+  \draw[LLBlue,line width=2.2pt] (8,-8) -- (14,-8);
+  \node[vissubtitle] at (16,-8) {geometry-derived evidence};
+  \draw[LLNavy!55,line width=2.2pt] (57,-8) -- (63,-8);
+  \node[vissubtitle] at (65,-8) {model evidence};
+  \draw[LLOrange,line width=2.2pt] (108,-8) -- (114,-8);
+  \node[vissubtitle] at (116,-8) {researcher-defined rule};
+\end{tikzpicture}

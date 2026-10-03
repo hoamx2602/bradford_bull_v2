@@ -1,0 +1,418 @@
+[
+  {
+    "image_id": 7,
+    "file_name": "M_CAS__kit-home__lt-floodlit__bc-bullstv__cam-closeup__shot0064__t00185500ms_jpg.rf.gvTjEdmfeBNUYNZE1GAV.jpg",
+    "annotation_id": 32,
+    "category_id": 16,
+    "class_name": "top_notch_home",
+    "bbox": [
+      975.16,
+      246.59,
+      97.16,
+      56.2
+    ]
+  },
+  {
+    "image_id": 7,
+    "file_name": "M_CAS__kit-home__lt-floodlit__bc-bullstv__cam-closeup__shot0064__t00185500ms_jpg.rf.gvTjEdmfeBNUYNZE1GAV.jpg",
+    "annotation_id": 33,
+    "category_id": 2,
+    "class_name": "asc_group_home",
+    "bbox": [
+      239.07,
+      641.52,
+      84.12,
+      50.42
+    ]
+  },
+  {
+    "image_id": 7,
+    "file_name": "M_CAS__kit-home__lt-floodlit__bc-bullstv__cam-closeup__shot0064__t00185500ms_jpg.rf.gvTjEdmfeBNUYNZE1GAV.jpg",
+    "annotation_id": 34,
+    "category_id": 10,
+    "class_name": "klg_home",
+    "bbox": [
+      1138.95,
+      800.62,
+      81.94,
+      45.36
+    ]
+  },
+  {
+    "image_id": 7,
+    "file_name": "M_CAS__kit-home__lt-floodlit__bc-bullstv__cam-closeup__shot0064__t00185500ms_jpg.rf.gvTjEdmfeBNUYNZE1GAV.jpg",
+    "annotation_id": 35,
+    "category_id": 11,
+    "class_name": "mcp_home",
+    "bbox": [
+      1121.67,
+      571.5,
+      67.26,
+      43.41
+    ]
+  },
+  {
+    "image_id": 7,
+    "file_name": "M_CAS__kit-home__lt-floodlit__bc-bullstv__cam-closeup__shot0064__t00185500ms_jpg.rf.gvTjEdmfeBNUYNZE1GAV.jpg",
+    "annotation_id": 36,
+    "category_id": 14,
+    "class_name": "paints_lacquers_home",
+    "bbox": [
+      1097.72,
+      862.34,
+      44.7,
+      43.45
+    ]
+  },
+  {
+    "image_id": 7,
+    "file_name": "M_CAS__kit-home__lt-floodlit__bc-bullstv__cam-closeup__shot0064__t00185500ms_jpg.rf.gvTjEdmfeBNUYNZE1GAV.jpg",
+    "annotation_id": 37,
+    "category_id": 15,
+    "class_name": "romantica_home",
+    "bbox": [
+      940.4,
+      198.75,
+      45.33,
+      28.12
+    ]
+  },
+  {
+    "image_id": 7,
+    "file_name": "M_CAS__kit-home__lt-floodlit__bc-bullstv__cam-closeup__shot0064__t00185500ms_jpg.rf.gvTjEdmfeBNUYNZE1GAV.jpg",
+    "annotation_id": 38,
+    "category_id": 2,
+    "class_name": "asc_group_home",
+    "bbox": [
+      1148.84,
+      739.77,
+      67.5,
+      47.32
+    ]
+  },
+  {
+    "image_id": 7,
+    "file_name": "M_CAS__kit-home__lt-floodlit__bc-bullstv__cam-closeup__shot0064__t00185500ms_jpg.rf.gvTjEdmfeBNUYNZE1GAV.jpg",
+    "annotation_id": 39,
+    "category_id": 10,
+    "class_name": "klg_home",
+    "bbox": [
+      241.36,
+      729.27,
+      97.78,
+      51.82
+    ]
+  },
+  {
+    "image_id": 7,
+    "file_name": "M_CAS__kit-home__lt-floodlit__bc-bullstv__cam-closeup__shot0064__t00185500ms_jpg.rf.gvTjEdmfeBNUYNZE1GAV.jpg",
+    "annotation_id": 40,
+    "category_id": 14,
+    "class_name": "paints_lacquers_home",
+    "bbox": [
+      189.81,
+      793.23,
+      42.01,
+      47.14
+    ]
+  },
+  {
+    "image_id": 7,
+    "file_name": "M_CAS__kit-home__lt-floodlit__bc-bullstv__cam-closeup__shot0064__t00185500ms_jpg.rf.gvTjEdmfeBNUYNZE1GAV.jpg",
+    "annotation_id": 41,
+    "category_id": 7,
+    "class_name": "ellgren_home",
+    "bbox": [
+      997.23,
+      217.89,
+      34.16,
+      30.13
+    ]
+  },
+  {
+    "image_id": 7,
+    "file_name": "M_CAS__kit-home__lt-floodlit__bc-bullstv__cam-closeup__shot0064__t00185500ms_jpg.rf.gvTjEdmfeBNUYNZE1GAV.jpg",
+    "annotation_id": 42,
+    "category_id": 11,
+    "class_name": "mcp_home",
+    "bbox": [
+      236.65,
+      470.94,
+      73.75,
+      37.95
+    ]
+  },
+  {
+    "image_id": 7,
+    "file_name": "M_CAS__kit-home__lt-floodlit__bc-bullstv__cam-closeup__shot0064__t00185500ms_jpg.rf.gvTjEdmfeBNUYNZE1GAV.jpg",
+    "annotation_id": 43,
+    "category_id": 11,
+    "class_name": "mcp_home",
+    "bbox": [
+      225.51,
+      505.27,
+      97.55,
+      39.18
+    ]
+  },
+  {
+    "image_id": 7,
+    "file_name": "M_CAS__kit-home__lt-floodlit__bc-bullstv__cam-closeup__shot0064__t00185500ms_jpg.rf.gvTjEdmfeBNUYNZE1GAV.jpg",
+    "annotation_id": 44,
+    "category_id": 1,
+    "class_name": "aon_home",
+    "bbox": [
+      327.8,
+      802.82,
+      52.14,
+      41.74
+    ]
+  },
+  {
+    "image_id": 16,
+    "file_name": "M_CAS__kit-home__lt-floodlit__bc-bullstv__cam-medium__shot0148__t00489000ms_jpg.rf.QnhMBX4B84wvNiMsNdyo.jpg",
+    "annotation_id": 96,
+    "category_id": 8,
+    "class_name": "em_workwear_home",
+    "bbox": [
+      1777.02,
+      846.34,
+      53.53,
+      41.4
+    ]
+  },
+  {
+    "image_id": 16,
+    "file_name": "M_CAS__kit-home__lt-floodlit__bc-bullstv__cam-medium__shot0148__t00489000ms_jpg.rf.QnhMBX4B84wvNiMsNdyo.jpg",
+    "annotation_id": 97,
+    "category_id": 14,
+    "class_name": "paints_lacquers_home",
+    "bbox": [
+      1005.88,
+      731,
+      41.19,
+      40.77
+    ]
+  },
+  {
+    "image_id": 16,
+    "file_name": "M_CAS__kit-home__lt-floodlit__bc-bullstv__cam-medium__shot0148__t00489000ms_jpg.rf.QnhMBX4B84wvNiMsNdyo.jpg",
+    "annotation_id": 98,
+    "category_id": 14,
+    "class_name": "paints_lacquers_home",
+    "bbox": [
+      1670.79,
+      616.59,
+      44.91,
+      46.39
+    ]
+  },
+  {
+    "image_id": 23,
+    "file_name": "M_CAS__kit-home__lt-floodlit__bc-bullstv__cam-wide__shot0072__t00215000ms_jpg.rf.uEGFkjWhoYo2V6SxHWyA.jpg",
+    "annotation_id": 102,
+    "category_id": 10,
+    "class_name": "klg_home",
+    "bbox": [
+      914.16,
+      424.42,
+      103.76,
+      51.17
+    ]
+  },
+  {
+    "image_id": 23,
+    "file_name": "M_CAS__kit-home__lt-floodlit__bc-bullstv__cam-wide__shot0072__t00215000ms_jpg.rf.uEGFkjWhoYo2V6SxHWyA.jpg",
+    "annotation_id": 103,
+    "category_id": 10,
+    "class_name": "klg_home",
+    "bbox": [
+      514.48,
+      1005.55,
+      125.61,
+      52.51
+    ]
+  },
+  {
+    "image_id": 23,
+    "file_name": "M_CAS__kit-home__lt-floodlit__bc-bullstv__cam-wide__shot0072__t00215000ms_jpg.rf.uEGFkjWhoYo2V6SxHWyA.jpg",
+    "annotation_id": 104,
+    "category_id": 14,
+    "class_name": "paints_lacquers_home",
+    "bbox": [
+      864.17,
+      477.67,
+      38.16,
+      41.18
+    ]
+  },
+  {
+    "image_id": 28,
+    "file_name": "M_HFC__kit-home__lt-day__bc-bullstv__cam-closeup__shot0029__t00117000ms_jpg.rf.QsRsMwuLq9miRJQXU6XN.jpg",
+    "annotation_id": 112,
+    "category_id": 14,
+    "class_name": "paints_lacquers_home",
+    "bbox": [
+      1205.14,
+      643.47,
+      35.12,
+      36.36
+    ]
+  },
+  {
+    "image_id": 28,
+    "file_name": "M_HFC__kit-home__lt-day__bc-bullstv__cam-closeup__shot0029__t00117000ms_jpg.rf.QsRsMwuLq9miRJQXU6XN.jpg",
+    "annotation_id": 113,
+    "category_id": 11,
+    "class_name": "mcp_home",
+    "bbox": [
+      1215.15,
+      329.92,
+      50.01,
+      30.94
+    ]
+  },
+  {
+    "image_id": 28,
+    "file_name": "M_HFC__kit-home__lt-day__bc-bullstv__cam-closeup__shot0029__t00117000ms_jpg.rf.QsRsMwuLq9miRJQXU6XN.jpg",
+    "annotation_id": 114,
+    "category_id": 10,
+    "class_name": "klg_home",
+    "bbox": [
+      1257.04,
+      574.18,
+      42.24,
+      42.58
+    ]
+  },
+  {
+    "image_id": 37,
+    "file_name": "M_HFC__kit-home__lt-day__bc-bullstv__cam-closeup__shot0064__t00239000ms_jpg.rf.3LsAQauYgnU0rIbhXlqO.jpg",
+    "annotation_id": 132,
+    "category_id": 14,
+    "class_name": "paints_lacquers_home",
+    "bbox": [
+      1796.78,
+      968.83,
+      73.92,
+      86.6
+    ]
+  },
+  {
+    "image_id": 37,
+    "file_name": "M_HFC__kit-home__lt-day__bc-bullstv__cam-closeup__shot0064__t00239000ms_jpg.rf.3LsAQauYgnU0rIbhXlqO.jpg",
+    "annotation_id": 133,
+    "category_id": 11,
+    "class_name": "mcp_home",
+    "bbox": [
+      1433.3,
+      655.32,
+      81.46,
+      75.02
+    ]
+  },
+  {
+    "image_id": 37,
+    "file_name": "M_HFC__kit-home__lt-day__bc-bullstv__cam-closeup__shot0064__t00239000ms_jpg.rf.3LsAQauYgnU0rIbhXlqO.jpg",
+    "annotation_id": 134,
+    "category_id": 9,
+    "class_name": "fairway_home",
+    "bbox": [
+      1416.31,
+      609.46,
+      67.8,
+      50.06
+    ]
+  },
+  {
+    "image_id": 57,
+    "file_name": "M_HKR__kit-home__lt-day__bc-bullstv__cam-closeup__shot0048__t00265000ms_jpg.rf.kM5aYSemw2Ux2X574arb.jpg",
+    "annotation_id": 159,
+    "category_id": 11,
+    "class_name": "mcp_home",
+    "bbox": [
+      1378.55,
+      482.15,
+      140.86,
+      76.32
+    ]
+  },
+  {
+    "image_id": 57,
+    "file_name": "M_HKR__kit-home__lt-day__bc-bullstv__cam-closeup__shot0048__t00265000ms_jpg.rf.kM5aYSemw2Ux2X574arb.jpg",
+    "annotation_id": 160,
+    "category_id": 9,
+    "class_name": "fairway_home",
+    "bbox": [
+      1402.26,
+      439.42,
+      86.99,
+      55.32
+    ]
+  },
+  {
+    "image_id": 61,
+    "file_name": "M_HKR__kit-home__lt-day__bc-bullstv__cam-medium__shot0016__t00062500ms_jpg.rf.gyt0jQvtV5KROg87pUKp.jpg",
+    "annotation_id": 161,
+    "category_id": 10,
+    "class_name": "klg_home",
+    "bbox": [
+      1236.79,
+      935.54,
+      121,
+      85.04
+    ]
+  },
+  {
+    "image_id": 61,
+    "file_name": "M_HKR__kit-home__lt-day__bc-bullstv__cam-medium__shot0016__t00062500ms_jpg.rf.gyt0jQvtV5KROg87pUKp.jpg",
+    "annotation_id": 162,
+    "category_id": 14,
+    "class_name": "paints_lacquers_home",
+    "bbox": [
+      1772.03,
+      947.79,
+      56.17,
+      58.26
+    ]
+  },
+  {
+    "image_id": 61,
+    "file_name": "M_HKR__kit-home__lt-day__bc-bullstv__cam-medium__shot0016__t00062500ms_jpg.rf.gyt0jQvtV5KROg87pUKp.jpg",
+    "annotation_id": 163,
+    "category_id": 14,
+    "class_name": "paints_lacquers_home",
+    "bbox": [
+      1119.54,
+      945.63,
+      59.32,
+      57.13
+    ]
+  },
+  {
+    "image_id": 61,
+    "file_name": "M_HKR__kit-home__lt-day__bc-bullstv__cam-medium__shot0016__t00062500ms_jpg.rf.gyt0jQvtV5KROg87pUKp.jpg",
+    "annotation_id": 164,
+    "category_id": 1,
+    "class_name": "aon_home",
+    "bbox": [
+      1322.26,
+      1050.06,
+      63.13,
+      55.31
+    ]
+  },
+  {
+    "image_id": 61,
+    "file_name": "M_HKR__kit-home__lt-day__bc-bullstv__cam-medium__shot0016__t00062500ms_jpg.rf.gyt0jQvtV5KROg87pUKp.jpg",
+    "annotation_id": 165,
+    "category_id": 1,
+    "class_name": "aon_home",
+    "bbox": [
+      386.98,
+      671.24,
+      50.23,
+      42.37
+    ]
+  }
+]

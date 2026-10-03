@@ -31,6 +31,7 @@ from app.pipeline.teamid.classifier import OTHER, TARGET, learn_weights
 from app.pipeline.teamid.features import N_L, color_feature, color_sim, encode_crops_masked
 from app.pipeline.teamid.jersey import (
     box_trustworthy, boxes_contested, get_jersey_region, jersey_quality,
+    _green_mask, _skin_mask,
 )
 
 log = logging.getLogger("app.teamid")
@@ -47,11 +48,14 @@ def _kmeans(X: np.ndarray, k: int, iters: int = 30, seed: int = 0):
     centers = [X[rng.integers(len(X))]]
     for _ in range(1, k):
         d2 = np.min([(np.linalg.norm(X - c, axis=1) ** 2) for c in centers], axis=0)
+        if d2.sum() <= 1e-12:
+            centers.append(X[rng.integers(len(X))])
+            continue
         p = d2 / (d2.sum() + 1e-12)
         centers.append(X[rng.choice(len(X), p=p)])
     C = np.stack(centers)
 
-    labels = np.zeros(len(X), dtype=int)
+    labels = np.full(len(X), -1, dtype=int)
     for _ in range(iters):
         d = ((X[:, None, :] - C[None, :, :]) ** 2).sum(-1)
         new_labels = d.argmin(1)
@@ -108,8 +112,6 @@ def _collect_crops(video_path: Path, n_frames: int, device: str):
     regions, masks = [], []
     enough = 150  # plenty for a stable Otsu split / centroids
     for fi in idxs:
-        if len(regions) >= enough:
-            break
         cap.set(cv2.CAP_PROP_POS_FRAMES, int(fi))
         ok, frame = cap.read()
         if not ok:
@@ -129,6 +131,16 @@ def _collect_crops(video_path: Path, n_frames: int, device: str):
             regions.append(region)
             masks.append(mask)
     cap.release()
+
+    # Sample every requested frame, THEN thin down — stopping the sweep as soon
+    # as `enough` crops existed drew the whole reference from the first minutes
+    # of the video, so one passage of play (a scrum, a set dominated by one
+    # side) decided which kit is "the target team". Uniform thinning keeps the
+    # crops spread over the full match.
+    if len(regions) > enough:
+        pick = np.linspace(0, len(regions) - 1, enough).astype(int)
+        regions = [regions[i] for i in pick]
+        masks = [masks[i] for i in pick]
     return regions, masks
 
 
@@ -145,7 +157,11 @@ def _anchor_features(kit: str, device: str):
         if img is None:
             continue
         h, w = img.shape[:2]
-        region, mask = get_jersey_region(img, (0, 0, w, h))
+        # These files are already torso crops, not full-body person boxes.
+        # Cropping their 15-45% band again selects only Bradford's dark chevron
+        # and can make a white kit look closer to the opponent's dark shirt.
+        region = img
+        mask = ~_green_mask(img) & ~_skin_mask(img)
         if region is not None:
             regions.append(region)
             masks.append(mask)
@@ -187,7 +203,9 @@ def build_refs_from_video(video_path: Path, kit: str) -> dict | None:
 
     if a_emb is not None or a_cf is not None:
         # ── Anchor mode: cluster, pick the cluster most similar to anchors ─
-        feats = embeddings if embeddings is not None else np.stack(color_feats)
+        # Cluster kit colour rather than generic semantic embeddings, which
+        # often separate front/back views or officials instead of teams.
+        feats = np.stack(color_feats)
         k = 3 if len(feats) >= 3 * 8 else 2   # 2 teams + officials
         labels, _ = _kmeans(feats, k)
         scores = []
@@ -203,12 +221,20 @@ def build_refs_from_video(video_path: Path, kit: str) -> dict | None:
             if a_emb is not None and embeddings is not None:
                 c = embeddings[ix].mean(0)
                 c /= (np.linalg.norm(c) + 1e-8)
-                sim += float(c @ a_emb)
-                n_terms += 1
+                sim += 0.2 * float(c @ a_emb)
+                n_terms += 0.2
             if a_cf is not None:
                 sim += color_sim(np.mean([color_feats[i] for i in ix], axis=0), a_cf)
                 n_terms += 1
-            scores.append(sim / max(1, n_terms))
+            # Product photos contain black backgrounds, and shirt patterns
+            # are not equally represented in every view. Respect the explicit
+            # home/light or away/dark kit selection instead of letting the
+            # photo background reverse team identity.
+            cluster_color = np.mean([color_feats[i] for i in ix], axis=0)
+            lum = _luminance(cluster_color)
+            dark_kit = kit in {x.strip() for x in s.team_dark_kits.split(",")}
+            kit_match = 1.0 - lum if dark_kit else lum
+            scores.append(0.3 * sim / max(1, n_terms) + 0.7 * kit_match)
         pick = int(np.argmax(scores))
         assignments = [TARGET if l == pick else OTHER for l in labels]
         mode = "anchors"
@@ -245,6 +271,11 @@ def build_refs_from_video(video_path: Path, kit: str) -> dict | None:
              len(assignments), n_pick, mode)
     w_color, w_siglip, centroids, colors = learn_weights(
         [TARGET, OTHER], assignments, embeddings, color_feats)
+    # Pseudo-labelled clusters cannot independently validate a semantic model.
+    # Keep colour dominant when references themselves were colour-clustered.
+    if mode == "anchors":
+        w_color = max(w_color, 0.8)
+        w_siglip = 1.0 - w_color if embeddings is not None else 0.0
 
     refs = {
         "schema": 3,
@@ -254,7 +285,11 @@ def build_refs_from_video(video_path: Path, kit: str) -> dict | None:
         },
         "meta": {"w_color": w_color, "w_siglip": w_siglip,
                  "temp_c": 8.0, "temp_s": 15.0,
-                 "bootstrap": mode, "kit": kit},
+                 "bootstrap": mode, "kit": kit,
+                 # How the bootstrap crops split. A target share far from ~50 %
+                 # is the first sign the wrong cluster was picked, so record it
+                 # alongside the centroids rather than only in the log line.
+                 "n_target": n_pick, "n_other": len(assignments) - n_pick},
     }
 
     # Debug copy for inspection / reuse.

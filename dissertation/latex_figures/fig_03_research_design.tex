@@ -1,0 +1,53 @@
+% Leakage-aware research design and case boundary: editable TikZ source.
+\begin{tikzpicture}[node distance=5mm and 7mm]
+  \node[lldata,text width=23mm,minimum height=18mm] (rq)
+    {\textbf{Research questions}\\\tiny evidence required};
+  \node[llteal,right=of rq,text width=23mm,minimum height=18mm] (matches)
+    {\textbf{Match-separated data}\\\tiny match = unit of independence};
+  \node[llblue,right=of matches,text width=31mm,minimum height=18mm] (split)
+    {\textbf{Leakage-safe split}\\\tiny train: fitting $\mid$ val: selection\\[-1mm]
+     \tiny held-out: final evaluation};
+  \node[llblue,right=of split,text width=27mm,minimum height=18mm] (train)
+    {\textbf{Parallel training}\\\tiny RF-DETR $\parallel$ YOLO26\\[-1mm]
+     \tiny same images and input size};
+
+  \node[llteal,below=11mm of train,text width=25mm,minimum height=18mm] (select)
+    {\textbf{Validation-only selection}\\\tiny checkpoint and stopping};
+  \node[llorange,left=of select,text width=25mm,minimum height=18mm] (test)
+    {\textbf{Held-out evaluation}\\\tiny shared scoring protocol};
+  \node[llgreen,left=of test,text width=25mm,minimum height=18mm] (evidence)
+    {\textbf{Detection evidence}\\\tiny accuracy, errors and conditions};
+  \node[llred,left=15mm of evidence,text width=25mm,minimum height=18mm] (visibility)
+    {\textbf{Visibility aggregation}\\\tiny segments, raw time, proxy score};
+
+  \foreach \nodeName/\number in {
+    rq/1,matches/2,split/3,train/4,select/5,test/6,evidence/7,visibility/8}
+    \node[llbadge,above left=-1.6mm and -1.6mm of \nodeName.north west] {\number};
+
+  \draw[llarrow] (rq) -- (matches);
+  \draw[llarrow] (matches) -- (split);
+  \draw[llarrow] (split) -- (train);
+  \draw[llarrow] (train) -- (select);
+  \draw[llarrow] (select) -- (test);
+  \draw[llarrow] (test) -- (evidence);
+  \draw[llarrow] (evidence) -- (visibility);
+
+  \draw[LLRed,dashed,line width=0.7pt]
+    ($(evidence.west)!0.5!(visibility.east)+(0,12mm)$) --
+    ($(evidence.west)!0.5!(visibility.east)+(0,-16mm)$);
+  \node[font=\tiny\bfseries,text=LLRed,align=center]
+    at ($(evidence.west)!0.5!(visibility.east)+(0,15mm)$)
+    {PROTOTYPE\\BOUNDARY};
+  \node[draw=LLRed,dashed,rounded corners=2pt,font=\tiny,text=LLRed,
+    below=2mm of visibility] {requires separate validation};
+
+  \begin{scope}[on background layer]
+    \node[draw=LLNavy!65,rounded corners=3pt,fit=(rq)(matches)(split)(train)(select)(test)(evidence),
+      inner sep=5mm,label={[llsection]above:EVALUATED DETECTION STUDY}] {};
+  \end{scope}
+
+  \node[lldata,below=18mm of evidence,text width=145mm,minimum height=12mm] (boundary)
+    {\textbf{CASE BOUNDARY}\qquad
+     One club\quad$\bullet$\quad White home kit\quad$\bullet$\quad
+     Broadcast and highlight footage\quad$\bullet$\quad Three unseen test matches};
+\end{tikzpicture}

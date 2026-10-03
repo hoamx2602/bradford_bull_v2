@@ -1,0 +1,161 @@
+% RF-DETR training trajectory and held-out evidence. All charts are native
+% PGFPlots/TikZ and read directly from the retained data files.
+\newcommand{\lltrainHeader}[2]{%
+  {\scriptsize\bfseries #1}\hfill
+  {\tiny\color{LLMuted}#2}\par\vspace{0.7mm}}
+
+% ---------------------------------------------------------------------------
+% Tier 1: both axes live in one groupplot, which guarantees identical vertical
+% alignment, plot height and x-axis baseline.
+\begin{tikzpicture}
+\begin{groupplot}[
+  group style={group size=2 by 1,horizontal sep=13mm},
+  llaxis,
+  width=74mm,
+  height=48mm,
+  xmin=0,xmax=51,
+  xtick={0,10,20,30,36,40,51},
+  xlabel={Epoch},
+  title style={font=\scriptsize\bfseries,text=LLNavy},
+]
+\nextgroupplot[
+  title={(a) Composite detection loss},
+  ymin=0,ymax=38,
+  ytick={0,5,10,20,30},
+  ylabel={Composite loss},
+  legend columns=2,
+  legend style={at={(0.98,0.98)},anchor=north east},
+  unbounded coords=jump,
+]
+  \addplot[LLBlue,line width=0.9pt,no marks]
+    table[col sep=comma,x=epoch,y=train_loss]{data/fig07_training.csv};
+  \addplot[LLOrange,line width=0.9pt,no marks]
+    table[col sep=comma,x=epoch,y=val_loss]{data/fig07_training.csv};
+  \draw[LLGreen,densely dotted,line width=0.9pt]
+    (axis cs:36,0) -- (axis cs:36,38);
+  \legend{Training,Validation}
+
+\nextgroupplot[
+  title={(b) Validation and checkpoint selection},
+  ymin=0,ymax=0.80,
+  ytick={0,0.2,0.4,0.6,0.8},
+  ylabel={Validation mAP@[0.50:0.95]},
+  legend columns=2,
+  legend style={at={(0.98,0.04)},anchor=south east},
+]
+  \addplot[LLBlue,line width=0.9pt,no marks]
+    table[col sep=comma,x=epoch,y=val_map]{data/fig07_training.csv};
+  \addplot[LLOrange,line width=0.9pt,no marks]
+    table[col sep=comma,x=epoch,y=ema_map]{data/fig07_training.csv};
+  \draw[LLGreen,densely dotted,line width=0.9pt]
+    (axis cs:36,0) -- (axis cs:36,0.80);
+  \addplot[only marks,mark=*,mark size=2.0pt,LLGreen]
+    coordinates {(36,0.741244)};
+  \node[font=\tiny\bfseries,text=LLNavy,fill=white,draw=LLGrid,
+    rounded corners=1pt,inner sep=1.5pt,anchor=south east]
+    at (axis cs:34.5,0.625) {epoch 36: 0.741};
+  \legend{Validation,EMA validation}
+\end{groupplot}
+\end{tikzpicture}
+
+\vspace{3.2mm}
+
+% ---------------------------------------------------------------------------
+% Tier 2: full-width operating-point matrix. Numeric class IDs replace rotated
+% brand names; the mapping is printed separately to eliminate label collisions.
+\lltrainHeader{(c) Held-out operating-point confusion}{confidence $\geq0.35$; IoU $\geq0.50$}
+\newcommand{\llcmcell}[4]{%
+  \ifnum#1=15
+    \fill[LLOrange!#3] (#1,#2) rectangle ++(1,1);
+  \else
+    \ifnum#2=0
+      \fill[LLOrange!#3] (#1,#2) rectangle ++(1,1);
+    \else
+      \fill[LLBlue!#3] (#1,#2) rectangle ++(1,1);
+    \fi
+  \fi
+  \node[font=\tiny,text=\ifnum#3>55 white\else LLNavy\fi]
+    at (#1+0.5,#2+0.5) {#4};}
+\begin{tikzpicture}[x=3.15mm,y=3.15mm]
+  \fill[white] (0,0) rectangle (16,16);
+  \draw[LLGrid,line width=0.22pt,step=1] (0,0) grid (16,16);
+  \input{data/fig07_confusion_cells.tex}
+  \draw[LLOrange!75,line width=0.55pt] (15,0) rectangle (16,16);
+  \draw[LLOrange!75,line width=0.55pt] (0,0) rectangle (16,1);
+
+  \foreach \pos/\id in {
+    0.5/1,1.5/2,2.5/3,3.5/4,4.5/5,5.5/6,6.5/7,7.5/8,
+    8.5/9,9.5/10,10.5/11,11.5/12,12.5/13,13.5/14,14.5/15,15.5/0}
+    \node[font=\tiny,anchor=north] at (\pos,-0.18) {\id};
+
+  \foreach \pos/\id in {
+    15.5/1,14.5/2,13.5/3,12.5/4,11.5/5,10.5/6,9.5/7,8.5/8,
+    7.5/9,6.5/10,5.5/11,4.5/12,3.5/13,2.5/14,1.5/15,0.5/0}
+    \node[font=\tiny,anchor=east] at (-0.18,\pos) {\id};
+
+  \node[font=\scriptsize] at (8,-1.55) {Predicted class ID};
+  \node[font=\scriptsize,rotate=90] at (-1.85,8) {Ground-truth class ID};
+
+  \node[font=\scriptsize\bfseries,text=LLNavy,anchor=west]
+    at (18.0,15.5) {Class-ID key};
+  \foreach \yy/\id/\name in {
+    14.3/1/Aon,13.1/2/ASC Group,11.9/3/ATM,10.7/4/Bartercard,
+    9.5/5/Chadlaw,8.3/6/Ellgren,7.1/7/EM Workwear,5.9/8/Fairway}
+    \node[font=\tiny,anchor=west] at (18.0,\yy) {\id\quad \name};
+  \foreach \yy/\id/\name in {
+    14.3/9/KLG,13.1/10/MCP,11.9/11/MNA Cladding,10.7/12/MNA Support,
+    9.5/13/P\&L,8.3/14/Romantica,7.1/15/Top Notch,5.9/0/No object}
+    \node[font=\tiny,anchor=west] at (29.0,\yy) {\id\quad \name};
+
+  \fill[LLBlue!75] (18.0,4.15) rectangle ++(0.55,0.55);
+  \node[font=\tiny,anchor=west] at (18.85,4.42) {146 correct detections};
+  \fill[LLOrange!65] (18.0,3.05) rectangle ++(0.55,0.55);
+  \node[font=\tiny,anchor=west] at (18.85,3.32) {19 missed ground truth};
+  \draw[LLOrange!80,line width=0.65pt] (18.0,1.95) rectangle ++(0.55,0.55);
+  \node[font=\tiny,anchor=west] at (18.85,2.22) {14 unmatched predictions};
+  \node[font=\tiny,text=LLMuted,anchor=north west,align=left,text width=55mm]
+    at (18.0,1.25)
+    {Blue diagonal = correct class; orange final column = misses; orange final row = unmatched predictions. Raw counts are printed in non-zero cells.};
+\end{tikzpicture}
+
+\vspace{3.2mm}
+
+% ---------------------------------------------------------------------------
+% Tier 3: full-width class-level AP chart. Labels sit outside bar ends on an
+% opaque white background so neither bars nor the mean line cross the values.
+\lltrainHeader{(d) Per-brand held-out AP@0.50}{all-class mean 0.933; support in parentheses; CCH omitted ($n=0$)}
+\begin{tikzpicture}
+\begin{axis}[
+  llaxis,
+  width=0.82\linewidth,
+  height=64mm,
+  xbar,
+  xmin=0,xmax=1.08,
+  ymin=-0.6,ymax=14.7,
+  xlabel={AP@0.50},
+  ytick={0,...,14},
+  yticklabels={
+    ATM (6),EM Workwear (6),Bartercard (5),MCP (27),Fairway (3),
+    Romantica (13),Top Notch (16),P\&L (18),ASC Group (11),
+    Ellgren (7),KLG (31),Aon (18),Chadlaw (1),MNA Support (1),MNA Cladding (2)
+  },
+  yticklabel style={font=\tiny},
+  bar width=2.6mm,
+  point meta=x,
+]
+  \addplot[fill=LLBlue,draw=none,bar shift=0pt,
+    nodes near coords={\pgfmathprintnumber[fixed,precision=3,zerofill]{\pgfplotspointmeta}},
+    every node near coord/.append style={font=\tiny,text=LLNavy,anchor=west,
+      xshift=1.5pt,fill=white,inner sep=0.7pt}]
+    table[col sep=comma,x=ap50,y=index]{data/fig07_per_brand_stable.csv};
+  \addplot[fill=black!28,draw=none,bar shift=0pt,
+    nodes near coords={\pgfmathprintnumber[fixed,precision=3,zerofill]{\pgfplotspointmeta}},
+    every node near coord/.append style={font=\tiny,text=LLNavy,anchor=west,
+      xshift=1.5pt,fill=white,inner sep=0.7pt}]
+    table[col sep=comma,x=ap50,y=index]{data/fig07_per_brand_sparse.csv};
+\end{axis}
+\end{tikzpicture}
+
+{\tiny\color{LLMuted}
+\textcolor{LLBlue}{\rule{1.5mm}{1.5mm}} $n\geq5$ boxes\quad
+\textcolor{black!35}{\rule{1.5mm}{1.5mm}} $n<5$ boxes}

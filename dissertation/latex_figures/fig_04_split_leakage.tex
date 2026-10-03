@@ -1,0 +1,61 @@
+% Dataset split and leakage diagnostic: editable PGFPlots source.
+\begin{minipage}[t]{0.49\linewidth}
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  llaxis,
+  width=\linewidth,
+  height=62mm,
+  ybar,
+  bar width=8pt,
+  ymin=0,
+  ymax=1800,
+  ylabel={Count},
+  symbolic x coords={Train,Validation,Test},
+  xtick=data,
+  xticklabels={\shortstack{Train\\9 matches},\shortstack{Validation\\3 matches},\shortstack{Test\\3 matches}},
+  enlarge x limits=0.22,
+  nodes near coords,
+  every node near coord/.append style={font=\tiny,text=LLNavy},
+  legend columns=2,
+  legend style={at={(0.5,0.98)},anchor=north},
+  title={(a) Match-disjoint dataset split},
+]
+  \addplot[fill=LLBlue,draw=none] coordinates {
+    (Train,460) (Validation,63) (Test,61)
+  };
+  \addplot[fill=LLOrange,draw=none] coordinates {
+    (Train,1611) (Validation,127) (Test,165)
+  };
+  \legend{Images,Boxes}
+\end{axis}
+\end{tikzpicture}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.49\linewidth}
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  llaxis,
+  width=\linewidth,
+  height=62mm,
+  ybar,
+  bar width=13pt,
+  ymin=0.80,
+  ymax=1.02,
+  ylabel={Score},
+  symbolic x coords={mAP50,F1},
+  xtick=data,
+  xticklabels={mAP@0.50,Best F1},
+  enlarge x limits=0.33,
+  nodes near coords,
+  every node near coord/.append style={font=\tiny,text=LLNavy,/pgf/number format/fixed,/pgf/number format/precision=3},
+  legend columns=1,
+  legend style={at={(0.98,0.02)},anchor=south east},
+  title={(b) Inflation on familiar match material},
+]
+  \addplot[fill=LLBlue,draw=none] coordinates {(mAP50,0.932) (F1,0.895)};
+  \addplot[fill=black!25,draw=none] coordinates {(mAP50,0.998) (F1,0.988)};
+  \legend{Unseen held-out matches,Training-match material}
+\end{axis}
+\end{tikzpicture}
+\end{minipage}

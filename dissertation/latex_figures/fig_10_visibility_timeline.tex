@@ -1,0 +1,28 @@
+% Brand-level visibility timeline: editable TikZ source.
+% Segment times are transcribed from the supplied interface screenshot.
+\newcommand{\lltimelabel}[3]{%
+  \fill[#3] (-1.15,#1-0.12) rectangle (-0.82,#1+0.12);
+  \node[font=\tiny,anchor=east,text=LLNavy] at (-1.35,#1) {#2};}
+\newcommand{\llsegment}[4]{%
+  \fill[#4,rounded corners=0.7pt] (#2,#1-0.18) rectangle (#3,#1+0.18);}
+
+\begin{tikzpicture}[x=1.82mm,y=-3.75mm]
+  % Row bands and time grid.
+  \foreach \row in {0,...,16}{
+    \fill[black!2] (0,\row-0.42) rectangle (72,\row+0.42);
+  }
+  \foreach \time in {0,10,...,70}{
+    \draw[LLGrid,line width=0.35pt] (\time,-0.55) -- (\time,16.55);
+    \node[font=\tiny,text=LLMuted,anchor=south] at (\time,-0.72)
+      {\ifnum\time<10 00:0\time\else 00:\time\fi};
+  }
+
+  \input{data/fig10_segments.tex}
+
+  % Interface playhead retained as an inspectability cue.
+  \draw[LLRed,line width=0.8pt] (25,-0.58) -- (25,16.55);
+  \node[font=\tiny,text=LLRed,anchor=south] at (25,-0.78) {playhead};
+
+  \draw[LLNavy!45,line width=0.45pt] (0,-0.55) rectangle (72,16.55);
+  \node[font=\scriptsize,text=LLNavy] at (36,17.35) {video time (mm:ss)};
+\end{tikzpicture}

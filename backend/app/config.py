@@ -11,6 +11,7 @@ from functools import lru_cache
 from pathlib import Path
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import Field
 
 # backend/ root (this file is backend/app/config.py)
 BACKEND_DIR = Path(__file__).resolve().parent.parent
@@ -175,6 +176,8 @@ class Settings(BaseSettings):
     team_person_imgsz: int = 960
     team_siglip_every: int = 5            # re-embed each track every N sampled frames
     team_hysteresis: float = 1.25         # vote lead needed to flip a track's label
+    team_vote_decay: float = Field(default=0.95, gt=0, le=1)
+    team_min_vote_margin: float = Field(default=0.20, ge=0, le=1)
     team_min_votes: float = 2.0           # vote mass before an OTHER label may drop logos
     team_keep_unknown: bool = True        # keep logos on not-yet-confident tracks
     team_keep_unassigned: bool = False    # keep logos not attached to any person

@@ -1,0 +1,80 @@
+{
+  "weights": "D:\\bradford_bull_v2\\runs\\rfdetr_matchsplit_r896\\checkpoint_best_total.pth",
+  "confidence": 0.35,
+  "iou_threshold": 0.5,
+  "scope": "qualitative examples from the held-out test split; not an aggregate occlusion benchmark",
+  "examples": [
+    {
+      "image_id": 7,
+      "annotation_id": 32,
+      "level": 0,
+      "level_label": "Clear",
+      "rationale": "The complete Top Notch mark is visible without foreground obstruction.",
+      "file_name": "M_CAS__kit-home__lt-floodlit__bc-bullstv__cam-closeup__shot0064__t00185500ms_jpg.rf.gvTjEdmfeBNUYNZE1GAV.jpg",
+      "class_name": "top_notch_home",
+      "bbox": [
+        975.16,
+        246.59,
+        97.16,
+        56.2
+      ],
+      "outcome": "detected",
+      "confidence": 0.9153433442115784,
+      "iou": 0.9364320119982966
+    },
+    {
+      "image_id": 61,
+      "annotation_id": 164,
+      "level": 1,
+      "level_label": "Partially occluded",
+      "rationale": "Another player's arm covers part of the Aon mark while the remaining letters are visible.",
+      "file_name": "M_HKR__kit-home__lt-day__bc-bullstv__cam-medium__shot0016__t00062500ms_jpg.rf.gyt0jQvtV5KROg87pUKp.jpg",
+      "class_name": "aon_home",
+      "bbox": [
+        1322.26,
+        1050.06,
+        63.13,
+        55.31
+      ],
+      "outcome": "detected",
+      "confidence": 0.7801758646965027,
+      "iou": 0.8788295151534335
+    },
+    {
+      "image_id": 53,
+      "annotation_id": 152,
+      "level": 1,
+      "level_label": "Partially occluded",
+      "rationale": "The player's hand and body pose obscure part of the Aon shorts mark.",
+      "file_name": "M_HKR__kit-home__lt-day__bc-bullstv__cam-closeup__shot0007__t00010000ms_jpg.rf.O2b2WMu05F2vDRtoB9Un.jpg",
+      "class_name": "aon_home",
+      "bbox": [
+        1133.15,
+        914.07,
+        58.44,
+        57.47
+      ],
+      "outcome": "missed",
+      "confidence": null,
+      "iou": null
+    },
+    {
+      "image_id": 37,
+      "annotation_id": 134,
+      "level": 2,
+      "level_label": "Heavily occluded",
+      "rationale": "A foreground head obscures most of the small Fairway mark.",
+      "file_name": "M_HFC__kit-home__lt-day__bc-bullstv__cam-closeup__shot0064__t00239000ms_jpg.rf.3LsAQauYgnU0rIbhXlqO.jpg",
+      "class_name": "fairway_home",
+      "bbox": [
+        1416.31,
+        609.46,
+        67.8,
+        50.06
+      ],
+      "outcome": "detected",
+      "confidence": 0.35072100162506104,
+      "iou": 0.920875021625435
+    }
+  ]
+}

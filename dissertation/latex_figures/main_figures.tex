@@ -1,0 +1,141 @@
+\documentclass[10pt,a4paper]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage[a4paper,margin=18mm]{geometry}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usepgfplotslibrary{groupplots}
+\usepackage{caption}
+\usepackage{float}
+\usepackage{placeins}
+\usepackage[hidelinks]{hyperref}
+\usetikzlibrary{positioning,arrows.meta,shapes.geometric,fit,backgrounds,calc}
+\pgfplotsset{compat=1.18}
+\input{logolens_style}
+
+\captionsetup{
+  font=small,
+  labelfont=bf,
+  labelsep=period,
+  justification=justified,
+  singlelinecheck=false
+}
+
+\title{LogoLens Dissertation Figures\\\large Native TikZ and PGFPlots Sources}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+\listoffigures
+\clearpage
+
+\begin{figure}[p]
+  \centering
+  \resizebox{\textwidth}{!}{\input{fig_01_model_architecture}}
+  \caption[YOLO26 and RF-DETR conceptual architecture]{Conceptual comparison of
+  the evaluated YOLO26 and RF-DETR detection routes. Both routes return the same
+  class--confidence--box schema and are evaluated using the same held-out
+  protocol; the diagram is not a layer-complete network specification.}
+  \label{fig:yolo-rfdetr-tikz}
+\end{figure}
+\clearpage
+
+\begin{figure}[p]
+  \centering
+  \resizebox{0.96\textwidth}{!}{\input{fig_02_research_framework}}
+  \caption[Research framework]{Research framework linking sponsorship
+  accountability to observable exposure, leakage-aware computer vision and
+  auditable visibility evidence.}
+  \label{fig:framework-tikz}
+\end{figure}
+\clearpage
+
+\begin{figure}[p]
+  \centering
+  \resizebox{\textwidth}{!}{\input{fig_03_research_design}}
+  \caption[Research design and case boundary]{Leakage-aware research design and
+  case boundary. Training, validation and held-out matches have non-overlapping
+  roles; visibility aggregation remains outside the validated detection study.}
+  \label{fig:design-tikz}
+\end{figure}
+\clearpage
+
+\begin{figure}[p]
+  \centering
+  \input{fig_04_split_leakage}
+  \caption[Dataset split and temporal leakage]{Match-disjoint dataset composition
+  and measured inflation on familiar match material. Familiar-material scores are
+  a leakage diagnostic rather than a generalisation result.}
+  \label{fig:split-leakage-pgf}
+\end{figure}
+\clearpage
+
+\begin{figure}[p]
+  \centering
+  \resizebox{\textwidth}{!}{\input{fig_05_system_architecture}}
+  \caption[LogoLens system architecture]{LogoLens processing pipeline. RF-DETR
+  Small and YOLO26 sit behind a common adapter and return one detection-record
+  schema, preserving traceability from report to source frame.}
+  \label{fig:system-tikz}
+\end{figure}
+\clearpage
+
+\begin{figure}[p]
+  \centering
+  \resizebox{\textwidth}{!}{\input{fig_06_visibility_aggregation}}
+  \caption[Visibility quality and duration aggregation]{Visibility quality and
+  duration measurement. Panel (a) converts box geometry and detector confidence
+  into a frame-level heuristic; panel (b) filters and groups ordered scores into
+  segments before reporting raw visible time and quality-weighted exposure.}
+  \label{fig:visibility-tikz}
+\end{figure}
+\clearpage
+
+\begin{figure}[p]
+  \centering
+  \input{fig_07_training_evidence}
+  \caption[RF-DETR training and held-out evidence]{RF-DETR Small training and
+  held-out evidence: loss trajectory, validation checkpoint selection,
+  operating-point confusion matrix and per-brand AP@0.50. Grey bars indicate
+  classes with fewer than five held-out boxes.}
+  \label{fig:training-pgf}
+\end{figure}
+\clearpage
+
+\begin{figure}[p]
+  \centering
+  \input{fig_08_occlusion_examples}
+  \caption[Qualitative held-out occlusion examples]{Qualitative held-out cases
+  across clear, partially occluded and heavily occluded conditions. The examples
+  illustrate detector behaviour and do not constitute an aggregate occlusion
+  benchmark.}
+  \label{fig:occlusion-tikz}
+\end{figure}
+\clearpage
+
+\begin{figure}[p]
+  \centering
+  \input{fig_09_detection_evidence}
+  \caption[Representative successes and failure modes]{Representative RF-DETR
+  outcomes on the held-out test set at confidence 0.35 and IoU 0.50. Box geometry,
+  status, colour and labels are rendered by TikZ over unmodified source frames.}
+  \label{fig:examples-tikz}
+\end{figure}
+\clearpage
+
+\begin{figure}[p]
+  \centering
+  \resizebox{\textwidth}{!}{\input{fig_10_visibility_timeline}}
+  \caption[Prototype brand-level visibility timeline]{Prototype brand-level
+  visibility timeline. Each bar represents one displayed visibility segment;
+  its position and extent are encoded directly as editable TikZ coordinates.}
+  \label{fig:timeline-tikz}
+\end{figure}
+
+\end{document}

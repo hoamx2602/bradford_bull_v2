@@ -1,0 +1,422 @@
+[
+  {
+    "index": 23,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "Declaration"
+  },
+  {
+    "index": 27,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "Abstract"
+  },
+  {
+    "index": 33,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "Acknowledgements"
+  },
+  {
+    "index": 36,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "Table of Contents"
+  },
+  {
+    "index": 109,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "List of Abbreviations"
+  },
+  {
+    "index": 113,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "List of Figures"
+  },
+  {
+    "index": 146,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "List of Tables"
+  },
+  {
+    "index": 157,
+    "kind": "paragraph",
+    "style": "Heading 1",
+    "text": "Chapter 1. Introduction"
+  },
+  {
+    "index": 158,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "1.1 Background and motivation"
+  },
+  {
+    "index": 164,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "1.2 Problem statement"
+  },
+  {
+    "index": 166,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "1.3 Aim and objectives"
+  },
+  {
+    "index": 175,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "1.4 Research questions"
+  },
+  {
+    "index": 186,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "1.5 Scope and delimitations"
+  },
+  {
+    "index": 188,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "1.6 Contributions"
+  },
+  {
+    "index": 195,
+    "kind": "paragraph",
+    "style": "Heading 1",
+    "text": "Chapter 2. Literature Review"
+  },
+  {
+    "index": 196,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "2.1 Object detection and its evaluation"
+  },
+  {
+    "index": 199,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "2.2 Logo detection and recognition"
+  },
+  {
+    "index": 204,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "2.3 Multi-object tracking and team attribution in sports video"
+  },
+  {
+    "index": 207,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "2.4 Measuring sponsorship exposure and media value"
+  },
+  {
+    "index": 212,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "2.5 Reducing annotation cost: weak supervision, foundation models and synthetic data"
+  },
+  {
+    "index": 215,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "2.6 Artificial intelligence in advertising"
+  },
+  {
+    "index": 217,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "2.7 Research gap and positioning"
+  },
+  {
+    "index": 220,
+    "kind": "paragraph",
+    "style": "Heading 1",
+    "text": "Chapter 3. Research Methodology"
+  },
+  {
+    "index": 222,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "3.1 Research design and philosophy"
+  },
+  {
+    "index": 225,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "3.2 Development approach and tools"
+  },
+  {
+    "index": 228,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "3.3 Data collection and preparation"
+  },
+  {
+    "index": 232,
+    "kind": "paragraph",
+    "style": "Heading 3",
+    "text": "3.3.1 High-value frame selection for annotation"
+  },
+  {
+    "index": 240,
+    "kind": "paragraph",
+    "style": "Heading 3",
+    "text": "3.3.2 Annotation with Roboflow and model-assisted labelling"
+  },
+  {
+    "index": 248,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "3.4 Evaluation methods and metrics"
+  },
+  {
+    "index": 257,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "3.5 Ethical, legal and professional considerations"
+  },
+  {
+    "index": 259,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "3.6 Reproducibility"
+  },
+  {
+    "index": 262,
+    "kind": "paragraph",
+    "style": "Heading 1",
+    "text": "Chapter 4. System Design and Implementation"
+  },
+  {
+    "index": 263,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "4.1 Architecture overview"
+  },
+  {
+    "index": 268,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "4.2 The processing pipeline"
+  },
+  {
+    "index": 273,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "4.3 Logo detection"
+  },
+  {
+    "index": 275,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "4.4 Team attribution"
+  },
+  {
+    "index": 292,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "4.5 Position assignment"
+  },
+  {
+    "index": 294,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "4.6 The three-tier valuation model"
+  },
+  {
+    "index": 302,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "4.7 The analytics dashboard"
+  },
+  {
+    "index": 312,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "4.8 Output data model and interface"
+  },
+  {
+    "index": 314,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "4.9 Implementation constraints"
+  },
+  {
+    "index": 317,
+    "kind": "paragraph",
+    "style": "Heading 1",
+    "text": "Chapter 5. Experiments and Results"
+  },
+  {
+    "index": 319,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "5.1 Experimental setup"
+  },
+  {
+    "index": 321,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "5.2 Dataset characterisation"
+  },
+  {
+    "index": 328,
+    "kind": "paragraph",
+    "style": "Heading 3",
+    "text": "5.2.1 Multi-logo frames, screen coverage and rendered resolution (RQ2)"
+  },
+  {
+    "index": 335,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "5.3 Detection accuracy and the effect of leakage (RQ1)"
+  },
+  {
+    "index": 359,
+    "kind": "paragraph",
+    "style": "Heading 3",
+    "text": "5.3.1 Alternative architecture benchmark: RF-DETR"
+  },
+  {
+    "index": 370,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "5.4 Team attribution (RQ1)"
+  },
+  {
+    "index": 379,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "5.5 Valuation plausibility and quality-weighting (RQ3)"
+  },
+  {
+    "index": 384,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "5.6 Parameter sensitivity and sampling bias (RQ3)"
+  },
+  {
+    "index": 391,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "5.7 Annotation effort and per-class accuracy (RQ4)"
+  },
+  {
+    "index": 401,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "5.8 Occlusion (RQ2)"
+  },
+  {
+    "index": 412,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "5.9 Throughput"
+  },
+  {
+    "index": 414,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "5.10 Summary of results"
+  },
+  {
+    "index": 417,
+    "kind": "paragraph",
+    "style": "Heading 1",
+    "text": "Chapter 6. Discussion"
+  },
+  {
+    "index": 418,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "6.1 Interpretation of the principal findings"
+  },
+  {
+    "index": 424,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "6.2 Relation to prior work"
+  },
+  {
+    "index": 427,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "6.3 Automated valuation in the context of AI in advertising"
+  },
+  {
+    "index": 430,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "6.4 Threats to validity"
+  },
+  {
+    "index": 436,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "6.5 Practical and ethical implications"
+  },
+  {
+    "index": 440,
+    "kind": "paragraph",
+    "style": "Heading 1",
+    "text": "Chapter 7. Conclusion and Future Work"
+  },
+  {
+    "index": 441,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "7.1 Conclusion"
+  },
+  {
+    "index": 445,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "7.2 Future work"
+  },
+  {
+    "index": 449,
+    "kind": "paragraph",
+    "style": "Heading 3",
+    "text": "Reducing the annotation requirement"
+  },
+  {
+    "index": 455,
+    "kind": "paragraph",
+    "style": "Heading 1",
+    "text": "References"
+  },
+  {
+    "index": 486,
+    "kind": "paragraph",
+    "style": "Heading 1",
+    "text": "Appendices"
+  },
+  {
+    "index": 487,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "Appendix A — Key system configuration"
+  },
+  {
+    "index": 490,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "Appendix B — Summary of experimental results"
+  },
+  {
+    "index": 493,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "Appendix C — Class distribution and per-class accuracy"
+  },
+  {
+    "index": 497,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "Appendix D — Note on assumptions and transparency"
+  }
+]

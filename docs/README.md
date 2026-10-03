@@ -18,6 +18,7 @@ tính **EMV (Equivalent Media Value)** cho từng brand và trực quan hóa tr�
 | 9 | [Vận hành & Troubleshooting](09-operations.md) | Tuning knobs, lỗi thường gặp, scaling |
 | 10 | [Location Breakdown](10-location-breakdown.md) | Bảng vị trí logo: Human/AI/AI Adjusted/Visibility % + công thức + export Excel |
 | 11 | [AI % calculation (EN)](11-ai-percentage-calculation.md) | English deep-dive: how every parameter is computed to produce the `AI %` / "AI % Detail" |
+| 12 | [Full match → report (CLI)](12-full-match-report.md) | Chạy video full match bằng CLI để lấy Excel Location Breakdown, không cần upload qua web |
 
 ## Tài liệu deep-dive (giữ ở repo root)
 

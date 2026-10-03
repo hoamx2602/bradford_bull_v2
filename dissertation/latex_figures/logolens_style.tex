@@ -1,0 +1,74 @@
+% Shared TikZ/PGFPlots design system for the LogoLens dissertation figures.
+% Load after tikz, pgfplots, xcolor and graphicx.
+
+\definecolor{LLNavy}{HTML}{172033}
+\definecolor{LLMuted}{HTML}{667085}
+\definecolor{LLGrid}{HTML}{D8DEE8}
+\definecolor{LLBlue}{HTML}{4C78A8}
+\definecolor{LLTeal}{HTML}{16859A}
+\definecolor{LLOrange}{HTML}{E28E3B}
+\definecolor{LLGreen}{HTML}{5B8E55}
+\definecolor{LLRed}{HTML}{C44E52}
+\definecolor{LLPurple}{HTML}{7A5195}
+\definecolor{LLGold}{HTML}{C99A32}
+
+% Fixed sponsor palette used by Figures 8--10.
+\definecolor{LLAon}{HTML}{0072B2}
+\definecolor{LLAsc}{HTML}{E69F00}
+\definecolor{LLAtm}{HTML}{009E73}
+\definecolor{LLBarter}{HTML}{CC79A7}
+\definecolor{LLCch}{HTML}{8C564B}
+\definecolor{LLChadlaw}{HTML}{D55E00}
+\definecolor{LLEllgren}{HTML}{56B4E9}
+\definecolor{LLEm}{HTML}{7A5195}
+\definecolor{LLFairway}{HTML}{2F4B7C}
+\definecolor{LLKlg}{HTML}{F05A67}
+\definecolor{LLMcp}{HTML}{00A087}
+\definecolor{LLMnaClad}{HTML}{F39C34}
+\definecolor{LLMnaSupport}{HTML}{6C5CE7}
+\definecolor{LLPaints}{HTML}{C44E52}
+\definecolor{LLRomantica}{HTML}{4E79A7}
+\definecolor{LLTopNotch}{HTML}{59A14F}
+\definecolor{LLFloorTonic}{HTML}{D81B60}
+
+\tikzset{
+  llbox/.style={
+    rectangle,
+    rounded corners=2pt,
+    draw=LLNavy!65,
+    line width=0.65pt,
+    fill=white,
+    align=center,
+    inner sep=4pt,
+    font=\scriptsize,
+    minimum height=10mm,
+    text width=23mm
+  },
+  lldata/.style={llbox,fill=black!3,draw=LLNavy!55},
+  llblue/.style={llbox,fill=LLBlue!7,draw=LLBlue},
+  llteal/.style={llbox,fill=LLTeal!7,draw=LLTeal},
+  llorange/.style={llbox,fill=LLOrange!8,draw=LLOrange},
+  llgreen/.style={llbox,fill=LLGreen!8,draw=LLGreen},
+  llred/.style={llbox,fill=LLRed!7,draw=LLRed},
+  llpurple/.style={llbox,fill=LLPurple!7,draw=LLPurple},
+  llarrow/.style={-{Stealth[length=2.0mm,width=1.3mm]},line width=0.75pt,draw=LLNavy!80},
+  llthinarr/.style={-{Stealth[length=1.6mm,width=1.1mm]},line width=0.55pt,draw=LLNavy!70},
+  lldashed/.style={draw=LLNavy!65,dashed,rounded corners=2pt,line width=0.55pt},
+  llbadge/.style={circle,fill=LLNavy,text=white,font=\scriptsize\bfseries,inner sep=1.6pt},
+  llsection/.style={font=\scriptsize\bfseries,text=LLNavy,align=center},
+  llnote/.style={font=\tiny,text=LLMuted,align=center},
+}
+
+\pgfplotsset{
+  compat=1.18,
+  llaxis/.style={
+    axis line style={draw=LLNavy!55,line width=0.5pt},
+    tick style={draw=LLNavy!45},
+    tick label style={font=\scriptsize,text=LLNavy},
+    label style={font=\scriptsize,text=LLNavy},
+    title style={font=\small\bfseries,text=LLNavy},
+    grid=major,
+    grid style={draw=LLGrid,line width=0.35pt},
+    legend style={font=\tiny,draw=LLGrid,fill=white,cells={anchor=west}},
+  }
+}

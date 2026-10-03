@@ -113,9 +113,9 @@ export default function LocationTable({ analysisId, enabled = true }: Props) {
                   <td style={{ ...td, fontWeight: 600 }}>{r.locationName}</td>
                   <td style={{ ...td, color: r.logo ? 'var(--c-ink)' : 'var(--c-ghost)' }}>{r.logo || '—'}</td>
                   <td style={{ ...tdR }} className="num">{pct(r.humanPercentage)}</td>
-                  <td style={{ ...tdR, color: 'var(--c-spark)', fontWeight: 600 }} className="num">{r.logo ? pct(r.aiPercentage) : '—'}</td>
-                  <td style={{ ...tdR, color: 'var(--c-ink)', fontWeight: 600 }} className="num">{r.logo ? pct(r.aiAdjusted) : '—'}</td>
-                  <td style={{ ...tdR }} className="num" title={r.logo ? `${r.onScreenSeconds}s on screen` : 'no logo mapped'}>{r.logo ? pct(r.visibility) : '—'}</td>
+                  <td style={{ ...tdR, color: 'var(--c-spark)', fontWeight: 600 }} className="num">{pct(r.aiPercentage)}</td>
+                  <td style={{ ...tdR, color: 'var(--c-ink)', fontWeight: 600 }} className="num">{pct(r.aiAdjusted)}</td>
+                  <td style={{ ...tdR }} className="num" title={r.onScreenSeconds != null ? `${r.onScreenSeconds}s on screen` : (r.logo ? 'anchor never detected' : 'no logo mapped')}>{pct(r.visibility)}</td>
                   <td style={{ ...tdR }}>
                     <input
                       type="number"

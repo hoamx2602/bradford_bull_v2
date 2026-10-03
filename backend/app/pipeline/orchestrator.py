@@ -10,6 +10,7 @@ task call, so the queue choice never leaks into the analysis logic.
 from __future__ import annotations
 
 import logging
+from collections.abc import Callable
 
 from app.db.base import session_scope
 from app.db.repository import AnalysisRepository, JobRepository
@@ -28,8 +29,14 @@ P_DETECT_END = 80
 P_EXPOSURE = 92
 P_PRICING = 98
 
+# (percent, stage, detail) — mirrors each DB progress write to the caller.
+ProgressCb = Callable[[int, str, str], None]
 
-def run_analysis(job_id: str) -> None:
+
+def run_analysis(job_id: str, progress_cb: ProgressCb | None = None) -> None:
+    """Run every stage for `job_id`. `progress_cb(pct, stage, detail)` mirrors the
+    DB progress updates to a caller that has no HTTP polling loop (the CLI
+    runner); the web flow leaves it None and reads progress off the job row."""
     settings = get_settings()
     storage = get_storage()
 
@@ -50,11 +57,16 @@ def run_analysis(job_id: str) -> None:
             "team_refs_key": getattr(job, "team_refs_key", None),
         }
 
+    def _update(pct: int, stage: str, detail: str) -> None:
+        _write_progress(job_id, pct, stage, detail)
+        if progress_cb is not None:
+            progress_cb(pct, stage, detail)
+
     try:
         video_path = storage.local_path(ctx["storage_key"])
 
         # 2. Ingest / probe.
-        _update(job_id, P_INGEST, "frames", "Reading video metadata")
+        _update(P_INGEST, "frames", "Reading video metadata")
         meta = ingest.probe(video_path)
 
         total = frames.expected_sample_count(meta, settings.sample_fps)
@@ -77,8 +89,6 @@ def run_analysis(job_id: str) -> None:
         team_refs = None  # kept for the team-detection video's fresh pass
         if settings.team_filter_enabled:
             try:
-                from pathlib import Path as _Path
-
                 from app.pipeline.teamid.tracker import TeamTracker
 
                 refs = None
@@ -87,11 +97,11 @@ def run_analysis(job_id: str) -> None:
                     # highest priority, overrides global file and auto guess.
                     import pickle as _pickle
 
-                    _update(job_id, P_TEAM, "team", "Using manually selected teams")
+                    _update(P_TEAM, "team", "Using manually selected teams")
                     with storage.local_path(ctx["team_refs_key"]).open("rb") as _f:
                         refs = _pickle.load(_f)
-                elif not _Path(settings.resolved_team_refs()).exists() and settings.team_auto_refs:
-                    _update(job_id, P_TEAM, "team",
+                elif settings.team_auto_refs:
+                    _update(P_TEAM, "team",
                             f"Identifying target-team kit ({ctx['kit']})")
                     from app.pipeline.teamid.bootstrap import build_refs_from_video
 
@@ -109,7 +119,7 @@ def run_analysis(job_id: str) -> None:
         for t, frame in frames.iter_sampled_frames(video_path, meta, settings.sample_fps):
             dets = detector.infer(frame, t)
             visibility.annotate(dets)
-            if team_tracker is not None and dets:
+            if team_tracker is not None:
                 tracked = team_tracker.process(frame)
                 team_tracker.annotate(dets, tracked)
                 kept = [d for d in dets if d.on_target_team]
@@ -126,12 +136,12 @@ def run_analysis(job_id: str) -> None:
                 frac = min(1.0, n / max(1, total))
                 pct = int(P_DETECT_START + frac * (P_DETECT_END - P_DETECT_START))
                 _update(
-                    job_id, pct, "detect",
+                    pct, "detect",
                     f"{n}/{total} frames · {len(set(d.brand_key for d in all_dets))} brands",
                 )
 
         # 4. Exposure aggregation (Tier 2).
-        _update(job_id, P_EXPOSURE, "exposure", "Quality-weighted segments")
+        _update(P_EXPOSURE, "exposure", "Quality-weighted segments")
         logos = exposure.aggregate_logos(all_dets, settings.sample_fps)
 
         # 4b. Per-detection "exposure facts" — the raw Tier-1 factor components
@@ -157,7 +167,7 @@ def run_analysis(job_id: str) -> None:
         ]
 
         # 5. Pricing (Tier 3).
-        _update(job_id, P_PRICING, "pricing", "Computing EMV per brand")
+        _update(P_PRICING, "pricing", "Computing EMV per brand")
         pricing.price_logos(
             logos,
             cpm_base=ctx["cpm_base"],
@@ -173,7 +183,7 @@ def run_analysis(job_id: str) -> None:
         timeline_dets = all_dets
         timeline_fps = settings.sample_fps
         if settings.preview_enabled:
-            _update(job_id, P_PRICING, "preview", "Rendering annotated video")
+            _update(P_PRICING, "preview", "Rendering annotated video")
             from app.pipeline.annotate import render_preview
 
             preview_tmp = video_path.parent / f"{video_path.stem}_preview.mp4"
@@ -234,7 +244,7 @@ def run_analysis(job_id: str) -> None:
                 engine = "yolo"
 
             if engine == "yolo":
-                _update(job_id, P_PRICING, "bodyseg", "Body-part segmentation (YOLO-seg)")
+                _update(P_PRICING, "bodyseg", "Body-part segmentation (YOLO-seg)")
                 from app.pipeline.bodyseg_yolo import render_bodyseg_yolo_video
 
                 seg_path, bodyseg_groups = render_bodyseg_yolo_video(
@@ -244,7 +254,7 @@ def run_analysis(job_id: str) -> None:
                     alpha=settings.bodyseg_alpha, imgsz=min(settings.imgsz, 960), conf=0.4,
                 )
             else:
-                _update(job_id, P_PRICING, "bodyseg", "Body-part segmentation (DensePose)")
+                _update(P_PRICING, "bodyseg", "Body-part segmentation (DensePose)")
                 from app.pipeline.bodyseg import render_bodyseg_video
 
                 seg_path, bodyseg_groups = render_bodyseg_video(
@@ -274,7 +284,7 @@ def run_analysis(job_id: str) -> None:
         teamdet_stats: dict = {}
         if settings.teamdet_video_enabled and team_tracker is not None:
             try:
-                _update(job_id, P_PRICING, "teamdet", "Rendering team-detection video")
+                _update(P_PRICING, "teamdet", "Rendering team-detection video")
                 from app.pipeline.av import mux_audio
                 from app.pipeline.teamdet_video import render_teamdet_video
                 from app.pipeline.teamid.tracker import TeamTracker
@@ -343,6 +353,6 @@ def run_analysis(job_id: str) -> None:
             JobRepository(s).mark_error(job_id, str(exc))
 
 
-def _update(job_id: str, pct: int, stage: str, detail: str) -> None:
+def _write_progress(job_id: str, pct: int, stage: str, detail: str) -> None:
     with session_scope() as s:
         JobRepository(s).update_progress(job_id, progress=pct, stage=stage, detail=detail)

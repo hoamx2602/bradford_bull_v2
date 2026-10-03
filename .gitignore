@@ -47,3 +47,45 @@ team_detection/output
 /logo_detection/wandb
 /video/node_modules
 /logo_detection/synthetic
+# Full-match CLI runner (docs/12-full-match-report.md): input videos and the
+# generated Excel reports are data, not source. The README in match_input/ is
+# the only tracked file there.
+match_input/*
+!match_input/README.txt
+match_reports/
+
+# --- Secrets: never commit ---------------------------------------------------
+.env
+!backend/.env.example
+
+# --- Data / outputs backed up on Google Drive, not git (see docs/14-mac-migration.md)
+/datasets/
+/training-result/
+/logo_detection/meshes/
+/backend/data/
+/*.pptx
+# Presentation build outputs: keep scripts/notes/manifests, drop heavy media
+/artifacts/**/node_modules
+/artifacts/**/.chart-data-*/
+/artifacts/**/*.mp4
+/artifacts/**/*.pptx
+/artifacts/**/*.zip
+/artifacts/**/*.jpg
+/artifacts/**/*.jpeg
+/artifacts/**/*.png
+/artifacts/**/*.pkl
+/artifacts/**/*.log
+/artifacts/**/*.ndjson
+# Dissertation: keep markdown + scripts, drop binaries/exports
+/dissertation/**/*.docx
+/dissertation/**/*.pptx
+/dissertation/**/*.pdf
+/dissertation/**/*.png
+/dissertation/**/*.jpg
+/dissertation/**/*.jpeg
+/dissertation/**/*.mp4
+/dissertation/*_media/
+/dissertation/**/*.aux
+/dissertation/**/*.lof
+/dissertation/**/*.log
+/dissertation/**/*.out

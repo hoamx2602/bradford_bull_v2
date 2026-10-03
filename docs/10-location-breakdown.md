@@ -28,8 +28,11 @@ cho phép override theo từng video.
 
 \* Human % là số khách tự đặt nên tổng có thể khác 100% (vd sheet gốc tổng ~194%).
 
-> **Vị trí không có logo** (vd Collar Back): các cột AI %, AI Adjusted %, Visibility %
-> để trống ("—"). Vị trí đó cũng **không** nhận phần exposure của zone — xem §6.
+> **Vị trí không có số liệu** → các cột AI %, AI Adjusted %, Visibility % để trống
+> ("—"), **không** điền `0.00` (0.00 sẽ đọc thành "đo được và bằng 0"). Hai trường
+> hợp: (a) chưa map logo nào vào vị trí đó, (b) có logo nhưng anchor zone của nó
+> chưa từng được detect trong video. Vị trí không logo cũng **không** nhận phần
+> exposure của zone — xem §6.
 
 ---
 
@@ -190,7 +193,12 @@ AI_adjusted = (1 − β)·AI_norm  +  β·reference_norm
 
 ## 8. Sheet Excel "AI % Detail" — thông số tạo ra AI %
 
-Mỗi location-có-logo một dòng, phơi bày các số sau (location không logo để trống):
+Mỗi location-có-số-liệu một dòng, phơi bày các số sau (location không có số liệu
+để trống cả dòng). Vì `Detections / Segments / On-screen / các trung bình` là số
+của **cả zone**, sheet có thêm `Locations on anchor` và tách
+`Quality (this location)` (= quality zone ÷ số location dùng chung anchor) khỏi
+`Quality (whole zone)` — cột `AI %` khớp với *quality của location*, không khớp
+với quality cả zone:
 
 | Cột | Nguồn | Ý nghĩa |
 |---|---|---|
@@ -217,6 +225,9 @@ Header file Excel cũng ghi: Event, Video, **Kit**, Analysed at, **AI criteria e
 - **Visibility %**, **Human %**, **Human AI %**: KHÔNG chuẩn hoá về 100%.
 - Location **không logo** → AI/AIadj/Visibility trống; không "ăn" phần của vùng;
   vùng chia exposure cho các location-có-logo dùng chung anchor.
+- Location **có logo nhưng anchor chưa từng detect** → cũng để trống, và bị loại
+  khỏi phép trộn AI Adjusted (nếu không nó sẽ pha loãng phần trăm của các dòng
+  thật sự đo được).
 - Nhiều location chung 1 anchor (Collar Back/Top Back/Nape Neck cùng `back-top`)
   → exposure của anchor chia **đều** cho các location-có-logo đó.
 - AI % gán theo **vùng**, không theo brand được detect (xem giới hạn §10).

@@ -1,0 +1,73 @@
+% Qualitative occlusion examples: layout and annotations are TikZ; source frames remain raster evidence.
+\newcommand{\lloccPanel}[9]{%
+  {\scriptsize\bfseries #1}\hfill{\tiny\color{LLMuted}#2}\par\vspace{0.6mm}
+  \begin{tikzpicture}
+    \node[anchor=south west,inner sep=0] (img) at (0,0)
+      {\includegraphics[width=\linewidth]{#3}};
+    \begin{scope}[
+      shift={(img.south west)},
+      x={($(img.south east)-(img.south west)$)},
+      y={($(img.north west)-(img.south west)$)}]
+      \draw[#5,line width=0.9pt] (#6,#7) rectangle (#8,#9);
+      \node[anchor=south east,inner sep=1.2pt,fill=white,draw=#5,line width=0.8pt]
+        (zoom) at (0.985,0.025) {\includegraphics[width=0.29\linewidth]{#4}};
+      % White underlay keeps the callout legible over a busy broadcast frame.
+      \draw[white,line width=2.2pt] (#8,#9) -- (zoom.north west);
+      \draw[white,line width=2.2pt] (#8,#7) -- (zoom.south west);
+      \draw[#5,line width=0.8pt] (#8,#9) -- (zoom.north west);
+      \draw[#5,line width=0.8pt] (#8,#7) -- (zoom.south west);
+    \end{scope}
+  \end{tikzpicture}}
+
+\newcommand{\lloccMissPanel}[9]{%
+  {\scriptsize\bfseries #1}\hfill{\tiny\color{LLMuted}#2}\par\vspace{0.6mm}
+  \begin{tikzpicture}
+    \node[anchor=south west,inner sep=0] (img) at (0,0)
+      {\includegraphics[width=\linewidth]{#3}};
+    \begin{scope}[
+      shift={(img.south west)},
+      x={($(img.south east)-(img.south west)$)},
+      y={($(img.north west)-(img.south west)$)}]
+      \draw[#5,dashed,line width=0.9pt] (#6,#7) rectangle (#8,#9);
+      \node[anchor=south east,inner sep=1.2pt,fill=white,draw=#5,line width=0.8pt]
+        (zoom) at (0.985,0.025) {\includegraphics[width=0.29\linewidth]{#4}};
+      \draw[white,line width=2.2pt] (#8,#9) -- (zoom.north west);
+      \draw[white,line width=2.2pt] (#8,#7) -- (zoom.south west);
+      \draw[#5,dashed,line width=0.8pt] (#8,#9) -- (zoom.north west);
+      \draw[#5,dashed,line width=0.8pt] (#8,#7) -- (zoom.south west);
+    \end{scope}
+  \end{tikzpicture}}
+
+\begin{minipage}[t]{0.495\linewidth}
+\lloccPanel
+  {A --- Clear: Top Notch}{detected; confidence 0.915}
+  {assets/fig08_A_source.jpg}{assets/fig08_A_crop.png}{LLTopNotch}
+  {0.507896}{0.719639}{0.558500}{0.771676}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.495\linewidth}
+\lloccPanel
+  {B --- Partially occluded: Aon}{detected; confidence 0.780}
+  {assets/fig08_B_source.jpg}{assets/fig08_B_crop.png}{LLAon}
+  {0.516508}{0.232382}{0.541168}{0.270792}
+\end{minipage}
+
+\vspace{2mm}
+
+\begin{minipage}[t]{0.495\linewidth}
+\lloccMissPanel
+  {C --- Partially occluded: Aon}{missed; no prediction}
+  {assets/fig08_C_source.jpg}{assets/fig08_C_crop.png}{LLAon}
+  {0.442637}{0.325319}{0.465465}{0.365229}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.495\linewidth}
+\lloccPanel
+  {D --- Heavily occluded: Fairway}{detected; confidence 0.351}
+  {assets/fig08_D_source.jpg}{assets/fig08_D_crop.png}{LLFairway}
+  {0.737661}{0.389333}{0.772974}{0.435685}
+\end{minipage}
+
+\vspace{1mm}
+{\tiny\color{LLMuted}
+Solid box = matched ground truth \quad$\mid$\quad
+Dashed box = missed ground truth \quad$\mid$\quad
+Colour = sponsor class.}

@@ -1,0 +1,145 @@
+Document: dissertation\LogoLens_MSc_Dissertation_v3.docx
+Blocks: 320
+Headings: 73
+Captions: 61
+Tables: 6
+Images in flow: 27
+Media files: 27
+
+OUTLINE
+- Heading 2: Declaration
+- Heading 2: Abstract
+- Heading 2: Acknowledgements
+- Heading 2: Table of Contents
+- Heading 2: List of Abbreviations
+- Heading 2: List of Figures
+- Heading 2: List of Tables
+- Heading 1: Chapter 1. Introduction
+- Heading 2: 1.1 Background and motivation
+- Heading 2: 1.2 Problem statement
+- Heading 2: 1.3 Aim and objectives
+- Heading 2: 1.4 Research questions
+- Heading 2: 1.5 Scope and delimitations
+- Heading 2: 1.6 Contributions
+- Heading 2: 1.7 Dissertation structure
+- Heading 1: Chapter 2. Literature Review
+- Heading 2: 2.1 Object detection and its evaluation
+- Heading 2: 2.2 Logo detection and recognition
+- Heading 2: 2.3 Multi-object tracking and team attribution in sports video
+- Heading 2: 2.4 Measuring sponsorship exposure and media value
+- Heading 3: 2.4.1 From manual valuation to AI: the evolution of sponsorship pricing
+- Heading 2: 2.5 Reducing annotation cost: weak supervision, foundation models and synthetic data
+- Heading 2: 2.6 Artificial intelligence in advertising
+- Heading 2: 2.7 Research gap and positioning
+- Heading 1: Chapter 3. Research Methodology
+- Heading 2: 3.1 Research design and philosophy
+- Heading 2: 3.2 Development approach and tools
+- Heading 2: 3.3 Data collection and preparation
+- Heading 3: 3.3.1 High-value frame selection for annotation
+- Heading 3: 3.3.2 Annotation with Roboflow and model-assisted labelling
+- Heading 2: 3.4 Evaluation methods and metrics
+- Heading 2: 3.5 Evaluation criteria derived from design goals
+- Heading 2: 3.6 Ethical, legal and professional considerations
+- Heading 2: 3.7 Reproducibility
+- Heading 1: Chapter 4. System Design and Implementation
+- Heading 2: 4.1 Architecture overview
+- Heading 2: 4.2 The processing pipeline
+- Heading 2: 4.3 Logo detection
+- Heading 2: 4.4 Team attribution
+- Heading 2: 4.5 Position assignment
+- Heading 2: 4.6 The three-tier valuation model
+- Heading 2: 4.7 The analytics dashboard
+- Heading 2: 4.8 The annotation-free data engine
+- Heading 2: 4.9 Output data model and interface
+- Heading 2: 4.10 Implementation constraints
+- Heading 1: Chapter 5. Experiments and Results
+- Heading 2: 5.1 Experimental setup
+- Heading 2: 5.2 Dataset characterisation
+- Heading 2: 5.3 Detection accuracy and the effect of leakage (RQ1)
+- Heading 3: 5.3.1 Alternative architecture benchmark: RF-DETR
+- Heading 2: 5.4 Team attribution (RQ1)
+- Heading 2: 5.5 Valuation plausibility and quality-weighting (RQ2)
+- Heading 2: 5.6 Parameter sensitivity and sampling bias (RQ2)
+- Heading 2: 5.7 The annotation-free data engine (RQ3)
+- Heading 2: 5.8 Throughput
+- Heading 2: 5.9 A worked single-match walkthrough
+- Heading 2: 5.10 Summary of results
+- Heading 1: Chapter 6. Discussion
+- Heading 2: 6.1 Interpretation of the principal findings
+- Heading 2: 6.2 Relation to prior work
+- Heading 2: 6.3 Automated valuation in the context of AI in advertising
+- Heading 2: 6.4 Threats to validity
+- Heading 2: 6.5 Practical implications
+- Heading 2: 6.6 Ethical and societal reflections
+- Heading 1: Chapter 7. Conclusion and Future Work
+- Heading 2: 7.1 Conclusion
+- Heading 2: 7.2 Future work
+- Heading 1: References
+- Heading 1: Appendices
+- Heading 2: Appendix A — Key system configuration
+- Heading 2: Appendix B — Summary of experimental results
+- Heading 2: Appendix C — Training-set class distribution
+- Heading 2: Appendix D — Note on assumptions and transparency
+
+CAPTIONS
+- Figure 1. High-value frame selection for annotation — §3.3.1
+- Figure 2. Examples of high-value selected frames (placeholder) — §3.3.1
+- Figure 3. Model-assisted (label-assist) annotation workflow — §3.3.2
+- Figure 4. Roboflow annotation interface with Label Assist (placeholder) — §3.3.2
+- Figure 5. Overall system architecture — §4.1
+- Figure 6. Processing pipeline for a newly uploaded video — §4.2
+- Figure 7. Official kit reference images (placeholder) — §4.4
+- Figure 8. The three-tier valuation model — §4.6
+- Figure 9. Analytics dashboard: Overview / Match view (placeholder) — §4.7
+- Figure 10. Three-dimensional kit-slot model (placeholder) — §4.7
+- Figure 11. Digital-twin frame with composited logos (placeholder) — §4.8
+- Figure 12. Per-class instance distribution of the training set — §5.2
+- Figure 13. Bounding-box geometry and label analysis — §5.2
+- Figure 14. Detection accuracy under three splitting protocols — §5.3
+- Figure 15. Training dynamics of the clip-disjoint run — §5.3
+- Figure 16. Normalised confusion matrix (clip-disjoint split) — §5.3
+- Figure 17. Per-class precision–recall curves — §5.3
+- Figure 18. Qualitative detection output (identity-redacted) — §5.3
+- Figure 19. RF-DETR per-class Average Precision — §5.3.1
+- Figure 20. RF-DETR validation mAP over training — §5.3.1
+- Figure 21. Team-attribution accuracy from the stratified audit — §5.4
+- Figure 22. Effect of the team-attribution filter — §5.4
+- Figure 23. Effect of quality-weighting by confidence — §5.5
+- Figure 24. Parameter sensitivity (visibility vs confidence floor) — §5.6
+- Figure 25. Sampling-rate bias — §5.6
+- Figure 26. Annotation-free inventory pipeline funnel — §5.7
+- Figure 27. Honest evaluation of the annotation-free student — §5.7
+- Table 1. Detection accuracy under three splitting protocols — §5.3
+- Table 2. RF-DETR validation metrics at the best checkpoint — §5.3.1
+- Figure 1. High-value frame selection for annotation. From each match video, an eight-step procedure — adaptive sampling, static-overlay masking, shot-type gating, person detection, target-colour filtering, weighted sharpness scoring, de-duplication and export — yields roughly two hundred high-value frames for annotation rather than a random sample.
+- Figure 2 shows representative frames chosen by this procedure, illustrating the sharp, logo-bearing, target-team images that the selector favours over the many uninformative frames it rejects.
+- Figure 2. Examples of high-value frames selected for annotation.
+- Figure 3. Model-assisted (label-assist) annotation workflow. A small manually annotated seed set trains an initial model that pre-labels new frames through Roboflow's Label Assist; the annotator corrects the suggestions, and the corrected frames improve the model in an active-learning loop, giving an order-of-magnitude speed-up over manual drawing.
+- Figure 4 shows the Label Assist feature in use within the Roboflow interface, where the model's suggested boxes are presented for the annotator to accept, adjust or supplement.
+- Figure 4. The Roboflow annotation interface with model-assisted Label Assist.
+- Figure 5. LogoLens overall system architecture. The frontend submits jobs and polls the backend over an HTTP API; the backend runs a pipeline orchestrator and keeps the database, file storage, job queue and model zoo behind interfaces, so each can be replaced by a production equivalent through configuration alone.
+- Figure 6. Processing pipeline for a newly uploaded video. The orchestrator runs eight stages with monotonically increasing progress; the central detection stage expands into a per-sampled-frame sub-pipeline of logo detection, visibility scoring, team attribution and pose-based slot assignment.
+- Figure 7. Official home and away kit reference images used to bootstrap team attribution.
+- Figure 8. The three-tier valuation model. A per-frame detection stream is refined into a monetary estimate, each tier adding a correction: spatial visibility quality, then temporal and recall structure, then broadcast and competitive context.
+- Figure 9. Analytics dashboard: the Overview portfolio view and the per-match view with preview video and per-brand timeline.
+- Figure 10. The rotatable three-dimensional kit model, colouring the eighteen sellable sponsor slots and ranking them by exposure.
+- Figure 11. A frame from the venue digital twin (3D Gaussian Splatting) with real sponsor logos composited onto the scene, used as a source of rare-condition training data with pixel-accurate labels.
+- Figure 12. Per-class instance distribution of the extended clip-aware training set (17 classes, 10,654 boxes). The distribution is heavily skewed, with an imbalance ratio of roughly 9.2 to 1 between the most and least frequent classes, reflecting how often each sponsor position appears in broadcast. Figure generated by the training framework.
+- Figure 13. Bounding-box geometry and label analysis of the training set. Upper-left: instances per class. Lower-left: the box-centre heat map, showing that logos cluster near the frame centre. Lower-right: the box width–height density, showing that logos are small and roughly square. Authentic output of the training framework's label analysis.
+- Table 1. Detection accuracy under three splitting protocols.
+- Figure 14. Detection accuracy under the three splitting protocols. Random-frame splitting inflates mAP@0.5 to 0.862 through leakage; the honest clip-disjoint and extended clip-aware protocols give 0.702 and 0.745. The headline figure is the honest 0.745.
+- Figure 15. Training dynamics of the clip-disjoint run. Left: validation mAP@0.5, precision and recall converge over the schedule. Right: training and validation box-loss decline together without divergence. Plotted from the run's logged metrics.
+- Figure 16. Normalised confusion matrix for the clip-disjoint split. The matrix is almost purely diagonal apart from the bottom background row, indicating that the detector rarely confuses brands and that its errors are misses into the background, concentrated on rare classes. Authentic framework output.
+- Figure 17. Per-class precision–recall curves for the clip-disjoint split. Well-represented sponsors sustain high precision across a broad recall range, while rare, data-starved classes lower the mean, mirroring the class imbalance in Figure 12.
+- Figure 18 shows qualitative detector output on held-out broadcast frames, with each logo localised and labelled by brand and confidence across open play, rucks and kicks. In accordance with the ethical stance of the dissertation and the club's figure policy, the club-identifying broadcast overlays — the channel watermark and the scoreboard — have been redacted, while the sponsor logos and labels, which are the object of study, are retained.
+- Figure 18. Qualitative detection output on held-out frames. Boxes show detected sponsor logos with brand class and confidence, across varied game situations. Club-identifying overlays (broadcast watermark and scoreboard) are redacted per the figure policy; sponsor marks are retained. Authentic model predictions.
+- Table 2. RF-DETR validation metrics at the best checkpoint.
+- Figure 19. RF-DETR per-class Average Precision at the best checkpoint. Well-represented sponsors achieve the highest AP while sparse classes trail, mirroring the class imbalance of Figure 12. Plotted from the model's logged metrics.
+- Figure 20. RF-DETR validation mAP over training. The mAP@0.5 and mAP@[.5:.95] rise quickly and plateau, with the best checkpoint reached early. Plotted from the model's logged metrics.
+- Figure 21. Team-attribution accuracy from the stratified manual audit (three frames across nine matches, 184 observations). Overall accuracy is 91.8%, above the 90% audit threshold, with balanced performance on the target and other subsets.
+- Figure 22. Effect of the team-attribution filter across nine matches. Of 25,153 raw detections, 44% are removed as not belonging to the target team, over a per-match range of 21–78%. Without this filter the value estimate would be roughly doubled in many matches.
+- Figure 23. Effect of quality-weighting by confidence. Low-confidence detections (below 0.4) are 29% of the raw count but contribute only 9.5% of quality-weighted exposure, while high-confidence detections (0.8 and above) carry 64% of exposure. The valuation model discounts uncertain appearances rather than counting them equally.
+- Figure 24. Parameter sensitivity over 13,439 detections. Raising the visibility floor from 0.02 to 0.1 removes up to 98% of quality exposure, whereas raising the confidence floor from 0.25 to 0.6 loses under 5%. The estimate is dominated by the visibility floor, justifying the low 0.02 setting.
+- Figure 25. Sampling-rate bias on a three-minute segment. Sparse two-frames-per-second analytics sampling over-measures total exposure by 63% relative to native fifty-frames-per-second processing, because isolated samples are quantised to half-second blocks and gaps are bridged.
+- Figure 26. The annotation-free inventory pipeline on a single match, shown as a funnel from 2,900 raw tracks to 107 high-purity (~94%) bootstrap labels produced without manual annotation.
+- Figure 27. Honest evaluation of the distilled annotation-free student. Left: correcting a leaky split reduces an apparent 0.92 mAP to a true 0.558. Right: a well-represented class reaches 0.867 on unseen tracks, a genuine learning signal, while a data-starved class fails at 0.248. The binding constraint is data quantity, not the method.

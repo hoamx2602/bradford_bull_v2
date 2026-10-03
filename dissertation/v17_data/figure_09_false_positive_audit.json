@@ -1,0 +1,322 @@
+{
+  "weights": "D:\\bradford_bull_v2\\runs\\rfdetr_matchsplit_r896\\checkpoint_best_total.pth",
+  "confidence": 0.35,
+  "iou_threshold": 0.5,
+  "candidate_count": 14,
+  "status_counts": {
+    "plausible_annotation_omission": 8,
+    "indeterminate": 2,
+    "verified_model_error": 3,
+    "duplicate_detection": 1
+  },
+  "candidates": [
+    {
+      "audit_id": "FP01",
+      "image_id": 8,
+      "file_name": "M_CAS__kit-home__lt-floodlit__bc-bullstv__cam-closeup__shot0070__t00210000ms_jpg.rf.kLEwXSoXO3NTJwjLkEIT.jpg",
+      "predicted_category_id": 2,
+      "predicted_class": "asc_group_home",
+      "confidence": 0.8633443117141724,
+      "bbox": [
+        1182.4854736328125,
+        826.7584838867188,
+        80.7110595703125,
+        42.8258056640625
+      ],
+      "frame_counts": {
+        "gt": 10,
+        "tp": 10,
+        "fp": 2,
+        "fn": 0
+      },
+      "review_status": "plausible_annotation_omission",
+      "review_rationale": "Sponsor-like lower-back kit mark; no overlapping ground-truth box."
+    },
+    {
+      "audit_id": "FP02",
+      "image_id": 53,
+      "file_name": "M_HKR__kit-home__lt-day__bc-bullstv__cam-closeup__shot0007__t00010000ms_jpg.rf.O2b2WMu05F2vDRtoB9Un.jpg",
+      "predicted_category_id": 8,
+      "predicted_class": "em_workwear_home",
+      "confidence": 0.720520555973053,
+      "bbox": [
+        1114.0552978515625,
+        1092.4453125,
+        72.9766845703125,
+        58.76806640625
+      ],
+      "frame_counts": {
+        "gt": 5,
+        "tp": 4,
+        "fp": 1,
+        "fn": 1
+      },
+      "review_status": "indeterminate",
+      "review_rationale": "The small blurred sock mark is not legible enough for a defensible class judgement."
+    },
+    {
+      "audit_id": "FP03",
+      "image_id": 4,
+      "file_name": "M_CAS__kit-home__lt-floodlit__bc-bullstv__cam-closeup__shot0029__t00084000ms_jpg.rf.nzZslNtRo6NSGa9iv2Kj.jpg",
+      "predicted_category_id": 1,
+      "predicted_class": "aon_home",
+      "confidence": 0.6835171580314636,
+      "bbox": [
+        1062.028564453125,
+        730.6647338867188,
+        45.7823486328125,
+        39.63165283203125
+      ],
+      "frame_counts": {
+        "gt": 9,
+        "tp": 9,
+        "fp": 1,
+        "fn": 0
+      },
+      "review_status": "plausible_annotation_omission",
+      "review_rationale": "The box encloses a visible Aon wordmark on the shorts, absent from the annotations."
+    },
+    {
+      "audit_id": "FP04",
+      "image_id": 35,
+      "file_name": "M_HFC__kit-home__lt-day__bc-bullstv__cam-closeup__shot0059__t00218000ms_jpg.rf.3GGDFhjFpB3rNz303tdq.jpg",
+      "predicted_category_id": 15,
+      "predicted_class": "romantica_home",
+      "confidence": 0.6766366958618164,
+      "bbox": [
+        858.9616088867188,
+        803.03125,
+        162.95538330078125,
+        133.9267578125
+      ],
+      "frame_counts": {
+        "gt": 0,
+        "tp": 0,
+        "fp": 1,
+        "fn": 0
+      },
+      "review_status": "indeterminate",
+      "review_rationale": "The motion-blurred chest patch is not legible enough for a defensible class judgement."
+    },
+    {
+      "audit_id": "FP05",
+      "image_id": 36,
+      "file_name": "M_HFC__kit-home__lt-day__bc-bullstv__cam-closeup__shot0062__t00225500ms_jpg.rf.m2NF7fkiAbbLzpWO8zc8.jpg",
+      "predicted_category_id": 2,
+      "predicted_class": "asc_group_home",
+      "confidence": 0.660329282283783,
+      "bbox": [
+        405.0567321777344,
+        631.798095703125,
+        56.53668212890625,
+        41.0059814453125
+      ],
+      "frame_counts": {
+        "gt": 6,
+        "tp": 5,
+        "fp": 1,
+        "fn": 1
+      },
+      "review_status": "plausible_annotation_omission",
+      "review_rationale": "Sponsor-like lower-back kit mark; no overlapping ground-truth box."
+    },
+    {
+      "audit_id": "FP06",
+      "image_id": 41,
+      "file_name": "M_HFC__kit-home__lt-day__bc-bullstv__cam-closeup__shot0093__t00446000ms_jpg.rf.2gjRpV0RBdzlnkrflRM2.jpg",
+      "predicted_category_id": 7,
+      "predicted_class": "ellgren_home",
+      "confidence": 0.6264280676841736,
+      "bbox": [
+        724.2298583984375,
+        111.86531066894531,
+        43.10955810546875,
+        36.40869140625
+      ],
+      "frame_counts": {
+        "gt": 5,
+        "tp": 5,
+        "fp": 1,
+        "fn": 0
+      },
+      "review_status": "plausible_annotation_omission",
+      "review_rationale": "Sponsor-like upper-chest kit mark; no overlapping ground-truth box."
+    },
+    {
+      "audit_id": "FP07",
+      "image_id": 60,
+      "file_name": "M_HKR__kit-home__lt-day__bc-bullstv__cam-closeup__shot0068__t00321000ms_jpg.rf.t6qsONYgyVIpBedeWtcv.jpg",
+      "predicted_category_id": 16,
+      "predicted_class": "top_notch_home",
+      "confidence": 0.5975436568260193,
+      "bbox": [
+        1646.66748046875,
+        892.1084594726562,
+        85.871826171875,
+        53.333984375
+      ],
+      "frame_counts": {
+        "gt": 0,
+        "tp": 0,
+        "fp": 2,
+        "fn": 0
+      },
+      "review_status": "verified_model_error",
+      "review_rationale": "Opponent-kit wordmark is predicted as Top Notch although it is visibly a different mark."
+    },
+    {
+      "audit_id": "FP08",
+      "image_id": 8,
+      "file_name": "M_CAS__kit-home__lt-floodlit__bc-bullstv__cam-closeup__shot0070__t00210000ms_jpg.rf.kLEwXSoXO3NTJwjLkEIT.jpg",
+      "predicted_category_id": 2,
+      "predicted_class": "asc_group_home",
+      "confidence": 0.5379682779312134,
+      "bbox": [
+        252.9459228515625,
+        300.4752197265625,
+        44.7200927734375,
+        41.368927001953125
+      ],
+      "frame_counts": {
+        "gt": 10,
+        "tp": 10,
+        "fp": 2,
+        "fn": 0
+      },
+      "review_status": "plausible_annotation_omission",
+      "review_rationale": "Sponsor-like side/back kit mark; no overlapping ground-truth box."
+    },
+    {
+      "audit_id": "FP09",
+      "image_id": 13,
+      "file_name": "M_CAS__kit-home__lt-floodlit__bc-bullstv__cam-medium__shot0025__t00072500ms_jpg.rf.L0SxFK3Z04PVO5CGhsoj.jpg",
+      "predicted_category_id": 2,
+      "predicted_class": "asc_group_home",
+      "confidence": 0.5286997556686401,
+      "bbox": [
+        390.26788330078125,
+        515.7932739257812,
+        57.023834228515625,
+        39.91766357421875
+      ],
+      "frame_counts": {
+        "gt": 6,
+        "tp": 5,
+        "fp": 1,
+        "fn": 1
+      },
+      "review_status": "duplicate_detection",
+      "review_rationale": "Second ASC Group prediction overlaps an already matched same-class ground-truth box (IoU 0.797)."
+    },
+    {
+      "audit_id": "FP10",
+      "image_id": 1,
+      "file_name": "M_CAS__kit-home__lt-floodlit__bc-bullstv__cam-closeup__shot0011__t00022500ms_jpg.rf.HFJOltMaOBy3NgMpK3wZ.jpg",
+      "predicted_category_id": 7,
+      "predicted_class": "ellgren_home",
+      "confidence": 0.47144535183906555,
+      "bbox": [
+        625.0280151367188,
+        207.64202880859375,
+        24.3670654296875,
+        25.976837158203125
+      ],
+      "frame_counts": {
+        "gt": 3,
+        "tp": 3,
+        "fp": 1,
+        "fn": 0
+      },
+      "review_status": "plausible_annotation_omission",
+      "review_rationale": "Sponsor-like upper-chest kit mark; no overlapping ground-truth box."
+    },
+    {
+      "audit_id": "FP11",
+      "image_id": 31,
+      "file_name": "M_HFC__kit-home__lt-day__bc-bullstv__cam-closeup__shot0048__t00174000ms_jpg.rf.dGNiDtyG3xjcciS2ijhj.jpg",
+      "predicted_category_id": 15,
+      "predicted_class": "romantica_home",
+      "confidence": 0.4608355164527893,
+      "bbox": [
+        626.612548828125,
+        722.966796875,
+        99.8314208984375,
+        71.96221923828125
+      ],
+      "frame_counts": {
+        "gt": 2,
+        "tp": 1,
+        "fp": 1,
+        "fn": 1
+      },
+      "review_status": "verified_model_error",
+      "review_rationale": "Prediction overlaps MNA Cladding ground truth (IoU 0.860) but assigns Romantica."
+    },
+    {
+      "audit_id": "FP12",
+      "image_id": 37,
+      "file_name": "M_HFC__kit-home__lt-day__bc-bullstv__cam-closeup__shot0064__t00239000ms_jpg.rf.3LsAQauYgnU0rIbhXlqO.jpg",
+      "predicted_category_id": 10,
+      "predicted_class": "klg_home",
+      "confidence": 0.45501023530960083,
+      "bbox": [
+        1894.5863037109375,
+        816.0333862304688,
+        25.4136962890625,
+        88.7047119140625
+      ],
+      "frame_counts": {
+        "gt": 3,
+        "tp": 3,
+        "fp": 1,
+        "fn": 0
+      },
+      "review_status": "plausible_annotation_omission",
+      "review_rationale": "Partially visible edge-of-frame kit logo; no overlapping ground-truth box."
+    },
+    {
+      "audit_id": "FP13",
+      "image_id": 60,
+      "file_name": "M_HKR__kit-home__lt-day__bc-bullstv__cam-closeup__shot0068__t00321000ms_jpg.rf.t6qsONYgyVIpBedeWtcv.jpg",
+      "predicted_category_id": 16,
+      "predicted_class": "top_notch_home",
+      "confidence": 0.3734135925769806,
+      "bbox": [
+        1605.209228515625,
+        948.73681640625,
+        66.496826171875,
+        54.06011962890625
+      ],
+      "frame_counts": {
+        "gt": 0,
+        "tp": 0,
+        "fp": 2,
+        "fn": 0
+      },
+      "review_status": "verified_model_error",
+      "review_rationale": "Opponent-kit graphic is predicted as Top Notch although it is visibly a different mark."
+    },
+    {
+      "audit_id": "FP14",
+      "image_id": 6,
+      "file_name": "M_CAS__kit-home__lt-floodlit__bc-bullstv__cam-closeup__shot0049__t00149000ms_jpg.rf.YwhPfaa1WLxqYtZZRHrH.jpg",
+      "predicted_category_id": 9,
+      "predicted_class": "fairway_home",
+      "confidence": 0.36355462670326233,
+      "bbox": [
+        1706.116943359375,
+        359.8195495605469,
+        51.0574951171875,
+        42.0018310546875
+      ],
+      "frame_counts": {
+        "gt": 4,
+        "tp": 4,
+        "fp": 1,
+        "fn": 0
+      },
+      "review_status": "plausible_annotation_omission",
+      "review_rationale": "Visible sponsor-like upper-back mark; no overlapping ground-truth box."
+    }
+  ]
+}

@@ -1,0 +1,120 @@
+% Representative held-out outcomes. Layout, boxes and callouts are native TikZ;
+% the four source frames and two detail crops remain natural-colour raster evidence.
+\tikzset{
+  tp/.style={solid},
+  fp/.style={densely dashed},
+  miss/.style={dash pattern=on 4pt off 2pt}
+}
+
+% Box coordinates are normalised to the displayed source frame. The label
+% argument is retained because the overlay files are also machine-readable,
+% but success panels deliberately omit in-frame labels to avoid visual clutter.
+\newcommand{\lldetbox}[7]{%
+  \draw[#5,#7,line width=1.0pt] (#1,#2) rectangle (#3,#4);}
+
+\newcommand{\lldetHeader}[2]{%
+  {\scriptsize\bfseries #1}\hfill
+  {\tiny\color{LLMuted}#2}\par\vspace{0.7mm}}
+
+\newcommand{\lldetPanel}[4]{%
+  \lldetHeader{#1}{#2}
+  \begin{tikzpicture}
+    \node[anchor=south west,inner sep=0] (img) at (0,0)
+      {\includegraphics[width=\linewidth]{#3}};
+    \begin{scope}[
+      shift={(img.south west)},
+      x={($(img.south east)-(img.south west)$)},
+      y={($(img.north west)-(img.south west)$)}]
+      \input{#4}
+    \end{scope}
+  \end{tikzpicture}}
+
+% Row 1: successful outcomes. Only class-coloured boxes are shown; the summary
+% line carries the evidential count and avoids covering the sponsor marks.
+\begin{minipage}[t]{0.495\linewidth}
+\lldetPanel
+  {(a) Complete seven-logo detection}{7/7 ground-truth logos matched; 0 FP}
+  {assets/fig09_A_source.jpg}{data/fig09_A_boxes.tex}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.495\linewidth}
+\lldetPanel
+  {(b) Dense multi-logo detection}{12/12 ground-truth logos matched; 0 FP}
+  {assets/fig09_B_source.jpg}{data/fig09_B_boxes.tex}
+\end{minipage}
+
+\vspace{2.4mm}
+
+% Row 2, panel C: verified KLG miss with a source-to-detail callout.
+\begin{minipage}[t]{0.495\linewidth}
+\lldetHeader{(c) Small-logo miss}{KLG missed; no prediction}
+\begin{tikzpicture}
+  \node[anchor=south west,inner sep=0] (img) at (0,0)
+    {\includegraphics[width=\linewidth]{assets/fig09_C_source.jpg}};
+  \begin{scope}[
+    shift={(img.south west)},
+    x={($(img.south east)-(img.south west)$)},
+    y={($(img.north west)-(img.south west)$)}]
+    \input{data/fig09_C_boxes.tex}
+    \node[anchor=south west,inner sep=1.2pt,fill=white,draw=LLKlg,line width=0.8pt]
+      (zoom) at (0.015,0.025)
+      {\includegraphics[width=0.34\linewidth]{assets/fig09_C_crop.png}};
+    \draw[white,line width=2.3pt] (0.799661,0.242917) -- (zoom.north east);
+    \draw[white,line width=2.3pt] (0.799661,0.222213) -- (zoom.south east);
+    \draw[LLKlg,miss,line width=0.8pt] (0.799661,0.242917) -- (zoom.north east);
+    \draw[LLKlg,miss,line width=0.8pt] (0.799661,0.222213) -- (zoom.south east);
+    \begin{scope}[
+      shift={(zoom.south west)},
+      x={($(zoom.south east)-(zoom.south west)$)},
+      y={($(zoom.north west)-(zoom.south west)$)}]
+      \draw[LLKlg,miss,line width=1.0pt]
+        (0.3845,0.4643) rectangle (0.4542,0.5441);
+      \node[anchor=south west,font=\tiny\bfseries,text=white,
+        fill=LLKlg,fill opacity=0.92,text opacity=1,inner sep=1pt]
+        at (0.3845,0.5441) {KLG --- missed};
+    \end{scope}
+  \end{scope}
+\end{tikzpicture}
+\end{minipage}\hfill
+% Row 2, panel D: two verified false positives on opponent-kit marks.
+\begin{minipage}[t]{0.495\linewidth}
+\lldetHeader{(d) Opponent-kit false positives}{2 FP; no in-scope ground truth}
+\begin{tikzpicture}
+  \node[anchor=south west,inner sep=0] (img) at (0,0)
+    {\includegraphics[width=\linewidth]{assets/fig09_D_source.jpg}};
+  \begin{scope}[
+    shift={(img.south west)},
+    x={($(img.south east)-(img.south west)$)},
+    y={($(img.north west)-(img.south west)$)}]
+    \input{data/fig09_D_boxes.tex}
+    \node[anchor=south west,inner sep=1.2pt,fill=white,draw=LLTopNotch,line width=0.8pt]
+      (zoom) at (0.015,0.025)
+      {\includegraphics[width=0.34\linewidth]{assets/fig09_D_crop.png}};
+    \draw[white,line width=2.3pt] (0.6270,0.3805) -- (zoom.north east);
+    \draw[white,line width=2.3pt] (0.6270,0.3036) -- (zoom.south east);
+    \draw[LLTopNotch,fp,line width=0.8pt] (0.6270,0.3805) -- (zoom.north east);
+    \draw[LLTopNotch,fp,line width=0.8pt] (0.6270,0.3036) -- (zoom.south east);
+    \begin{scope}[
+      shift={(zoom.south west)},
+      x={($(zoom.south east)-(zoom.south west)$)},
+      y={($(zoom.north west)-(zoom.south west)$)}]
+      \draw[LLTopNotch,fp,line width=1.0pt]
+        (0.3492,0.4806) rectangle (0.5537,0.6710);
+      \node[anchor=south west,font=\tiny\bfseries,text=white,
+        fill=LLTopNotch,fill opacity=0.92,text opacity=1,inner sep=1pt]
+        at (0.3492,0.6710) {FP 0.60};
+      \draw[LLTopNotch,fp,line width=1.0pt]
+        (0.2505,0.2757) rectangle (0.4088,0.4688);
+      \node[anchor=north west,font=\tiny\bfseries,text=white,
+        fill=LLTopNotch,fill opacity=0.92,text opacity=1,inner sep=1pt]
+        at (0.4088,0.4688) {FP 0.37};
+    \end{scope}
+  \end{scope}
+\end{tikzpicture}
+\end{minipage}
+
+\vspace{1.2mm}
+{\tiny\color{LLMuted}
+Solid box = correct prediction \quad$\mid$\quad
+Short-dashed box = false positive \quad$\mid$\quad
+Long-dashed box = missed ground truth \quad$\mid$\quad
+Colour = sponsor class.}

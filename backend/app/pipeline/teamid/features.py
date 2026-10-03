@@ -19,9 +19,10 @@ log = logging.getLogger("app.teamid")
 # Colour histogram layout: L (luminance) bins + H (hue) bins.
 N_L = 8      # luminance bins (white vs black lives here)
 N_H = 12     # hue bins (separates coloured kits, e.g. referee green)
+N_S = 8      # saturation separates shaded white fabric from coloured kits
 SAT_MIN = 40  # only saturated pixels vote for hue
 
-COLOR_DIM = N_L + N_H
+COLOR_DIM = N_L + N_H + N_S
 
 
 def color_feature(region_bgr: np.ndarray | None, pixel_mask: np.ndarray | None) -> np.ndarray | None:
@@ -48,13 +49,20 @@ def color_feature(region_bgr: np.ndarray | None, pixel_mask: np.ndarray | None) 
     else:
         h_hist = np.zeros(N_H, dtype=np.float32)
 
-    return np.concatenate([l_hist, h_hist]).astype(np.float32)
+    s_hist, _ = np.histogram(hsv[:, 1], bins=N_S, range=(0, 256))
+    s_hist = s_hist.astype(np.float32)
+    s_hist /= s_hist.sum() + 1e-8
+    return np.concatenate([l_hist, h_hist, s_hist]).astype(np.float32)
 
 
 def color_sim(fq: np.ndarray, fr: np.ndarray) -> float:
     """Histogram-intersection similarity in [0,1] (L-block weighted higher)."""
     sim_l = float(np.minimum(fq[:N_L], fr[:N_L]).sum())
-    sim_h = float(np.minimum(fq[N_L:], fr[N_L:]).sum())
+    sim_h = float(np.minimum(fq[N_L:N_L + N_H], fr[N_L:N_L + N_H]).sum())
+    if len(fq) >= COLOR_DIM and len(fr) >= COLOR_DIM:
+        sim_s = float(np.minimum(fq[N_L + N_H:], fr[N_L + N_H:]).sum())
+        return 0.35 * sim_l + 0.25 * sim_h + 0.4 * sim_s
+    # Manual references saved before saturation features remain readable.
     return 0.65 * sim_l + 0.35 * sim_h
 
 

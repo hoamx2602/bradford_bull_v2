@@ -14,7 +14,7 @@ from pathlib import Path
 
 import cv2
 
-from app.pipeline.teamid.classifier import TARGET
+from app.pipeline.teamid.classifier import TARGET, UNKNOWN
 from app.pipeline.teamid.tracker import TeamTracker, TrackedPerson
 
 log = logging.getLogger("app.teamid")
@@ -38,7 +38,7 @@ def _open_writer(path: Path, fps: float, size: tuple[int, int]) -> cv2.VideoWrit
 def _style(p: TrackedPerson, min_votes: float) -> tuple[tuple[int, int, int], str]:
     # Below the vote floor the label is a default, not a decision — claim
     # nothing rather than flash "TARGET?" at half the field on early frames.
-    if p.vote_mass < min_votes:
+    if p.team == UNKNOWN or p.vote_mass < min_votes:
         return _C_PENDING, "?"
     if p.team == TARGET:
         return _C_TARGET, "TARGET"

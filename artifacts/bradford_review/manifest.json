@@ -1,0 +1,65 @@
+{
+  "source": "D:\\bradford_bull_v2\\backend\\data\\uploads\\c775d9975e3047a19eca8268a5825f3f.mp4",
+  "source_name": "M08_white_1080p.mp4",
+  "kit": "home",
+  "model": "D:\\bradford_bull_v2\\runs\\yolo26\\matchsplit_896_m\\weights\\best.pt",
+  "device": "CUDA",
+  "team_reference_meta": {
+    "w_color": 0.8,
+    "w_siglip": 0.19999999999999996,
+    "temp_c": 8.0,
+    "temp_s": 15.0,
+    "bootstrap": "anchors",
+    "kit": "home",
+    "n_target": 59,
+    "n_other": 91
+  },
+  "clips": [
+    {
+      "name": "wide",
+      "start": 18,
+      "duration": 10,
+      "frames": 250,
+      "all_logo_detections": 348,
+      "retained_logo_detections": 226,
+      "confirmed_target": 226,
+      "uncertain_retained": 0,
+      "body_pixel_counts": {
+        "unknown": 3419694,
+        "head": 3613702,
+        "torso": 8460528,
+        "upper_arm": 6854397,
+        "lower_arm": 3501226,
+        "hand": 8458,
+        "upper_leg": 8786498,
+        "lower_leg": 6705421,
+        "foot": 70056
+      }
+    },
+    {
+      "name": "tackle",
+      "start": 84,
+      "duration": 12,
+      "frames": 300,
+      "all_logo_detections": 235,
+      "retained_logo_detections": 181,
+      "confirmed_target": 181,
+      "uncertain_retained": 0,
+      "body_pixel_counts": {
+        "unknown": 3725369,
+        "head": 5625624,
+        "torso": 14939334,
+        "upper_arm": 11394836,
+        "lower_arm": 7600714,
+        "foot": 208950,
+        "lower_leg": 8498102,
+        "hand": 137669,
+        "upper_leg": 9346624
+      }
+    }
+  ],
+  "scope": "Demonstration clips; not full-match measurement or a labelled accuracy benchmark.",
+  "team_method": "Kit-specific home colour evidence, temporal votes, broadcast-cut reset",
+  "team_keep_unknown": false,
+  "team_min_votes": 2.0
+}

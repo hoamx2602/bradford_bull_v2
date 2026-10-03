@@ -1,0 +1,56 @@
+[
+  {
+    "index": 110,
+    "kind": "table",
+    "style": "Table",
+    "text": "Abbreviation | Meaning\nAP / mAP | Average Precision / mean Average Precision\nAPI | Application Programming Interface\nBoT-SORT | Robust multi-object tracker (Bag-of-Tricks SORT)\nCI | Confidence Interval\nCPM | Cost Per Mille (cost per thousand impressions)\nDETR | Detection Transformer (object-detection family)\nEMV | Equivalent Media Value\nFPS | Frames Per Second\nGPU | Graphics Processing Unit\nIoU | Intersection over Union\nOBB | Oriented Bounding Box\nOCR | Optical Character Recognition\nP / R | Precision / Recall\nRQ | Research Question\nSMV | Sponsorship Media Value\nYOLO | You Only Look Once (object-detection family)"
+  },
+  {
+    "index": 183,
+    "kind": "table",
+    "style": "Table",
+    "text": "Specified activity | Research question | Where addressed\nTrain and evaluate logo detection models | RQ1 | §4.3, §5.3, §5.3.1\nDetect multiple logos simultaneously | RQ2 | §4.2, §5.2.1\nAnalyse logo size and screen coverage | RQ2 | §5.2, §5.2.1\nMeasure occlusion levels | RQ2 | §3.4, §5.8\nAssess image quality and readability | RQ2 | §5.2.1\nMeasure visibility duration | RQ3 | §4.6, §5.6\nDevelop a Logo Visibility Score | RQ3 | §4.6, §5.5\nOutput:  logo detection engine | RQ1 | §4.1–§4.3\nOutput:  visibility scoring framework | RQ3 | §4.6\nOutput:  performance evaluation reports | RQ1, RQ3 | Chapter 5, §4.7"
+  },
+  {
+    "index": 337,
+    "kind": "table",
+    "style": "Table",
+    "text": "Split protocol | mAP@0.5 | Note\nRandom-frame | 0.862 | Inflated by adjacent-frame leakage\nClip-disjoint | 0.702 | Honest\nExtended clip-aware | 0.745 (P 0.65, R 0.74) | Headline result"
+  },
+  {
+    "index": 361,
+    "kind": "table",
+    "style": "Table",
+    "text": "Metric | RF-DETR (best)\nmAP@0.5 | 0.771 (EMA 0.778)\nmAP@0.75 | 0.505\nmAP@[.5:.95] | 0.458 (EMA 0.465)\nPrecision | 0.730\nRecall | 0.711\nF1 | 0.710"
+  },
+  {
+    "index": 398,
+    "kind": "table",
+    "style": "Table",
+    "text": "Statistic | Value\nClasses analysed | 17\nPearson  r  (AP vs instances) | +0.73 ( p  = 0.001)\nPearson  r  (AP vs log₁₀ instances) | +0.66 ( p  = 0.004)\nSpearman  ρ | +0.60 ( p  = 0.012)\nFitted slope | +0.169 AP per 10× data (95% CI [0.064, 0.275])\nVariance explained ( R ²) | 0.44\nMean AP, ≥ 500 instances (9 classes) | 0.498\nMean AP, < 500 instances (8 classes) | 0.414\nDifference | +0.084 (Welch  t -test,  p  = 0.009)"
+  },
+  {
+    "index": 409,
+    "kind": "table",
+    "style": "Table",
+    "text": "Measure | Value\nLogos audited | 153 (9 per class × 17 classes)\nUnobstructed | 106 (69.3%)\nPartially covered | 41 (26.8%)\nHeavily covered | 6 (3.9%)\nCovered to any degree | 47 (30.7%), Wilson 95% CI 24.0–38.4%\nCovered, marks under 32 px tall | 21.9%\nCovered, marks 72 px tall and over | 54.8%\nMedian height, covered vs unobstructed | 52 px vs 44 px (Mann–Whitney  p  = 0.009)\nPer-class rate, range | 0% – 77.8% (SE ≈ 15 pp per class)\nCorrelation with data-efficiency residual | r  = +0.20 ( p  = 0.45); adjusted  R ² falls when added"
+  },
+  {
+    "index": 488,
+    "kind": "table",
+    "style": "Table",
+    "text": "Parameter | Default | Meaning\nAnalytics sampling rate | 2 fps | Frame sampling for the analytics pass\nDetection input size | 1280 px | Detector input resolution\nVisibility floor | 0.02 | Minimum visibility to form a segment\nMinimum segment length | 0.5 s | Shorter segments discarded as flicker\nDuration weight | 0.5 / 1.0 / 1.2 | For segments <1 s / 1–5 s / >5 s\nDefault CPM | US$22.0 | Value-model input\nPlacement multiplier | 1.0 / 1.4 / 0.85 / 0.7 | Live TV / highlight / stream / social\nKeep-unknown policy | enabled | Revenue-safety: keep when evidence is insufficient\nMinimum votes (attribution) | 2.0 | Vote mass before trusting an \"other-team\" label\nVote hysteresis | 1.25 | Stickiness of the voted team label\nBootstrap frames | 32 | Frames sampled when bootstrapping kit references"
+  },
+  {
+    "index": 491,
+    "kind": "table",
+    "style": "Table",
+    "text": "Metric | Value | Source / condition\nmAP@0.5 (random-frame) | 0.862 | Inflated by leakage; not cited as true performance\nmAP@0.5 (clip-disjoint) | 0.702 | Honest protocol\nmAP@0.5 (extended clip-aware) | 0.745 (P 0.65, R 0.74) | Headline result\nRF-DETR mAP@0.5 (clip/match-disjoint) | 0.771 (EMA 0.778) | 18% group holdout; checkpoint selected on same partition\nRF-DETR mAP@[.5:.95] / P / R | 0.458 / 0.730 / 0.711 | Best checkpoint\nTeam-attribution accuracy | 91.8% (169/184) | Stratified human audit, 3 frames × 9 matches\nAttribution filter removal rate | 44% (11,161/25,153) | 9 matches, per-match range 21–78%\nLow-confidence detections (conf < 0.4) | 29% of count / 9.5% of weighted exposure | 8 matches\nHigh-confidence detections (conf ≥ 0.8) | 64% of weighted exposure | 8 matches\nVisibility-floor sensitivity (0.02→0.1) | up to 98% of exposure removed | 13,439 detections\nConfidence-floor sensitivity (0.25→0.6) | under 5% lost | 13,439 detections\nSampling bias (2 fps vs 50 fps) | +63% over-measurement | 3-minute segment\nThroughput | ~1.0× real time (0.81–1.12×) | RTX 5060 Ti 16 GB workstation\nLogos per frame | 63.1% of frames carry ≥2; mean 3.15 | 4,113 annotated frames\nScreen coverage per logo | median 0.145% of frame area; 95.7% under 1% | 12,960 instances\nRendered resolution | median 46 px tall; 18.7% under 32 px | 12,960 instances; 1080p source\nOcclusion, any degree | 30.7% (Wilson 95% CI 24.0–38.4%) | Stratified audit, 153 logos, 9 per class\nOcclusion, heavy | 3.9% | Same audit\nOcclusion vs mark size | 54.8% covered at ≥72 px vs 21.9% under 32 px | Mann–Whitney  p  = 0.009\nOcclusion vs per-class accuracy | r  = +0.20 ( p  = 0.45) — no association | Adjusted  R ² falls when added\nData efficiency, AP vs instances | Pearson  r  = +0.73 ( p  = 0.001) | 17 sponsor classes\nData efficiency, fitted slope | +0.169 AP per 10× data (95% CI [0.064, 0.275]) | R ² = 0.44\nMean AP, ≥ 500 vs < 500 instances | 0.498 vs 0.414 (+0.084) | Welch  t -test,  p  = 0.009"
+  },
+  {
+    "index": 495,
+    "kind": "table",
+    "style": "Table",
+    "text": "Class | Training instances | Held-out instances | AP@[.5:.95]\nklg | 1,667 | 341 | 0.606\npaints_lacquers | 1,170 | 218 | 0.474\nmcp | 1,106 | 318 | 0.576\nromantica | 886 | 226 | 0.498\naon | 749 | 102 | 0.452\nellgren | 718 | 161 | 0.394\nacs_group | 700 | 154 | 0.474\nbartercard | 612 | 159 | 0.479\ntop_notch | 582 | 138 | 0.529\nfloor_tonic | 446 | 71 | 0.490\natm | 431 | 108 | 0.382\nem_workwear | 385 | 64 | 0.422\nfairway | 313 | 86 | 0.319\nmna_support_service | 249 | 50 | 0.408\nmna_cladding | 240 | 44 | 0.401\nchadlaw | 218 | 25 | 0.432\ncch | 182 | 41 | 0.454\nTotal / mean | 10,654 | 2,306 | 0.458"
+  }
+]

@@ -1,0 +1,1337 @@
+{
+ "cuts": {
+  "match": {
+   "M_CAS": {
+    "n_images": 24,
+    "n_boxes": 106,
+    "map50": 0.9730318047540265,
+    "map75": 0.9574302445980108,
+    "map": 0.7870009677102252,
+    "tp": 97,
+    "fp": 6,
+    "fn": 9,
+    "p": 0.941747572815534,
+    "r": 0.9150943396226415,
+    "f1": 0.9282296650717704
+   },
+   "M_HFC": {
+    "n_images": 28,
+    "n_boxes": 41,
+    "map50": 0.9340995512389549,
+    "map75": 0.9314732939182626,
+    "map": 0.7872760193923087,
+    "tp": 33,
+    "fp": 5,
+    "fn": 8,
+    "p": 0.868421052631579,
+    "r": 0.8048780487804879,
+    "f1": 0.8354430379746836
+   },
+   "M_HKR": {
+    "n_images": 9,
+    "n_boxes": 18,
+    "map50": 0.9756875687568757,
+    "map75": 0.9476347634763476,
+    "map": 0.841954528786212,
+    "tp": 16,
+    "fp": 3,
+    "fn": 2,
+    "p": 0.8421052631578947,
+    "r": 0.8888888888888888,
+    "f1": 0.8648648648648649
+   }
+  },
+  "camera": {
+   "closeup": {
+    "n_images": 40,
+    "n_boxes": 126,
+    "map50": 0.9266530228831202,
+    "map75": 0.9051821002806558,
+    "map": 0.7604061363985938,
+    "tp": 113,
+    "fp": 13,
+    "fn": 13,
+    "p": 0.8968253968253969,
+    "r": 0.8968253968253969,
+    "f1": 0.8968253968253969
+   },
+   "medium": {
+    "n_images": 13,
+    "n_boxes": 33,
+    "map50": 1.0,
+    "map75": 1.0,
+    "map": 0.8075586192340164,
+    "tp": 30,
+    "fp": 1,
+    "fn": 3,
+    "p": 0.967741935483871,
+    "r": 0.9090909090909091,
+    "f1": 0.9374999999999999
+   },
+   "wide": {
+    "n_images": 8,
+    "n_boxes": 6,
+    "map50": 0.6238275143303804,
+    "map75": 0.6238275143303804,
+    "map": 0.5624283480979676,
+    "tp": 3,
+    "fp": 0,
+    "fn": 3,
+    "p": 1.0,
+    "r": 0.5,
+    "f1": 0.6666666666666666
+   }
+  },
+  "lighting": {
+   "day": {
+    "n_images": 37,
+    "n_boxes": 59,
+    "map50": 0.9032889429820737,
+    "map75": 0.8901148233723106,
+    "map": 0.7577425458742721,
+    "tp": 49,
+    "fp": 8,
+    "fn": 10,
+    "p": 0.8596491228070176,
+    "r": 0.8305084745762712,
+    "f1": 0.8448275862068966
+   },
+   "floodlit": {
+    "n_images": 24,
+    "n_boxes": 106,
+    "map50": 0.9730318047540265,
+    "map75": 0.9574302445980108,
+    "map": 0.7870009677102252,
+    "tp": 97,
+    "fp": 6,
+    "fn": 9,
+    "p": 0.941747572815534,
+    "r": 0.9150943396226415,
+    "f1": 0.9282296650717704
+   }
+  },
+  "source_size": {
+   "1920x1080": {
+    "n_images": 52,
+    "n_boxes": 147,
+    "map50": 0.9408518791647645,
+    "map75": 0.9280151669221117,
+    "map": 0.753122375881438,
+    "tp": 130,
+    "fp": 11,
+    "fn": 17,
+    "p": 0.9219858156028369,
+    "r": 0.8843537414965986,
+    "f1": 0.9027777777777778
+   },
+   "2560x1440": {
+    "n_images": 9,
+    "n_boxes": 18,
+    "map50": 0.9756875687568757,
+    "map75": 0.9476347634763476,
+    "map": 0.841954528786212,
+    "tp": 16,
+    "fp": 3,
+    "fn": 2,
+    "p": 0.8421052631578947,
+    "r": 0.8888888888888888,
+    "f1": 0.8648648648648649
+   }
+  }
+ },
+ "gt_boxes": [
+  {
+   "sqrt_area": 71.92834559476535,
+   "w": 93.27,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 59.29169587724743,
+   "w": 67.88,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 33.042282003517855,
+   "w": 38.84,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 61.14776610801085,
+   "w": 72.73,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 49.17498347737394,
+   "w": 60.85,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 62.357798229251166,
+   "w": 72.25,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 74.55793183826923,
+   "w": 104.06,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 36.0034220595765,
+   "w": 45.26,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 31.51907676312871,
+   "w": 35.71,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 35.257986329341044,
+   "w": 46.11,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 32.7260293955744,
+   "w": 39.74,
+   "hit": false,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 50.19354540177452,
+   "w": 60.1,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 44.54535217056882,
+   "w": 47.29,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 45.37628896240855,
+   "w": 62.66,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 68.03835756395064,
+   "w": 97.89,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 55.658266232429476,
+   "w": 78.11,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 60.40417866340043,
+   "w": 91.08,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 54.590664952901975,
+   "w": 76.63,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 63.32783905992687,
+   "w": 80.66,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 39.571367173753295,
+   "w": 37.01,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 51.735197883066036,
+   "w": 89.01,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 50.113182896319806,
+   "w": 68.41,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 37.90286005039726,
+   "w": 39.06,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 45.121981339475774,
+   "w": 70.99,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 63.90392945664609,
+   "w": 89.91,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 58.42720342443235,
+   "w": 79.63,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 59.55204782373147,
+   "w": 84.56,
+   "hit": false,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 150.00037999951869,
+   "w": 178.36,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 93.32964159365449,
+   "w": 114.31,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 127.26187174483958,
+   "w": 158.16,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 79.24299022626543,
+   "w": 96.95,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 73.89446528665053,
+   "w": 97.16,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 65.1254973109611,
+   "w": 84.12,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 60.96555092837265,
+   "w": 81.94,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 54.03477213794836,
+   "w": 67.26,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 44.070568410221355,
+   "w": 44.7,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 35.702655363432,
+   "w": 45.33,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 56.516369310138806,
+   "w": 67.5,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 71.18257932949606,
+   "w": 97.78,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 44.501139311258086,
+   "w": 42.01,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 32.08178299284502,
+   "w": 34.16,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 52.90380421103949,
+   "w": 73.75,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 61.822398853489986,
+   "w": 97.55,
+   "hit": false,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 46.65108358870135,
+   "w": 52.14,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 64.85092443442885,
+   "w": 77.94,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 53.93996941044739,
+   "w": 80.13,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 45.50140437393114,
+   "w": 51.07,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 85.49640343312693,
+   "w": 106.71,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 38.694811021634415,
+   "w": 43.64,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 42.9926644905849,
+   "w": 40.57,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 41.62780320891315,
+   "w": 37.96,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 56.22328699035659,
+   "w": 73.65,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 38.21355518660885,
+   "w": 44.78,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 43.02829650358006,
+   "w": 45.19,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 63.45170210482931,
+   "w": 81.09,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 39.68533986247315,
+   "w": 48.06,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 56.452975120891544,
+   "w": 71.44,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 44.84750160265341,
+   "w": 61.47,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 46.20209086177811,
+   "w": 55.72,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 33.858338707030505,
+   "w": 40.21,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 88.0181458564085,
+   "w": 101.35,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 71.19633698442638,
+   "w": 94.64,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 70.59359744339426,
+   "w": 84.18,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 70.09793220916006,
+   "w": 99.69,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 59.902467394924564,
+   "w": 78.76,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 36.640874716633064,
+   "w": 32.61,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 45.73649964743695,
+   "w": 69.06,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 60.19938953178844,
+   "w": 91.63,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 47.382618120994536,
+   "w": 73.25,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 38.36738719277089,
+   "w": 45.49,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 42.921236002706166,
+   "w": 59.91,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 32.13451726726262,
+   "w": 33.44,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 35.145161829190656,
+   "w": 31.16,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 44.69168155261111,
+   "w": 54.32,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 72.83981054341095,
+   "w": 97.89,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "medium"
+  },
+  {
+   "sqrt_area": 72.70975175311769,
+   "w": 89.91,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "medium"
+  },
+  {
+   "sqrt_area": 72.0635344678569,
+   "w": 90.3,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "medium"
+  },
+  {
+   "sqrt_area": 37.28709562301682,
+   "w": 47.05,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "medium"
+  },
+  {
+   "sqrt_area": 43.70169447515737,
+   "w": 52.31,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "medium"
+  },
+  {
+   "sqrt_area": 50.422814280839184,
+   "w": 52.99,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "medium"
+  },
+  {
+   "sqrt_area": 37.66872442756723,
+   "w": 37.98,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "medium"
+  },
+  {
+   "sqrt_area": 27.80445108251555,
+   "w": 28.75,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "medium"
+  },
+  {
+   "sqrt_area": 46.71194815033944,
+   "w": 53.89,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "medium"
+  },
+  {
+   "sqrt_area": 50.3823629854734,
+   "w": 55.85,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "medium"
+  },
+  {
+   "sqrt_area": 38.321811021923274,
+   "w": 44.61,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "medium"
+  },
+  {
+   "sqrt_area": 40.72434161530423,
+   "w": 45.6,
+   "hit": false,
+   "scale": 1.0,
+   "camera": "medium"
+  },
+  {
+   "sqrt_area": 43.32147735246341,
+   "w": 50.02,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "medium"
+  },
+  {
+   "sqrt_area": 40.40034405794089,
+   "w": 51.23,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "medium"
+  },
+  {
+   "sqrt_area": 46.141109652889796,
+   "w": 55.85,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "medium"
+  },
+  {
+   "sqrt_area": 92.43484407949201,
+   "w": 132.12,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "medium"
+  },
+  {
+   "sqrt_area": 41.37071427954804,
+   "w": 54.3,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "medium"
+  },
+  {
+   "sqrt_area": 56.813827542245384,
+   "w": 57.18,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "medium"
+  },
+  {
+   "sqrt_area": 35.23413969433623,
+   "w": 36.74,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "medium"
+  },
+  {
+   "sqrt_area": 56.34401476643282,
+   "w": 60.24,
+   "hit": false,
+   "scale": 1.0,
+   "camera": "medium"
+  },
+  {
+   "sqrt_area": 31.031127920202966,
+   "w": 35.81,
+   "hit": false,
+   "scale": 1.0,
+   "camera": "medium"
+  },
+  {
+   "sqrt_area": 47.07591741007285,
+   "w": 53.53,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "medium"
+  },
+  {
+   "sqrt_area": 40.97946192911761,
+   "w": 41.19,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "medium"
+  },
+  {
+   "sqrt_area": 45.6440017965121,
+   "w": 44.91,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "medium"
+  },
+  {
+   "sqrt_area": 62.160247747254026,
+   "w": 91.91,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "medium"
+  },
+  {
+   "sqrt_area": 38.934118713539675,
+   "w": 51.49,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "medium"
+  },
+  {
+   "sqrt_area": 25.882534651768555,
+   "w": 29.96,
+   "hit": false,
+   "scale": 1.0,
+   "camera": "wide"
+  },
+  {
+   "sqrt_area": 72.86562426823777,
+   "w": 103.76,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "wide"
+  },
+  {
+   "sqrt_area": 81.21441436099875,
+   "w": 125.61,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "wide"
+  },
+  {
+   "sqrt_area": 39.641251241604365,
+   "w": 38.16,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "wide"
+  },
+  {
+   "sqrt_area": 24.795588317279346,
+   "w": 27.62,
+   "hit": false,
+   "scale": 1.0,
+   "camera": "wide"
+  },
+  {
+   "sqrt_area": 40.066039235242606,
+   "w": 38.45,
+   "hit": false,
+   "scale": 1.0,
+   "camera": "wide"
+  },
+  {
+   "sqrt_area": 128.18045872909022,
+   "w": 149,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 105.93183846228669,
+   "w": 120.61,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 95.22983776107151,
+   "w": 122.6,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 51.59492998347803,
+   "w": 38.76,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 98.92719444116466,
+   "w": 89.31,
+   "hit": false,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 35.73462186731518,
+   "w": 35.12,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 39.33585387404219,
+   "w": 50.01,
+   "hit": false,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 42.40965927710337,
+   "w": 42.24,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 57.43301837793309,
+   "w": 77.54,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 25.14307857045354,
+   "w": 27.63,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 56.47438711486827,
+   "w": 79.16,
+   "hit": false,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 40.88930667057098,
+   "w": 47.31,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 78.66715833179688,
+   "w": 88.89,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 86.14534346092074,
+   "w": 73.49,
+   "hit": false,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 142.18189160367785,
+   "w": 167.39,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 156.61526362395205,
+   "w": 215.01,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 97.91231587497049,
+   "w": 98.64,
+   "hit": false,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 89.20191085397218,
+   "w": 103.19,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 121.86488501615221,
+   "w": 131.74,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 55.51519701847414,
+   "w": 79.37,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 38.39930468120484,
+   "w": 43.19,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 28.74011656204616,
+   "w": 37.09,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 39.28408838193907,
+   "w": 54.57,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 55.70985191148869,
+   "w": 77.96,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 114.8378108464281,
+   "w": 198.73,
+   "hit": false,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 80.00919947106082,
+   "w": 73.92,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 78.17371169389362,
+   "w": 81.46,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 58.25863026196205,
+   "w": 67.8,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 94.39867848651272,
+   "w": 124.37,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 58.23130773046403,
+   "w": 64.27,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 30.315817653495678,
+   "w": 40.38,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 44.39542318753139,
+   "w": 58.94,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 29.675087194480156,
+   "w": 30.22,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 110.30498628801874,
+   "w": 124.6,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 121.94406258608905,
+   "w": 115.06,
+   "hit": false,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 147.6839781425189,
+   "w": 158.53,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 117.33002343816352,
+   "w": 145.46,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 59.761041657588265,
+   "w": 72.93,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 54.16464621872832,
+   "w": 74.03,
+   "hit": false,
+   "scale": 1.0,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 32.258332256953395,
+   "w": 43,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "medium"
+  },
+  {
+   "sqrt_area": 51.05442292299464,
+   "w": 63.59,
+   "hit": true,
+   "scale": 1.0,
+   "camera": "medium"
+  },
+  {
+   "sqrt_area": 101.18727390339161,
+   "w": 146.04,
+   "hit": true,
+   "scale": 0.75,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 57.51076420984162,
+   "w": 52.4,
+   "hit": true,
+   "scale": 0.75,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 73.3881189294289,
+   "w": 117.8,
+   "hit": true,
+   "scale": 0.75,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 93.23534093893795,
+   "w": 119.67,
+   "hit": true,
+   "scale": 0.75,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 57.95297058822783,
+   "w": 58.44,
+   "hit": false,
+   "scale": 0.75,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 131.7804613742113,
+   "w": 162.68,
+   "hit": true,
+   "scale": 0.75,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 114.81854728222265,
+   "w": 169.06,
+   "hit": false,
+   "scale": 0.75,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 211.54937697852006,
+   "w": 200.93,
+   "hit": true,
+   "scale": 0.75,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 133.72722235954802,
+   "w": 172.2,
+   "hit": true,
+   "scale": 0.75,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 141.70802129731402,
+   "w": 182.01,
+   "hit": true,
+   "scale": 0.75,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 151.3397921896287,
+   "w": 188.71,
+   "hit": true,
+   "scale": 0.75,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 103.68430546616011,
+   "w": 140.86,
+   "hit": true,
+   "scale": 0.75,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 69.37064797160251,
+   "w": 86.99,
+   "hit": true,
+   "scale": 0.75,
+   "camera": "closeup"
+  },
+  {
+   "sqrt_area": 101.43884857390684,
+   "w": 121,
+   "hit": true,
+   "scale": 0.75,
+   "camera": "medium"
+  },
+  {
+   "sqrt_area": 57.20545603349387,
+   "w": 56.17,
+   "hit": true,
+   "scale": 0.75,
+   "camera": "medium"
+  },
+  {
+   "sqrt_area": 58.21470261025131,
+   "w": 59.32,
+   "hit": true,
+   "scale": 0.75,
+   "camera": "medium"
+  },
+  {
+   "sqrt_area": 59.09078016069851,
+   "w": 63.13,
+   "hit": true,
+   "scale": 0.75,
+   "camera": "medium"
+  },
+  {
+   "sqrt_area": 46.13290691036063,
+   "w": 50.23,
+   "hit": true,
+   "scale": 0.75,
+   "camera": "medium"
+  }
+ ],
+ "size_bins": [
+  {
+   "lo": 0,
+   "hi": 30,
+   "n": 6,
+   "recall": 0.6666666666666666
+  },
+  {
+   "lo": 30,
+   "hi": 45,
+   "n": 49,
+   "recall": 0.8979591836734694
+  },
+  {
+   "lo": 45,
+   "hi": 60,
+   "n": 47,
+   "recall": 0.8936170212765957
+  },
+  {
+   "lo": 60,
+   "hi": 80,
+   "n": 29,
+   "recall": 0.9655172413793104
+  },
+  {
+   "lo": 80,
+   "hi": 120,
+   "n": 21,
+   "recall": 0.7619047619047619
+  },
+  {
+   "lo": 120,
+   "hi": 10000,
+   "n": 13,
+   "recall": 0.9230769230769231
+  }
+ ]
+}

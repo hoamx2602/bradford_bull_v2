@@ -133,12 +133,25 @@ def _build_breakdown(
     }
     ai_pct = compute_location_ai_percentages(facts, enabled, anchor_by_location)
 
+    # A location only has a MEASURED value when its anchor zone was actually
+    # detected in this video. A mapped slot whose anchor never appeared (pose
+    # never resolved it, or the camera never showed it) is "no data" — its
+    # cells stay empty rather than reporting a computed 0.00 %, which would
+    # read as "measured zero exposure".
+    def _has_data(loc) -> bool:
+        return bool(eff_brand[loc.id]) and (
+            zone_detail.get(loc.anchor_id, {}).get("detections", 0) > 0
+        )
+
+    has_data = {loc.id: _has_data(loc) for loc in locations}
+
     # AI Adjusted — reconcile measured AI % with the human reference (manual
-    # Human-AI % per row when set, else contractual Human %), over the logo'd
-    # locations, blended by the configured weight.
+    # Human-AI % per row when set, else contractual Human %). Computed over the
+    # locations WITH data only, so the blend (and its 100 % total) isn't diluted
+    # by slots that contributed no measurement.
     reference: dict[str, float] = {}
     for loc in locations:
-        if not eff_brand[loc.id]:
+        if not has_data[loc.id]:
             continue
         ov = overrides.get(loc.id)
         human = (ov.human_percentage if ov and ov.human_percentage is not None
@@ -146,24 +159,29 @@ def _build_breakdown(
         human_ai = ov.human_ai_percentage if ov else None
         reference[loc.id] = human_ai if human_ai is not None else (human or 0.0)
     adjust_weight = settings_repo.get_ai_adjust_weight()
-    ai_adj = compute_ai_adjusted(ai_pct, reference, adjust_weight)
+    ai_adj = compute_ai_adjusted(
+        {k: v for k, v in ai_pct.items() if has_data.get(k)}, reference, adjust_weight
+    )
 
     rows = []
     for loc in locations:
         ov = overrides.get(loc.id)
         brand_key = eff_brand[loc.id]
-        has_logo = bool(brand_key)
+        measured = has_data[loc.id]
         human = (ov.human_percentage if ov and ov.human_percentage is not None
                  else loc.human_percentage)
         human_ai = ov.human_ai_percentage if ov else None
         # Visibility = how much of the whole video the logo was on screen at this
         # location: attributed on-screen seconds / video duration. Raw presence
-        # (not criteria-weighted), so it does not sum to 100 %. No logo -> no
-        # visibility (nothing to be seen there).
+        # (not criteria-weighted), so it does not sum to 100 %. No measurement ->
+        # null, not 0.
         on_screen = (
-            zone_detail.get(loc.anchor_id, {}).get("totalDuration", 0.0) if has_logo else 0.0
+            zone_detail.get(loc.anchor_id, {}).get("totalDuration", 0.0) if measured else None
         )
-        visibility = round(on_screen / video_seconds * 100, 2) if (video_seconds and has_logo) else 0.0
+        visibility = (
+            round(on_screen / video_seconds * 100, 2)
+            if (measured and video_seconds) else None
+        )
         rows.append({
             "locationId": loc.id,
             "locationName": loc.name,
@@ -171,10 +189,10 @@ def _build_breakdown(
             "brandKey": brand_key,
             "logo": _brand_label(brand_key),
             "humanPercentage": round(human, 2),
-            "aiPercentage": ai_pct.get(loc.id, 0.0),
-            "aiAdjusted": ai_adj.get(loc.id, 0.0) if has_logo else None,
+            "aiPercentage": ai_pct.get(loc.id) if measured else None,
+            "aiAdjusted": ai_adj.get(loc.id) if measured else None,
             "visibility": visibility,
-            "onScreenSeconds": round(on_screen, 1),
+            "onScreenSeconds": round(on_screen, 1) if measured else None,
             "humanAiPercentage": human_ai,
             "notes": ov.notes if ov else "",
         })

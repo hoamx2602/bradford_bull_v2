@@ -5,8 +5,8 @@ over teams; fused as w_color*p_color + w_siglip*p_siglip. Weights are learned
 from the reference crops (learn_weights) so colour dominates for white-vs-black
 kits while SigLIP can take over for harder pairs.
 
-VoteTracker: per-track majority voting with hysteresis — one bad frame can't
-flip a player's team, and the shown label never flickers.
+VoteTracker: per-track decayed voting with hysteresis to reduce label flicker.
+The runtime additionally abstains when the signed vote margin is too small.
 """
 from __future__ import annotations
 
@@ -16,6 +16,7 @@ from app.pipeline.teamid.features import color_sim, softmax
 
 TARGET = "target"
 OTHER = "other"
+UNKNOWN = "unknown"
 
 
 class TeamClassifier:
@@ -79,21 +80,24 @@ class TeamClassifier:
 class VoteTracker:
     """Per-track vote accumulation + hysteresis-stabilised label."""
 
-    def __init__(self, teams: list[str], hysteresis: float = 1.25):
+    def __init__(self, teams: list[str], hysteresis: float = 1.25, decay: float = .95):
         self.teams = list(teams)
         self.hyst = hysteresis
+        self.decay = decay
         self.votes: dict[int, np.ndarray] = {}   # tid -> vote mass per team
         self.shown: dict[int, str] = {}          # tid -> stable label
 
     def update(self, tid: int, team: str | None, weight: float) -> None:
         v = self.votes.setdefault(tid, np.zeros(len(self.teams)))
         if team is not None and weight > 0:
+            # Bound historical inertia so a track identity switch can recover.
+            v *= self.decay
             v[self.teams.index(team)] += weight
 
     def label(self, tid: int) -> str:
         v = self.votes.get(tid)
         if v is None or v.sum() == 0:
-            return self.shown.get(tid, self.teams[0])
+            return UNKNOWN
         top = int(np.argmax(v))
         cur = self.shown.get(tid)
         if cur is None:
@@ -108,6 +112,19 @@ class VoteTracker:
         """Total vote weight seen for this track — confidence proxy."""
         v = self.votes.get(tid)
         return float(v.sum()) if v is not None else 0.0
+
+    def margin(self, tid: int, team: str) -> float:
+        """Signed vote lead for the displayed team, divided by total mass.
+
+        Large total mass alone does not resolve conflicting team evidence.
+        A stale hysteresis label may have a negative margin.
+        """
+        v = self.votes.get(tid)
+        if v is None or v.sum() <= 0 or team not in self.teams:
+            return 0.0
+        i = self.teams.index(team)
+        rival = max((float(x) for j, x in enumerate(v) if j != i), default=0.0)
+        return float((v[i] - rival) / v.sum())
 
 
 def learn_weights(teams, assignments, embeddings, color_feats):

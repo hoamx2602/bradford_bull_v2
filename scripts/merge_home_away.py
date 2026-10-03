@@ -24,9 +24,13 @@ import shutil
 from collections import Counter
 from pathlib import Path
 
+import os
+
 import yaml
 
-DATA_DIR = Path(r"C:\Users\xmai\Bradford\bradford_bull_v2\logo_detection\data")
+# Override with LOGO_DATA_DIR=/path/to/data; defaults to this repo's logo_detection/data
+# (previously hard-coded to C:\Users\xmai\Bradford\bradford_bull_v2\logo_detection\data).
+DATA_DIR = Path(os.environ.get("LOGO_DATA_DIR", Path(__file__).resolve().parents[1] / "logo_detection" / "data"))
 SPLITS = ["train", "val"]
 
 

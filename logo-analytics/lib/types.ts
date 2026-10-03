@@ -145,12 +145,13 @@ export interface LocationBreakdownRow {
   brandKey: string | null
   logo: string
   humanPercentage: number
-  aiPercentage: number
-  // AI % reconciled toward the human reference (null when no logo).
+  // null = no measurement (no logo mapped, or the anchor zone never detected).
+  aiPercentage: number | null
+  // AI % reconciled toward the human reference (null when there is no AI %).
   aiAdjusted: number | null
   // On-screen time at this location / video duration (raw presence, %).
-  visibility: number
-  onScreenSeconds: number
+  visibility: number | null
+  onScreenSeconds: number | null
   humanAiPercentage: number | null
   notes: string
 }

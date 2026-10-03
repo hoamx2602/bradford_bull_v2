@@ -69,25 +69,14 @@ def _bones(kpts) -> list[tuple[np.ndarray, np.ndarray, str]]:
     if face:
         h = np.mean(face, axis=0)
         out.append((h, h, "head"))
-    # Torso: spine line shoulder-centre → hip-centre. Hips are often missing
-    # (occluded / cropped); when they are, estimate the hip downward from the
-    # shoulders so torso pixels don't get misassigned to head/arms.
+    # A torso needs observed shoulders and hips. A vertical extrapolation is
+    # unsafe for horizontal rugby tackles and cropped broadcasts.
     l_sho, r_sho = _kp(kpts, L_SHO), _kp(kpts, R_SHO)
     sho = [p for p in (l_sho, r_sho) if p is not None]
     hip = [p for p in (_kp(kpts, L_HIP), _kp(kpts, R_HIP)) if p is not None]
-    if sho:
+    if sho and hip:
         sho_c = np.mean(sho, axis=0)
-        if hip:
-            hip_c = np.mean(hip, axis=0)
-        else:
-            # torso length ≈ 1.8× shoulder width (fallback to head distance)
-            if l_sho is not None and r_sho is not None:
-                tlen = np.linalg.norm(l_sho - r_sho) * 1.8
-            elif face:
-                tlen = np.linalg.norm(sho_c - h) * 2.0
-            else:
-                tlen = 60.0
-            hip_c = sho_c + np.array([0.0, max(20.0, tlen)], dtype=np.float32)
+        hip_c = np.mean(hip, axis=0)
         out.append((sho_c, hip_c, "torso"))
     # Arms
     seg(L_SHO, L_ELB, "upper_arm"); seg(R_SHO, R_ELB, "upper_arm")
@@ -122,6 +111,18 @@ def _iou(b1, b2) -> float:
     return inter / (a1 + a2 - inter + 1e-6)
 
 
+def _match_poses(seg_boxes, pose_boxes, threshold=0.3):
+    """One-to-one association; a tackle must not reuse one skeleton twice."""
+    pairs = sorted(((_iou(s, p), i, j) for i, s in enumerate(seg_boxes)
+                    for j, p in enumerate(pose_boxes)), reverse=True)
+    matches, used = {}, set()
+    for score, i, j in pairs:
+        if score >= threshold and i not in matches and j not in used:
+            matches[i] = j
+            used.add(j)
+    return matches
+
+
 def _segment_frame(img, seg_model, pose_model, device, imgsz, conf, counts):
     """Return BGR overlay (0 where no person) for one frame at img's size."""
     h, w = img.shape[:2]
@@ -140,28 +141,39 @@ def _segment_frame(img, seg_model, pose_model, device, imgsz, conf, counts):
     pose_boxes = (pose_res[0].boxes.xyxy.cpu().numpy()
                   if pose_res and pose_res[0].boxes is not None else np.empty((0, 4)))
 
-    for mi in range(masks.shape[0]):
+    matches = _match_poses(seg_boxes, pose_boxes)
+    occupied = np.zeros((h, w), dtype=bool)
+    # Higher-confidence silhouettes own overlap pixels first.
+    scores = seg_res[0].boxes.conf.cpu().numpy()
+    for mi in np.argsort(-scores):
         mask = masks[mi] > 0.5
+        if mask.shape != (h, w):
+            mask = cv2.resize(mask.astype(np.uint8), (w, h), interpolation=cv2.INTER_NEAREST).astype(bool)
+        mask &= ~occupied
+        occupied |= mask
         ys, xs = np.where(mask)
         if len(xs) == 0:
             continue
         # match this mask to the best-overlapping pose person
-        best_j, best_iou = -1, 0.2
-        for pj in range(pose_boxes.shape[0]):
-            i = _iou(seg_boxes[mi], pose_boxes[pj])
-            if i > best_iou:
-                best_iou, best_j = i, pj
+        best_j = matches.get(mi, -1)
 
         pts = np.stack([xs, ys], axis=1).astype(np.float32)
         bones = _bones(pose_kp[best_j]) if best_j >= 0 else []
         if not bones:
-            overlay[ys, xs] = _GROUP_BGR["torso"]    # no pose → flat silhouette
-            counts["torso"] = counts.get("torso", 0) + len(xs)
+            # Grey explicitly means unassigned, never measured torso exposure.
+            overlay[ys, xs] = (128, 128, 128)
+            counts["unknown"] = counts.get("unknown", 0) + len(xs)
             continue
         D = np.stack([_pt_seg_dist(pts, a, b) for a, b, _ in bones])  # (B, P)
         best = D.argmin(0)
+        # Do not extrapolate a visible wrist/face to the entire missing body.
+        radius = max(4.0, 0.16 * np.hypot(seg_boxes[mi][2] - seg_boxes[mi][0],
+                                        seg_boxes[mi][3] - seg_boxes[mi][1]))
+        supported = D.min(0) <= radius
+        overlay[ys[~supported], xs[~supported]] = (128, 128, 128)
+        counts["unknown"] = counts.get("unknown", 0) + int((~supported).sum())
         for bi, (_, _, g) in enumerate(bones):
-            sel = best == bi
+            sel = (best == bi) & supported
             if sel.any():
                 overlay[ys[sel], xs[sel]] = _GROUP_BGR[g]
                 counts[g] = counts.get(g, 0) + int(sel.sum())
@@ -212,5 +224,5 @@ def render_bodyseg_yolo_video(
         return None, {}
 
     total = sum(counts.values()) or 1
-    group_pct = {GROUP_LABEL[g]: round(100 * px / total, 1) for g, px in counts.items()}
+    group_pct = {GROUP_LABEL.get(g, "Unassigned"): round(100 * px / total, 1) for g, px in counts.items()}
     return out_path, group_pct

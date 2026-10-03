@@ -64,7 +64,7 @@ def init_db() -> None:
 # neck/back slots intentionally share an anchor (COCO-17 can't separate them).
 _SEED_LOCATIONS: list[tuple[str, str, str, str | None, str | None, float]] = [
     ("main-sponsor",     "Main Sponsor",      "chest-center",   "top_notch",      "floor_tonic",  26.0),
-    ("collar-back",      "Collar Back",       "back-top",       None,             None,            8.0),
+    ("collar-back",      "Collar Back",       "back-top",       "mna_support_service", None,       8.0),
     ("collar-bone",      "Collar Bone",       "chest-l",        "mna_cladding",   None,            8.0),
     ("chest-opp-badge",  "Chest (opp Badge)", "chest-r",        "romatica",       None,            7.0),
     ("sleeve-1",         "Sleeve 1",          "sleeve-l",       "lawrence",       None,            4.0),
@@ -78,7 +78,7 @@ _SEED_LOCATIONS: list[tuple[str, str, str, str | None, str | None, float]] = [
     ("shorts-back-1",    "Shorts Back 1",     "shorts-leg-l",   "aon",            None,            3.0),
     ("shorts-back-2",    "Shorts Back 2",     "shorts-leg-r",   "paints_lacquers",None,            3.0),
     ("socks-front",      "Socks front",       "sock-l",         "ellgren",        None,            1.0),
-    ("socks-back",       "Socks back",        "sock-r",         "em_workwear",    None,          100.0),
+    ("socks-back",       "Socks back",        "sock-r",         "em_workwear",    None,            1.0),
 ]
 
 # All Tier-1..3 algorithm factors enabled by default (matches the legacy

@@ -1,0 +1,23 @@
+% Research framework: editable TikZ source.
+\begin{tikzpicture}[node distance=8mm]
+  \node[llred,text width=31mm,minimum height=24mm] (account)
+    {\textbf{Sponsorship accountability}\\[1mm]
+     \tiny What exposure was actually delivered?};
+  \node[lldata,right=of account,text width=31mm,minimum height=24mm] (exposure)
+    {\textbf{Observable exposure}\\[1mm]
+     \tiny Presence, size, position and time};
+  \node[llorange,right=of exposure,text width=31mm,minimum height=24mm] (vision)
+    {\textbf{Leakage-aware computer vision}\\[1mm]
+     \tiny Match-separated training and evaluation};
+  \node[llgreen,right=of vision,text width=31mm,minimum height=24mm] (evidence)
+    {\textbf{Auditable visibility evidence}\\[1mm]
+     \tiny Segments, source frames and explicit assumptions};
+
+  \draw[llarrow,draw=LLRed] (account) -- (exposure);
+  \draw[llarrow,draw=LLRed] (exposure) -- (vision);
+  \draw[llarrow,draw=LLRed] (vision) -- (evidence);
+
+  \node[llnote,below=5mm of exposure.south east,xshift=4mm,text width=82mm]
+    {Visibility is an observable media condition; it is not itself attention,
+     recall, return on investment or sponsorship value.};
+\end{tikzpicture}

@@ -15,8 +15,16 @@ log = logging.getLogger("app.models")
 
 
 def resolve_device(requested: str) -> str:
-    """Map 'auto' to the best available backend: CUDA > MPS (Apple) > CPU."""
-    if requested and requested != "auto":
+    """Map 'auto' to the best available backend: CUDA > MPS (Apple) > CPU.
+
+    Toggle with the DEVICE env var / setting: auto | cuda | 0 | mps | cpu.
+    'cuda' and 'gpu' are aliases for the first CUDA device ('0'), which is
+    the form ultralytics expects.
+    """
+    requested = (str(requested).strip().lower() if requested is not None else "auto") or "auto"
+    if requested in ("cuda", "gpu"):
+        return "0"
+    if requested != "auto":
         return requested
     try:
         import torch

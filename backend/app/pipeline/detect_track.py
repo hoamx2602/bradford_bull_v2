@@ -120,6 +120,13 @@ class _YoloBackend:
         self.backend = registry.get_logo_backend()
         self.backend.reset()  # fresh tracker state per video
         self.names = self.backend.names  # {class_id: raw_name}
+        self.model = self.backend.model
+        self.device = registry.device()
+        self.reset_tracker()
+
+    def reset_tracker(self) -> None:
+        for tracker in getattr(getattr(self.model, "predictor", None), "trackers", []):
+            tracker.reset()
 
     def _to_detections(self, raw_boxes, t: float, w: int, h: int) -> list[Detection]:
         out: list[Detection] = []

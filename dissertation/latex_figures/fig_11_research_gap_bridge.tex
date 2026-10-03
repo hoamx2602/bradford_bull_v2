@@ -1,0 +1,68 @@
+% Research gap bridge: literature limitation -> study response -> research question.
+% Editable TikZ source, Section 2.5.
+\begin{tikzpicture}[node distance=6mm]
+
+  % ---- column headings ----
+  \node[llsection,text width=55mm] (h1) {Limitation in the reviewed literature};
+  \node[llsection,text width=62mm,right=10mm of h1] (h2) {Response in this study};
+  \node[llsection,text width=20mm,right=8mm of h2] (h3) {Research question};
+
+  % ---- row 1: evaluation validity ----
+  \node[llred,below=4mm of h1.south,anchor=north,text width=55mm,minimum height=21mm] (l1)
+    {\textbf{Evaluation validity}\\[0.8mm]
+     \tiny Accuracy is normally reported without separating whole matches, so
+     neighbouring-frame correlation inflates it, and general YOLO/DETR benchmark
+     rankings do not transfer to small, deformable kit marks.\\[0.6mm]
+     \tiny\itshape Deliège et al. (2021); Carion et al. (2020); Zhao et al. (2024)};
+
+  \node[llgreen,right=10mm of l1,text width=62mm,minimum height=21mm] (r1)
+    {\textbf{Match-disjoint, single-protocol comparison}\\[0.8mm]
+     \tiny Complete match groups are assigned to training, validation and test
+     roles, the leakage inflation is quantified directly, and RF-DETR Small and
+     three YOLO26 baselines are scored on the same data, resolution and
+     evaluation code.};
+
+  \node[llbadge,right=9mm of r1,minimum size=9mm,font=\small\bfseries] (q1) {RQ1};
+
+  % ---- row 2: conditions of appearance ----
+  \node[llred,below=6mm of l1,text width=55mm,minimum height=21mm] (l2)
+    {\textbf{Conditions of appearance}\\[0.8mm]
+     \tiny Aggregate scores conceal the broadcast conditions that produce them.
+     Camera distance, logo size, lighting and source resolution are rarely
+     reported as separate strata.\\[0.6mm]
+     \tiny\itshape Liao et al. (2017); Su et al. (2018)};
+
+  \node[llgreen,right=10mm of l2,text width=62mm,minimum height=21mm] (r2)
+    {\textbf{Stratified held-out analysis}\\[0.8mm]
+     \tiny The final predictions are recut by camera distance, logo size,
+     lighting and source resolution, error cases are selected by reproducible
+     rules, and every evaluator outcome is audited at source resolution.};
+
+  \node[llbadge,right=9mm of r2,minimum size=9mm,font=\small\bfseries] (q2) {RQ2};
+
+  % ---- row 3: transformation to evidence ----
+  \node[llred,below=6mm of l2,text width=55mm,minimum height=21mm] (l3)
+    {\textbf{Transformation to evidence}\\[0.8mm]
+     \tiny Exposure analytics report duration and coverage without exposing
+     which quantities are measured, which are model outputs and which are design
+     choices, and association rules are not checked against manual timing.\\[0.6mm]
+     \tiny\itshape Sarkhoosh et al. (2025); Nielsen (2017); Zhang et al. (2022)};
+
+  \node[llgreen,right=10mm of l3,text width=62mm,minimum height=21mm] (r3)
+    {\textbf{Traceable prototype with a stated status}\\[0.8mm]
+     \tiny Every aggregate stays resolvable to segments, detections, timestamps
+     and source frames; each component is classified as measured, model-derived
+     or assumed; the outstanding validation is pre-specified.};
+
+  \node[llbadge,right=9mm of r3,minimum size=9mm,font=\small\bfseries] (q3) {RQ3};
+
+  % ---- arrows ----
+  \foreach \a/\b in {l1/r1,l2/r2,l3/r3} \draw[llarrow,draw=LLRed] (\a) -- (\b);
+  \foreach \a/\b in {r1/q1,r2/q2,r3/q3} \draw[llarrow,draw=LLGreen] (\a) -- (\b);
+
+  % ---- closing note ----
+  \node[llnote,below=6mm of l3.south east,xshift=30mm,text width=150mm]
+    {The gap is integrative rather than a shortage of algorithms: none of the reviewed work
+     supplies all three responses in one reproducible, club-specific evidence chain.};
+
+\end{tikzpicture}

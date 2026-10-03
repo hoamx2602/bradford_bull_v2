@@ -1,0 +1,368 @@
+[
+  {
+    "index": 33,
+    "kind": "paragraph",
+    "style": "List Bullet",
+    "text": "Figure 1. High-value frame selection for annotation — §3.3.1"
+  },
+  {
+    "index": 34,
+    "kind": "paragraph",
+    "style": "List Bullet",
+    "text": "Figure 2. Examples of high-value selected frames (placeholder) — §3.3.1"
+  },
+  {
+    "index": 35,
+    "kind": "paragraph",
+    "style": "List Bullet",
+    "text": "Figure 3. Model-assisted (label-assist) annotation workflow — §3.3.2"
+  },
+  {
+    "index": 36,
+    "kind": "paragraph",
+    "style": "List Bullet",
+    "text": "Figure 4. Roboflow annotation interface with Label Assist (placeholder) — §3.3.2"
+  },
+  {
+    "index": 37,
+    "kind": "paragraph",
+    "style": "List Bullet",
+    "text": "Figure 5. Overall system architecture — §4.1"
+  },
+  {
+    "index": 38,
+    "kind": "paragraph",
+    "style": "List Bullet",
+    "text": "Figure 6. Processing pipeline for a newly uploaded video — §4.2"
+  },
+  {
+    "index": 39,
+    "kind": "paragraph",
+    "style": "List Bullet",
+    "text": "Figure 7. Official kit reference images (placeholder) — §4.4"
+  },
+  {
+    "index": 40,
+    "kind": "paragraph",
+    "style": "List Bullet",
+    "text": "Figure 8. The three-tier valuation model — §4.6"
+  },
+  {
+    "index": 41,
+    "kind": "paragraph",
+    "style": "List Bullet",
+    "text": "Figure 9. Analytics dashboard: Overview / Match view (placeholder) — §4.7"
+  },
+  {
+    "index": 42,
+    "kind": "paragraph",
+    "style": "List Bullet",
+    "text": "Figure 10. Three-dimensional kit-slot model (placeholder) — §4.7"
+  },
+  {
+    "index": 43,
+    "kind": "paragraph",
+    "style": "List Bullet",
+    "text": "Figure 11. Digital-twin frame with composited logos (placeholder) — §4.8"
+  },
+  {
+    "index": 44,
+    "kind": "paragraph",
+    "style": "List Bullet",
+    "text": "Figure 12. Per-class instance distribution of the training set — §5.2"
+  },
+  {
+    "index": 45,
+    "kind": "paragraph",
+    "style": "List Bullet",
+    "text": "Figure 13. Bounding-box geometry and label analysis — §5.2"
+  },
+  {
+    "index": 46,
+    "kind": "paragraph",
+    "style": "List Bullet",
+    "text": "Figure 14. Detection accuracy under three splitting protocols — §5.3"
+  },
+  {
+    "index": 47,
+    "kind": "paragraph",
+    "style": "List Bullet",
+    "text": "Figure 15. Training dynamics of the clip-disjoint run — §5.3"
+  },
+  {
+    "index": 48,
+    "kind": "paragraph",
+    "style": "List Bullet",
+    "text": "Figure 16. Normalised confusion matrix (clip-disjoint split) — §5.3"
+  },
+  {
+    "index": 49,
+    "kind": "paragraph",
+    "style": "List Bullet",
+    "text": "Figure 17. Per-class precision–recall curves — §5.3"
+  },
+  {
+    "index": 50,
+    "kind": "paragraph",
+    "style": "List Bullet",
+    "text": "Figure 18. Qualitative detection output (identity-redacted) — §5.3"
+  },
+  {
+    "index": 51,
+    "kind": "paragraph",
+    "style": "List Bullet",
+    "text": "Figure 19. RF-DETR per-class Average Precision — §5.3.1"
+  },
+  {
+    "index": 52,
+    "kind": "paragraph",
+    "style": "List Bullet",
+    "text": "Figure 20. RF-DETR validation mAP over training — §5.3.1"
+  },
+  {
+    "index": 53,
+    "kind": "paragraph",
+    "style": "List Bullet",
+    "text": "Figure 21. Team-attribution accuracy from the stratified audit — §5.4"
+  },
+  {
+    "index": 54,
+    "kind": "paragraph",
+    "style": "List Bullet",
+    "text": "Figure 22. Effect of the team-attribution filter — §5.4"
+  },
+  {
+    "index": 55,
+    "kind": "paragraph",
+    "style": "List Bullet",
+    "text": "Figure 23. Effect of quality-weighting by confidence — §5.5"
+  },
+  {
+    "index": 56,
+    "kind": "paragraph",
+    "style": "List Bullet",
+    "text": "Figure 24. Parameter sensitivity (visibility vs confidence floor) — §5.6"
+  },
+  {
+    "index": 57,
+    "kind": "paragraph",
+    "style": "List Bullet",
+    "text": "Figure 25. Sampling-rate bias — §5.6"
+  },
+  {
+    "index": 58,
+    "kind": "paragraph",
+    "style": "List Bullet",
+    "text": "Figure 26. Annotation-free inventory pipeline funnel — §5.7"
+  },
+  {
+    "index": 59,
+    "kind": "paragraph",
+    "style": "List Bullet",
+    "text": "Figure 27. Honest evaluation of the annotation-free student — §5.7"
+  },
+  {
+    "index": 61,
+    "kind": "paragraph",
+    "style": "List Bullet",
+    "text": "Table 1. Detection accuracy under three splitting protocols — §5.3"
+  },
+  {
+    "index": 62,
+    "kind": "paragraph",
+    "style": "List Bullet",
+    "text": "Table 2. RF-DETR validation metrics at the best checkpoint — §5.3.1"
+  },
+  {
+    "index": 146,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Figure 1. High-value frame selection for annotation. From each match video, an eight-step procedure — adaptive sampling, static-overlay masking, shot-type gating, person detection, target-colour filtering, weighted sharpness scoring, de-duplication and export — yields roughly two hundred high-value frames for annotation rather than a random sample."
+  },
+  {
+    "index": 147,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Figure 2 shows representative frames chosen by this procedure, illustrating the sharp, logo-bearing, target-team images that the selector favours over the many uninformative frames it rejects."
+  },
+  {
+    "index": 149,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Figure 2. Examples of high-value frames selected for annotation."
+  },
+  {
+    "index": 153,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Figure 3. Model-assisted (label-assist) annotation workflow. A small manually annotated seed set trains an initial model that pre-labels new frames through Roboflow's Label Assist; the annotator corrects the suggestions, and the corrected frames improve the model in an active-learning loop, giving an order-of-magnitude speed-up over manual drawing."
+  },
+  {
+    "index": 154,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Figure 4 shows the Label Assist feature in use within the Roboflow interface, where the model's suggested boxes are presented for the annotator to accept, adjust or supplement."
+  },
+  {
+    "index": 156,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Figure 4. The Roboflow annotation interface with model-assisted Label Assist."
+  },
+  {
+    "index": 177,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Figure 5. LogoLens overall system architecture. The frontend submits jobs and polls the backend over an HTTP API; the backend runs a pipeline orchestrator and keeps the database, file storage, job queue and model zoo behind interfaces, so each can be replaced by a production equivalent through configuration alone."
+  },
+  {
+    "index": 182,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Figure 6. Processing pipeline for a newly uploaded video. The orchestrator runs eight stages with monotonically increasing progress; the central detection stage expands into a per-sampled-frame sub-pipeline of logo detection, visibility scoring, team attribution and pose-based slot assignment."
+  },
+  {
+    "index": 190,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Figure 7. Official home and away kit reference images used to bootstrap team attribution."
+  },
+  {
+    "index": 200,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Figure 8. The three-tier valuation model. A per-frame detection stream is refined into a monetary estimate, each tier adding a correction: spatial visibility quality, then temporal and recall structure, then broadcast and competitive context."
+  },
+  {
+    "index": 208,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Figure 9. Analytics dashboard: the Overview portfolio view and the per-match view with preview video and per-brand timeline."
+  },
+  {
+    "index": 210,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Figure 10. The rotatable three-dimensional kit model, colouring the eighteen sellable sponsor slots and ranking them by exposure."
+  },
+  {
+    "index": 217,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Figure 11. A frame from the venue digital twin (3D Gaussian Splatting) with real sponsor logos composited onto the scene, used as a source of rare-condition training data with pixel-accurate labels."
+  },
+  {
+    "index": 232,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Figure 12. Per-class instance distribution of the extended clip-aware training set (17 classes, 10,654 boxes). The distribution is heavily skewed, with an imbalance ratio of roughly 9.2 to 1 between the most and least frequent classes, reflecting how often each sponsor position appears in broadcast. Figure generated by the training framework."
+  },
+  {
+    "index": 235,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Figure 13. Bounding-box geometry and label analysis of the training set. Upper-left: instances per class. Lower-left: the box-centre heat map, showing that logos cluster near the frame centre. Lower-right: the box width–height density, showing that logos are small and roughly square. Authentic output of the training framework's label analysis."
+  },
+  {
+    "index": 240,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Table 1. Detection accuracy under three splitting protocols."
+  },
+  {
+    "index": 242,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Figure 14. Detection accuracy under the three splitting protocols. Random-frame splitting inflates mAP@0.5 to 0.862 through leakage; the honest clip-disjoint and extended clip-aware protocols give 0.702 and 0.745. The headline figure is the honest 0.745."
+  },
+  {
+    "index": 245,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Figure 15. Training dynamics of the clip-disjoint run. Left: validation mAP@0.5, precision and recall converge over the schedule. Right: training and validation box-loss decline together without divergence. Plotted from the run's logged metrics."
+  },
+  {
+    "index": 247,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Figure 16. Normalised confusion matrix for the clip-disjoint split. The matrix is almost purely diagonal apart from the bottom background row, indicating that the detector rarely confuses brands and that its errors are misses into the background, concentrated on rare classes. Authentic framework output."
+  },
+  {
+    "index": 249,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Figure 17. Per-class precision–recall curves for the clip-disjoint split. Well-represented sponsors sustain high precision across a broad recall range, while rare, data-starved classes lower the mean, mirroring the class imbalance in Figure 12."
+  },
+  {
+    "index": 251,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Figure 18 shows qualitative detector output on held-out broadcast frames, with each logo localised and labelled by brand and confidence across open play, rucks and kicks. In accordance with the ethical stance of the dissertation and the club's figure policy, the club-identifying broadcast overlays — the channel watermark and the scoreboard — have been redacted, while the sponsor logos and labels, which are the object of study, are retained."
+  },
+  {
+    "index": 253,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Figure 18. Qualitative detection output on held-out frames. Boxes show detected sponsor logos with brand class and confidence, across varied game situations. Club-identifying overlays (broadcast watermark and scoreboard) are redacted per the figure policy; sponsor marks are retained. Authentic model predictions."
+  },
+  {
+    "index": 258,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Table 2. RF-DETR validation metrics at the best checkpoint."
+  },
+  {
+    "index": 260,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Figure 19. RF-DETR per-class Average Precision at the best checkpoint. Well-represented sponsors achieve the highest AP while sparse classes trail, mirroring the class imbalance of Figure 12. Plotted from the model's logged metrics."
+  },
+  {
+    "index": 262,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Figure 20. RF-DETR validation mAP over training. The mAP@0.5 and mAP@[.5:.95] rise quickly and plateau, with the best checkpoint reached early. Plotted from the model's logged metrics."
+  },
+  {
+    "index": 267,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Figure 21. Team-attribution accuracy from the stratified manual audit (three frames across nine matches, 184 observations). Overall accuracy is 91.8%, above the 90% audit threshold, with balanced performance on the target and other subsets."
+  },
+  {
+    "index": 270,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Figure 22. Effect of the team-attribution filter across nine matches. Of 25,153 raw detections, 44% are removed as not belonging to the target team, over a per-match range of 21–78%. Without this filter the value estimate would be roughly doubled in many matches."
+  },
+  {
+    "index": 275,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Figure 23. Effect of quality-weighting by confidence. Low-confidence detections (below 0.4) are 29% of the raw count but contribute only 9.5% of quality-weighted exposure, while high-confidence detections (0.8 and above) carry 64% of exposure. The valuation model discounts uncertain appearances rather than counting them equally."
+  },
+  {
+    "index": 279,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Figure 24. Parameter sensitivity over 13,439 detections. Raising the visibility floor from 0.02 to 0.1 removes up to 98% of quality exposure, whereas raising the confidence floor from 0.25 to 0.6 loses under 5%. The estimate is dominated by the visibility floor, justifying the low 0.02 setting."
+  },
+  {
+    "index": 282,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Figure 25. Sampling-rate bias on a three-minute segment. Sparse two-frames-per-second analytics sampling over-measures total exposure by 63% relative to native fifty-frames-per-second processing, because isolated samples are quantised to half-second blocks and gaps are bridged."
+  },
+  {
+    "index": 286,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Figure 26. The annotation-free inventory pipeline on a single match, shown as a funnel from 2,900 raw tracks to 107 high-purity (~94%) bootstrap labels produced without manual annotation."
+  },
+  {
+    "index": 289,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Figure 27. Honest evaluation of the distilled annotation-free student. Left: correcting a leaky split reduces an apparent 0.92 mAP to a true 0.558. Right: a well-represented class reaches 0.867 on unseen tracks, a genuine learning signal, while a data-starved class fails at 0.248. The binding constraint is data quantity, not the method."
+  }
+]

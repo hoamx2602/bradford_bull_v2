@@ -1,0 +1,61 @@
+{
+  "source": "D:\\bradford_bull_v2\\backend\\data\\uploads\\c775d9975e3047a19eca8268a5825f3f.mp4",
+  "source_name": "M08_white_1080p.mp4",
+  "segments": [
+    [
+      12,
+      20
+    ],
+    [
+      132,
+      140
+    ],
+    [
+      218,
+      238
+    ],
+    [
+      266,
+      290
+    ],
+    [
+      344,
+      354
+    ],
+    [
+      430,
+      440
+    ],
+    [
+      548,
+      558
+    ]
+  ],
+  "fps": 25.0,
+  "size": [
+    1920,
+    1080
+  ],
+  "imgsz": 1280,
+  "confidence_threshold": 0.4,
+  "model": "D:\\bradford_bull_v2\\runs\\yolo26\\matchsplit_896_m\\weights\\best.pt",
+  "description": "Edited highlight reel in chronological order; source timestamps shown. Silent for presentation use. No artificial blur, restoration, generated logos or bounding boxes.",
+  "frames": 2250,
+  "duration": 90.0,
+  "detection_instances": 6639,
+  "confirmed_target_instances": 4574,
+  "uncertain_instances": 1792,
+  "team_audit": "team_audit/audit.json",
+  "team_settings": {
+    "team_person_conf": 0.35,
+    "team_person_imgsz": 960,
+    "team_siglip_every": 5,
+    "team_hysteresis": 1.25,
+    "team_min_votes": 2.0,
+    "team_vote_decay": 0.95,
+    "team_min_vote_margin": 0.2,
+    "team_keep_unknown": false,
+    "team_keep_unassigned": false
+  },
+  "team_status_labels": "BRA = predicted Bradford; ? = uncertain; colour = sponsor"
+}

@@ -1,0 +1,44 @@
+% LogoLens processing pipeline: editable TikZ source.
+\begin{tikzpicture}[node distance=3.5mm]
+  \node[lldata,text width=19mm,minimum height=19mm] (video)
+    {\textbf{Video input}\\\tiny file + metadata};
+  \node[llteal,right=of video,text width=19mm,minimum height=19mm] (sample)
+    {\textbf{Frame sampling}\\\tiny native aspect};
+  \node[llblue,right=of sample,text width=19mm,minimum height=19mm] (detect)
+    {\textbf{Logo detection}\\\tiny detector adapter};
+  \node[llorange,right=of detect,text width=19mm,minimum height=19mm] (records)
+    {\textbf{Detection records}\\\tiny class $\bullet$ score $\bullet$ box $\bullet$ time};
+  \node[llred,right=of records,text width=19mm,minimum height=19mm] (aggregate)
+    {\textbf{Temporal aggregation}\\\tiny segments + visible time};
+  \node[llgreen,right=of aggregate,text width=19mm,minimum height=19mm] (report)
+    {\textbf{Evidence report}\\\tiny traceable outputs};
+
+  \foreach \nodeName/\number in {video/1,sample/2,detect/3,records/4,aggregate/5,report/6}
+    \node[llbadge,above=-1.8mm of \nodeName.north] {\number};
+
+  \draw[llarrow] (video) -- (sample);
+  \draw[llarrow] (sample) -- (detect);
+  \draw[llarrow] (detect) -- (records);
+  \draw[llarrow] (records) -- (aggregate);
+  \draw[llarrow] (aggregate) -- (report);
+
+  \node[llblue,below=14mm of detect,text width=24mm] (adapter)
+    {\textbf{Common adapter}};
+  \node[llorange,right=8mm of adapter,yshift=7mm,text width=30mm] (rfdetr)
+    {\textbf{RF-DETR Small}\\\tiny selected system};
+  \node[llteal,right=8mm of adapter,yshift=-7mm,text width=30mm] (yolo)
+    {\textbf{YOLO26}\\\tiny comparison baseline};
+  \node[llgreen,right=9mm of rfdetr,yshift=-7mm,text width=26mm] (common)
+    {\textbf{Common output}\\\tiny class $\bullet$ score $\bullet$ box};
+
+  \draw[llarrow] (detect.south) -- (adapter.north);
+  \draw[llthinarr] (adapter.east) -- ++(3mm,0) |- (rfdetr.west);
+  \draw[llthinarr] (adapter.east) -- ++(3mm,0) |- (yolo.west);
+  \draw[llthinarr] (rfdetr.east) -- ++(3mm,0) |- (common.west);
+  \draw[llthinarr] (yolo.east) -- ++(3mm,0) |- (common.west);
+
+  \begin{scope}[on background layer]
+    \node[lldashed,fit=(adapter)(rfdetr)(yolo)(common),inner sep=4mm,
+      label={[llsection]above:Inside stage 3 --- interchangeable detector backends}] {};
+  \end{scope}
+\end{tikzpicture}

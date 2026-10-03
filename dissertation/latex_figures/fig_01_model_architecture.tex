@@ -1,0 +1,43 @@
+% Conceptual architecture comparison: editable TikZ source.
+\begin{tikzpicture}[node distance=4mm and 5mm]
+  \node[lldata,text width=18mm,minimum height=18mm] (input)
+    {Broadcast frame\\[-1mm]\scriptsize small sponsor logos};
+
+  \node[llblue,right=10mm of input,yshift=13mm] (yback)
+    {Convolutional\\backbone\\[-1mm]\tiny local features};
+  \node[llteal,right=of yback] (yfuse)
+    {Multi-scale\\feature fusion\\[-1mm]\tiny detail across scales};
+  \node[llblue,right=of yfuse] (yhead)
+    {One-to-one\\detection head\\[-1mm]\tiny end-to-end output};
+
+  \node[llorange,right=10mm of input,yshift=-13mm] (rback)
+    {DINOv2 visual\\backbone\\[-1mm]\tiny pre-trained features};
+  \node[llorange,right=of rback] (rproj)
+    {Projected\\feature maps\\[-1mm]\tiny multi-scale representation};
+  \node[llorange,right=of rproj] (rdec)
+    {Object queries\\+ decoder\\[-1mm]\tiny global set reasoning};
+
+  \node[llgreen,right=10mm of yhead,yshift=-13mm,text width=21mm,minimum height=19mm]
+    (output) {Common output\\[-1mm]\scriptsize class $\bullet$ confidence $\bullet$ box};
+
+  \draw[llarrow] (input.east) -- ++(4mm,0) |- (yback.west);
+  \draw[llarrow] (input.east) -- ++(4mm,0) |- (rback.west);
+  \draw[llarrow] (yback) -- (yfuse);
+  \draw[llarrow] (yfuse) -- (yhead);
+  \draw[llarrow] (rback) -- (rproj);
+  \draw[llarrow] (rproj) -- (rdec);
+  \draw[llarrow] (yhead.east) -- ++(4mm,0) |- (output.west);
+  \draw[llarrow] (rdec.east) -- ++(4mm,0) |- (output.west);
+
+  \begin{scope}[on background layer]
+    \node[draw=LLBlue,fill=LLBlue!2,rounded corners=3pt,
+      fit=(yback)(yfuse)(yhead),inner sep=4mm,
+      label={[llsection,text=LLBlue]above:YOLO26 --- convolutional route}] {};
+    \node[draw=LLOrange,fill=LLOrange!2,rounded corners=3pt,
+      fit=(rback)(rproj)(rdec),inner sep=4mm,
+      label={[llsection,text=LLOrange!80!black]below:RF-DETR --- transformer route}] {};
+  \end{scope}
+
+  \node[llnote,below=8mm of rproj]
+    {Different feature routes; identical prediction schema and held-out scoring protocol};
+\end{tikzpicture}

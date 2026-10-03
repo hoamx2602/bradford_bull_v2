@@ -32,10 +32,16 @@ def iter_sampled_frames(
     try:
         idx = 0
         while True:
-            ok, frame = cap.read()
-            if not ok:
+            # grab() advances the decoder without colour-converting / copying the
+            # frame; only the frames we actually sample are retrieve()d. At 2fps
+            # over a 30fps full match that skips ~93 % of the pixel work, which
+            # is minutes of wall-clock on a 100-minute video.
+            if not cap.grab():
                 break
             if idx % step == 0:
+                ok, frame = cap.retrieve()
+                if not ok:
+                    break
                 t = idx / meta.fps if meta.fps > 0 else 0.0
                 yield round(t, 3), frame
             idx += 1

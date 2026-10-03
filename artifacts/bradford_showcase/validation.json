@@ -1,0 +1,20 @@
+{
+  "logo_showcase_90s": {
+    "decoded_frames": 2250,
+    "fps": 25.0,
+    "size": [
+      1920,
+      1080
+    ],
+    "duration": 90.0
+  },
+  "team_showcase_90s": {
+    "decoded_frames": 2250,
+    "fps": 25.0,
+    "size": [
+      1920,
+      1080
+    ],
+    "duration": 90.0
+  }
+}

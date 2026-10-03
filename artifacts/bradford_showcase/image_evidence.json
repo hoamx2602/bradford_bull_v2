@@ -1,0 +1,197 @@
+[
+  {
+    "file": "images/01_player_occlusion.png",
+    "frame": "images/01_player_occlusion_frame.png",
+    "crop": "images/01_player_occlusion_crop.png",
+    "title": "KLG detected behind another player",
+    "description_vi": "Che b\u1edfi c\u1ea7u th\u1ee7 kh\u00e1c; logo KLG c\u00f2n nh\u00ecn th\u1ea5y m\u1ed9t ph\u1ea7n.",
+    "source_time": 282,
+    "detection": {
+      "box": [
+        658.5903930664062,
+        919.8165283203125,
+        719.9447631835938,
+        990.127197265625
+      ],
+      "conf": 0.5999882817268372,
+      "class": 9,
+      "name": "klg_home",
+      "target": false,
+      "sharpness": 214.17534273245866
+    },
+    "selection": "Visually inspected illustrative model prediction; not independent ground-truth annotation."
+  },
+  {
+    "file": "images/02_foreground_head.png",
+    "frame": "images/02_foreground_head_frame.png",
+    "crop": "images/02_foreground_head_crop.png",
+    "title": "KLG detected behind a foreground head",
+    "description_vi": "\u0110\u1ea7u tr\u1ecdng t\u00e0i \u1edf ti\u1ec1n c\u1ea3nh che m\u1ed9t ph\u1ea7n logo KLG.",
+    "source_time": 282,
+    "detection": {
+      "box": [
+        1468.4974365234375,
+        936.2862548828125,
+        1567.2806396484375,
+        1020.8175659179688
+      ],
+      "conf": 0.787796139717102,
+      "class": 9,
+      "name": "klg_home",
+      "target": true,
+      "sharpness": 336.3008236352393
+    },
+    "selection": "Visually inspected illustrative model prediction; not independent ground-truth annotation."
+  },
+  {
+    "file": "images/03_crossing_arm.png",
+    "frame": "images/03_crossing_arm_frame.png",
+    "crop": "images/03_crossing_arm_crop.png",
+    "title": "MCP detected beneath a crossing arm",
+    "description_vi": "B\u00e0n tay v\u00e0 c\u00e1nh tay che m\u1ed9t ph\u1ea7n logo MCP tr\u00ean l\u01b0ng \u00e1o.",
+    "source_time": 282,
+    "detection": {
+      "box": [
+        668.0067138671875,
+        502.2155456542969,
+        735.3665161132812,
+        557.4419555664062
+      ],
+      "conf": 0.5379595756530762,
+      "class": 10,
+      "name": "mcp_home",
+      "target": false,
+      "sharpness": 457.3522057407547
+    },
+    "selection": "Visually inspected illustrative model prediction; not independent ground-truth annotation."
+  },
+  {
+    "file": "images/04_forearm_occlusion.png",
+    "frame": "images/04_forearm_occlusion_frame.png",
+    "crop": "images/04_forearm_occlusion_crop.png",
+    "title": "ASC Group detected with partial arm occlusion",
+    "description_vi": "C\u1eb3ng tay che logo ASC Group; v\u00ed d\u1ee5 confidence th\u1ea5p, c\u1ea7n ki\u1ec3m tra.",
+    "source_time": 284,
+    "detection": {
+      "box": [
+        464.169921875,
+        823.054931640625,
+        509.40863037109375,
+        854.6259155273438
+      ],
+      "conf": 0.3991239368915558,
+      "class": 1,
+      "name": "asc_group_home",
+      "target": true,
+      "sharpness": 793.7136881591963
+    },
+    "selection": "Visually inspected illustrative model prediction; not independent ground-truth annotation."
+  },
+  {
+    "file": "images/05_blurred_fairway.png",
+    "frame": "images/05_blurred_fairway_frame.png",
+    "crop": "images/05_blurred_fairway_crop.png",
+    "title": "Fairway detected in a blurred frame",
+    "description_vi": "Logo Fairway b\u1ecb m\u1edd trong footage g\u1ed1c; kh\u00f4ng l\u00e0m m\u1edd nh\u00e2n t\u1ea1o.",
+    "source_time": 348,
+    "detection": {
+      "box": [
+        607.9253540039062,
+        517.5904541015625,
+        696.3731689453125,
+        574.826904296875
+      ],
+      "conf": 0.9078059196472168,
+      "class": 8,
+      "name": "fairway_home",
+      "target": true,
+      "sharpness": 122.12655233589592
+    },
+    "selection": "Visually inspected illustrative model prediction; not independent ground-truth annotation."
+  },
+  {
+    "file": "images/06_moving_player_blur.png",
+    "frame": "images/06_moving_player_blur_frame.png",
+    "crop": "images/06_moving_player_blur_crop.png",
+    "title": "ASC Group detected on a moving player",
+    "description_vi": "Logo ASC Group nh\u1ecf v\u00e0 m\u1edd khi c\u1ea7u th\u1ee7 di chuy\u1ec3n.",
+    "source_time": 496,
+    "detection": {
+      "box": [
+        444.325439453125,
+        473.01312255859375,
+        519.0216674804688,
+        524.5227661132812
+      ],
+      "conf": 0.6662782430648804,
+      "class": 1,
+      "name": "asc_group_home",
+      "target": true,
+      "sharpness": 263.81069161433635
+    },
+    "selection": "Visually inspected illustrative model prediction; not independent ground-truth annotation."
+  },
+  {
+    "file": "images/07_fabric_folds.png",
+    "frame": "images/07_fabric_folds_frame.png",
+    "crop": "images/07_fabric_folds_crop.png",
+    "title": "ASC Group detected across fabric folds",
+    "description_vi": "N\u1ebfp g\u1ea5p \u00e1o l\u00e0m bi\u1ebfn d\u1ea1ng logo ASC Group nh\u01b0ng detector v\u1eabn tr\u1ea3 box.",
+    "source_time": 282,
+    "detection": {
+      "box": [
+        359.85748291015625,
+        816.2552490234375,
+        438.8089599609375,
+        886.0958251953125
+      ],
+      "conf": 0.9333990216255188,
+      "class": 1,
+      "name": "asc_group_home",
+      "target": true,
+      "sharpness": 216.6723322073582
+    },
+    "selection": "Visually inspected illustrative model prediction; not independent ground-truth annotation."
+  },
+  {
+    "file": "images/08_oblique_chest.png",
+    "frame": "images/08_oblique_chest_frame.png",
+    "crop": "images/08_oblique_chest_crop.png",
+    "title": "Top Notch detected on a bent torso",
+    "description_vi": "Logo ng\u1ef1c Top Notch nghi\u00eang, bi\u1ebfn d\u1ea1ng theo t\u01b0 th\u1ebf c\u00fai ng\u01b0\u1eddi.",
+    "source_time": 552,
+    "detection": {
+      "box": [
+        821.726318359375,
+        482.7452087402344,
+        950.9388427734375,
+        567.4169921875
+      ],
+      "conf": 0.6483287215232849,
+      "class": 15,
+      "name": "top_notch_home",
+      "target": true,
+      "sharpness": 852.3140089939197
+    },
+    "selection": "Visually inspected illustrative model prediction; not independent ground-truth annotation."
+  },
+  {
+    "file": "images/09_multiple_players.png",
+    "title": "Ten selected detections across Bradford players",
+    "description_vi": "10 detection \u0111\u01b0\u1ee3c ch\u1ecdn \u0111\u1ec3 minh h\u1ecda nhi\u1ec1u logo tr\u00ean nhi\u1ec1u c\u1ea7u th\u1ee7 Bradford; b\u1ecf m\u1ed9t d\u1ef1 \u0111o\u00e1n sai r\u00f5 r\u00e0ng tr\u00ean t\u00ean c\u1ea7u th\u1ee7.",
+    "source_time": 282,
+    "selected_detection_indices": [
+      0,
+      1,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      11
+    ],
+    "all_predictions_source": "scan.json"
+  }
+]

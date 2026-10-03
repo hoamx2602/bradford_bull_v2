@@ -1,0 +1,2612 @@
+[
+  {
+    "index": 2,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "UNIVERSITY OF BRADFORD"
+  },
+  {
+    "index": 3,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "FACULTY OF MANAGEMENT, SCIENCES AND ENGINEERING"
+  },
+  {
+    "index": 5,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "MSc Thesis"
+  },
+  {
+    "index": 7,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "MAI XUAN HOA"
+  },
+  {
+    "index": 9,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "LOGOLENS: A LOW-COST COMPUTER-VISION SYSTEM FOR MEASURING AND VALUING SPONSOR-LOGO EXPOSURE IN SPORTS BROADCASTS"
+  },
+  {
+    "index": 11,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Words: 13,646"
+  },
+  {
+    "index": 13,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "LOGOLENS: A LOW-COST COMPUTER-VISION SYSTEM FOR MEASURING AND VALUING SPONSOR-LOGO EXPOSURE IN SPORTS BROADCASTS"
+  },
+  {
+    "index": 14,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "MAI XUAN HOA"
+  },
+  {
+    "index": 15,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "[Insert student ID]"
+  },
+  {
+    "index": 16,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "A dissertation submitted in partial fulfilment of the requirements for the degree of"
+  },
+  {
+    "index": 17,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "MSc Applied Artificial Intelligence and Data Analytics"
+  },
+  {
+    "index": 18,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Faculty of Engineering and Digital Technologies"
+  },
+  {
+    "index": 19,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "University of Bradford"
+  },
+  {
+    "index": 20,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Supervisor: [Insert supervisor name]"
+  },
+  {
+    "index": 21,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "[Month] 2026"
+  },
+  {
+    "index": 23,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "Declaration"
+  },
+  {
+    "index": 24,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "I declare that this dissertation is my own work and has not been submitted, in whole or in part, for any other degree or qualification. All sources of information have been acknowledged, and all external material has been cited in accordance with the University of Bradford's academic-integrity regulations. The system described in this dissertation was designed and implemented by the author. Where third-party open-source models and libraries have been used, they are identified in the text. Any figures reproduced from software tools are attributed in their captions."
+  },
+  {
+    "index": 25,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Signed: ______________________ Date: ______________"
+  },
+  {
+    "index": 27,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "Abstract"
+  },
+  {
+    "index": 28,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Sports sponsorship is a multi-billion-pound advertising channel whose value depends on how prominently and for how long a sponsor's logo is visible during a broadcast. Measuring this exposure and converting it into a monetary estimate has traditionally required either painstaking manual review or expensive commercial services, both of which are out of reach for smaller, mid-tier clubs. This dissertation designs, implements and evaluates LogoLens, an end-to-end computer-vision system that automatically measures sponsor-logo exposure in rugby-league broadcasts and converts it into an Equivalent Media Value (EMV) estimate, using only consumer-grade hardware. The system couples a fine-tuned YOLO detector with a reference-based team-attribution filter, pose-based assignment of logos to sellable kit positions, and a three-tier visibility-to-value model, all orchestrated behind a web dashboard."
+  },
+  {
+    "index": 29,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "The work follows a design-science methodology combined with an experimental evaluation on real broadcast footage from Bradford Bulls. The evaluation is deliberately conservative. Under a leakage-controlled, clip-disjoint split the detector achieves a mean Average Precision (mAP@0.5) of 0.745, whereas a naive random-frame split inflates this to 0.862; the honest figure is reported as the headline result. A stratified manual audit finds that team attribution is correct in 91.8% of 184 sampled cases, and the attribution filter removes 44% of detections that would otherwise inflate the value estimate. Characterising the exposure signal shows that 63% of frames carry two or more sponsor logos, that each covers a median of 0.145% of the screen at a median height of 46 pixels, and, from a second audit of 153 logos, that 30.7% are partly or heavily obscured — more often when the mark is rendered large, since close-up framing coincides with contact. A sensitivity analysis quantifies how the value estimate responds to key thresholds, and a controlled experiment shows that sparse frame sampling over-measures exposure by 63% relative to native-rate processing, a bias disclosed rather than hidden. A data-efficiency analysis across the seventeen sponsor classes relates annotation effort to accuracy, finding that per-class accuracy rises by 0.169 AP for each tenfold increase in annotated instances and that classes above roughly 500 instances outperform those below by 0.084 AP, which yields a concrete labelling budget for onboarding a new sponsor."
+  },
+  {
+    "index": 30,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "The dissertation contributes a reproducible, low-cost pipeline for sponsorship measurement, an honest evaluation methodology in a domain lacking public ground truth, and a discussion of how automated valuation relates to the wider debate on artificial intelligence in advertising. The findings support the feasibility of democratising a measurement capability previously confined to well-resourced organisations, while being candid about the system's limitations."
+  },
+  {
+    "index": 31,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Keywords: computer vision, object detection, sponsorship measurement, media valuation, data efficiency, sports analytics."
+  },
+  {
+    "index": 33,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "Acknowledgements"
+  },
+  {
+    "index": 34,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "I thank my supervisor for guidance throughout this project and, in particular, for encouraging me to situate the technical work within the broader discussion of artificial intelligence in advertising. I am grateful to Bradford Bulls and the associated stakeholders for the business context and the official kit materials that made the case study concrete. I acknowledge the open-source community — notably the developers of Ultralytics, Segment Anything, and DINOv2 — whose tools made a project of this scope achievable by a single student. Finally, I thank my family for their support."
+  },
+  {
+    "index": 36,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "Table of Contents"
+  },
+  {
+    "index": 37,
+    "kind": "paragraph",
+    "style": "toc 2",
+    "text": "Declaration 3"
+  },
+  {
+    "index": 38,
+    "kind": "paragraph",
+    "style": "toc 2",
+    "text": "Abstract 4"
+  },
+  {
+    "index": 39,
+    "kind": "paragraph",
+    "style": "toc 2",
+    "text": "Acknowledgements 5"
+  },
+  {
+    "index": 40,
+    "kind": "paragraph",
+    "style": "toc 2",
+    "text": "Table of Contents 6"
+  },
+  {
+    "index": 41,
+    "kind": "paragraph",
+    "style": "toc 2",
+    "text": "List of Abbreviations 9"
+  },
+  {
+    "index": 42,
+    "kind": "paragraph",
+    "style": "toc 2",
+    "text": "List of Figures 10"
+  },
+  {
+    "index": 43,
+    "kind": "paragraph",
+    "style": "toc 2",
+    "text": "List of Tables 11"
+  },
+  {
+    "index": 44,
+    "kind": "paragraph",
+    "style": "toc 1",
+    "text": "Chapter 1. Introduction 13"
+  },
+  {
+    "index": 45,
+    "kind": "paragraph",
+    "style": "toc 2",
+    "text": "1.1 Background and motivation 13"
+  },
+  {
+    "index": 46,
+    "kind": "paragraph",
+    "style": "toc 2",
+    "text": "1.2 Problem statement 14"
+  },
+  {
+    "index": 47,
+    "kind": "paragraph",
+    "style": "toc 2",
+    "text": "1.3 Aim and objectives 14"
+  },
+  {
+    "index": 48,
+    "kind": "paragraph",
+    "style": "toc 2",
+    "text": "1.4 Research questions 14"
+  },
+  {
+    "index": 49,
+    "kind": "paragraph",
+    "style": "toc 2",
+    "text": "1.5 Scope and delimitations 16"
+  },
+  {
+    "index": 50,
+    "kind": "paragraph",
+    "style": "toc 2",
+    "text": "1.6 Contributions 16"
+  },
+  {
+    "index": 51,
+    "kind": "paragraph",
+    "style": "toc 1",
+    "text": "Chapter 2. Literature Review 17"
+  },
+  {
+    "index": 52,
+    "kind": "paragraph",
+    "style": "toc 2",
+    "text": "2.1 Object detection and its evaluation 17"
+  },
+  {
+    "index": 53,
+    "kind": "paragraph",
+    "style": "toc 2",
+    "text": "2.2 Logo detection and recognition 17"
+  },
+  {
+    "index": 54,
+    "kind": "paragraph",
+    "style": "toc 2",
+    "text": "2.3 Multi-object tracking and team attribution in sports video 18"
+  },
+  {
+    "index": 55,
+    "kind": "paragraph",
+    "style": "toc 2",
+    "text": "2.4 Measuring sponsorship exposure and media value 18"
+  },
+  {
+    "index": 56,
+    "kind": "paragraph",
+    "style": "toc 2",
+    "text": "2.5 Reducing annotation cost: weak supervision, foundation models and synthetic data 20"
+  },
+  {
+    "index": 57,
+    "kind": "paragraph",
+    "style": "toc 2",
+    "text": "2.6 Artificial intelligence in advertising 20"
+  },
+  {
+    "index": 58,
+    "kind": "paragraph",
+    "style": "toc 2",
+    "text": "2.7 Research gap and positioning 20"
+  },
+  {
+    "index": 59,
+    "kind": "paragraph",
+    "style": "toc 1",
+    "text": "Chapter 3. Research Methodology 22"
+  },
+  {
+    "index": 60,
+    "kind": "paragraph",
+    "style": "toc 2",
+    "text": "3.1 Research design and philosophy 22"
+  },
+  {
+    "index": 61,
+    "kind": "paragraph",
+    "style": "toc 2",
+    "text": "3.2 Development approach and tools 22"
+  },
+  {
+    "index": 62,
+    "kind": "paragraph",
+    "style": "toc 2",
+    "text": "3.3 Data collection and preparation 22"
+  },
+  {
+    "index": 63,
+    "kind": "paragraph",
+    "style": "toc 3",
+    "text": "3.3.1 High-value frame selection for annotation 23"
+  },
+  {
+    "index": 64,
+    "kind": "paragraph",
+    "style": "toc 3",
+    "text": "3.3.2 Annotation with Roboflow and model-assisted labelling 24"
+  },
+  {
+    "index": 65,
+    "kind": "paragraph",
+    "style": "toc 2",
+    "text": "3.4 Evaluation methods and metrics 26"
+  },
+  {
+    "index": 66,
+    "kind": "paragraph",
+    "style": "toc 2",
+    "text": "3.5 Ethical, legal and professional considerations 28"
+  },
+  {
+    "index": 67,
+    "kind": "paragraph",
+    "style": "toc 2",
+    "text": "3.6 Reproducibility 28"
+  },
+  {
+    "index": 68,
+    "kind": "paragraph",
+    "style": "toc 1",
+    "text": "Chapter 4. System Design and Implementation 29"
+  },
+  {
+    "index": 69,
+    "kind": "paragraph",
+    "style": "toc 2",
+    "text": "4.1 Architecture overview 29"
+  },
+  {
+    "index": 70,
+    "kind": "paragraph",
+    "style": "toc 2",
+    "text": "4.2 The processing pipeline 29"
+  },
+  {
+    "index": 71,
+    "kind": "paragraph",
+    "style": "toc 2",
+    "text": "4.3 Logo detection 30"
+  },
+  {
+    "index": 72,
+    "kind": "paragraph",
+    "style": "toc 2",
+    "text": "4.4 Team attribution 31"
+  },
+  {
+    "index": 73,
+    "kind": "paragraph",
+    "style": "toc 2",
+    "text": "4.5 Position assignment 32"
+  },
+  {
+    "index": 74,
+    "kind": "paragraph",
+    "style": "toc 2",
+    "text": "4.6 The three-tier valuation model 32"
+  },
+  {
+    "index": 75,
+    "kind": "paragraph",
+    "style": "toc 2",
+    "text": "4.7 The analytics dashboard 33"
+  },
+  {
+    "index": 76,
+    "kind": "paragraph",
+    "style": "toc 2",
+    "text": "4.8 Output data model and interface 36"
+  },
+  {
+    "index": 77,
+    "kind": "paragraph",
+    "style": "toc 2",
+    "text": "4.9 Implementation constraints 37"
+  },
+  {
+    "index": 78,
+    "kind": "paragraph",
+    "style": "toc 1",
+    "text": "Chapter 5. Experiments and Results 38"
+  },
+  {
+    "index": 79,
+    "kind": "paragraph",
+    "style": "toc 2",
+    "text": "5.1 Experimental setup 38"
+  },
+  {
+    "index": 80,
+    "kind": "paragraph",
+    "style": "toc 2",
+    "text": "5.2 Dataset characterisation 38"
+  },
+  {
+    "index": 81,
+    "kind": "paragraph",
+    "style": "toc 3",
+    "text": "5.2.1 Multi-logo frames, screen coverage and rendered resolution (RQ2) 39"
+  },
+  {
+    "index": 82,
+    "kind": "paragraph",
+    "style": "toc 2",
+    "text": "5.3 Detection accuracy and the effect of leakage (RQ1) 41"
+  },
+  {
+    "index": 83,
+    "kind": "paragraph",
+    "style": "toc 3",
+    "text": "5.3.1 Alternative architecture benchmark: RF-DETR 47"
+  },
+  {
+    "index": 84,
+    "kind": "paragraph",
+    "style": "toc 2",
+    "text": "5.4 Team attribution (RQ1) 49"
+  },
+  {
+    "index": 85,
+    "kind": "paragraph",
+    "style": "toc 2",
+    "text": "5.5 Valuation plausibility and quality-weighting (RQ3) 52"
+  },
+  {
+    "index": 86,
+    "kind": "paragraph",
+    "style": "toc 2",
+    "text": "5.6 Parameter sensitivity and sampling bias (RQ3) 52"
+  },
+  {
+    "index": 87,
+    "kind": "paragraph",
+    "style": "toc 2",
+    "text": "5.7 Annotation effort and per-class accuracy (RQ4) 54"
+  },
+  {
+    "index": 88,
+    "kind": "paragraph",
+    "style": "toc 2",
+    "text": "5.8 Occlusion (RQ2) 56"
+  },
+  {
+    "index": 89,
+    "kind": "paragraph",
+    "style": "toc 2",
+    "text": "5.9 Throughput 58"
+  },
+  {
+    "index": 90,
+    "kind": "paragraph",
+    "style": "toc 2",
+    "text": "5.10 Summary of results 58"
+  },
+  {
+    "index": 91,
+    "kind": "paragraph",
+    "style": "toc 1",
+    "text": "Chapter 6. Discussion 59"
+  },
+  {
+    "index": 92,
+    "kind": "paragraph",
+    "style": "toc 2",
+    "text": "6.1 Interpretation of the principal findings 59"
+  },
+  {
+    "index": 93,
+    "kind": "paragraph",
+    "style": "toc 2",
+    "text": "6.2 Relation to prior work 60"
+  },
+  {
+    "index": 94,
+    "kind": "paragraph",
+    "style": "toc 2",
+    "text": "6.3 Automated valuation in the context of AI in advertising 60"
+  },
+  {
+    "index": 95,
+    "kind": "paragraph",
+    "style": "toc 2",
+    "text": "6.4 Threats to validity 60"
+  },
+  {
+    "index": 96,
+    "kind": "paragraph",
+    "style": "toc 2",
+    "text": "6.5 Practical and ethical implications 61"
+  },
+  {
+    "index": 97,
+    "kind": "paragraph",
+    "style": "toc 1",
+    "text": "Chapter 7. Conclusion and Future Work 63"
+  },
+  {
+    "index": 98,
+    "kind": "paragraph",
+    "style": "toc 2",
+    "text": "7.1 Conclusion 63"
+  },
+  {
+    "index": 99,
+    "kind": "paragraph",
+    "style": "toc 2",
+    "text": "7.2 Future work 63"
+  },
+  {
+    "index": 100,
+    "kind": "paragraph",
+    "style": "toc 3",
+    "text": "Reducing the annotation requirement 64"
+  },
+  {
+    "index": 101,
+    "kind": "paragraph",
+    "style": "toc 1",
+    "text": "References 66"
+  },
+  {
+    "index": 102,
+    "kind": "paragraph",
+    "style": "toc 1",
+    "text": "Appendices 69"
+  },
+  {
+    "index": 103,
+    "kind": "paragraph",
+    "style": "toc 2",
+    "text": "Appendix A — Key system configuration 69"
+  },
+  {
+    "index": 104,
+    "kind": "paragraph",
+    "style": "toc 2",
+    "text": "Appendix B — Summary of experimental results 69"
+  },
+  {
+    "index": 105,
+    "kind": "paragraph",
+    "style": "toc 2",
+    "text": "Appendix C — Class distribution and per-class accuracy 71"
+  },
+  {
+    "index": 106,
+    "kind": "paragraph",
+    "style": "toc 2",
+    "text": "Appendix D — Note on assumptions and transparency 72"
+  },
+  {
+    "index": 109,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "List of Abbreviations"
+  },
+  {
+    "index": 110,
+    "kind": "table",
+    "style": "Table",
+    "text": "Abbreviation | Meaning\nAP / mAP | Average Precision / mean Average Precision\nAPI | Application Programming Interface\nBoT-SORT | Robust multi-object tracker (Bag-of-Tricks SORT)\nCI | Confidence Interval\nCPM | Cost Per Mille (cost per thousand impressions)\nDETR | Detection Transformer (object-detection family)\nEMV | Equivalent Media Value\nFPS | Frames Per Second\nGPU | Graphics Processing Unit\nIoU | Intersection over Union\nOBB | Oriented Bounding Box\nOCR | Optical Character Recognition\nP / R | Precision / Recall\nRQ | Research Question\nSMV | Sponsorship Media Value\nYOLO | You Only Look Once (object-detection family)"
+  },
+  {
+    "index": 113,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "List of Figures"
+  },
+  {
+    "index": 114,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "All figures are generated from the project's own data, tools, running system or annotation platform. Where a figure shows broadcast footage, club-identifying overlays and any caption naming an individual are blurred, in line with the position set out in Section 3.5."
+  },
+  {
+    "index": 115,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "• Figure 1. High-value frame selection for annotation — §3.3.1"
+  },
+  {
+    "index": 116,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "• Figure 2. Examples of high-value selected frames — §3.3.1"
+  },
+  {
+    "index": 117,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "• Figure 3. Model-assisted (label-assist) annotation workflow — §3.3.2"
+  },
+  {
+    "index": 118,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "• Figure 4. Roboflow annotation interface with Label Assist — §3.3.2"
+  },
+  {
+    "index": 119,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "• Figure 5. Overall system architecture — §4.1"
+  },
+  {
+    "index": 120,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "• Figure 6. Processing pipeline for a newly uploaded video — §4.2"
+  },
+  {
+    "index": 121,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "• Figure 7. Official home and away kit references — §4.4"
+  },
+  {
+    "index": 122,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "• Figure 8. The three-tier valuation model — §4.6"
+  },
+  {
+    "index": 123,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "• Figure 9. Dashboard: the Overview portfolio view — §4.7"
+  },
+  {
+    "index": 124,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "• Figure 10. Dashboard: the per-match view — §4.7"
+  },
+  {
+    "index": 125,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "• Figure 11. Dashboard: the three-dimensional kit-slot model — §4.7"
+  },
+  {
+    "index": 126,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "• Figure 12. Per-class instance distribution of the training set — §5.2"
+  },
+  {
+    "index": 127,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "• Figure 13. Bounding-box geometry and label analysis — §5.2"
+  },
+  {
+    "index": 128,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "• Figure 14. Logos per frame, screen coverage and rendered resolution — §5.2.1"
+  },
+  {
+    "index": 129,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "• Figure 15. Detection accuracy under three splitting protocols — §5.3"
+  },
+  {
+    "index": 130,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "• Figure 16. Training dynamics of the clip-disjoint run — §5.3"
+  },
+  {
+    "index": 131,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "• Figure 17. Normalised confusion matrix (clip-disjoint split) — §5.3"
+  },
+  {
+    "index": 132,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "• Figure 18. Per-class precision–recall curves — §5.3"
+  },
+  {
+    "index": 133,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "• Figure 19. Detection output on a held-out frame: nine marks, six brands — §5.3"
+  },
+  {
+    "index": 134,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "• Figure 20. Detection output on a held-out frame: open play — §5.3"
+  },
+  {
+    "index": 135,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "• Figure 21. Detection output on a held-out frame: confidence gradient — §5.3"
+  },
+  {
+    "index": 136,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "• Figure 22. RF-DETR per-class Average Precision — §5.3.1"
+  },
+  {
+    "index": 137,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "• Figure 23. RF-DETR validation mAP over training — §5.3.1"
+  },
+  {
+    "index": 138,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "• Figure 24. The team-attribution stage on one frame — §5.4"
+  },
+  {
+    "index": 139,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "• Figure 25. Team-attribution accuracy from the stratified audit — §5.4"
+  },
+  {
+    "index": 140,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "• Figure 26. Effect of the team-attribution filter — §5.4"
+  },
+  {
+    "index": 141,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "• Figure 27. Effect of quality-weighting by confidence — §5.5"
+  },
+  {
+    "index": 142,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "• Figure 28. Parameter sensitivity (visibility vs confidence floor) — §5.6"
+  },
+  {
+    "index": 143,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "• Figure 29. Sampling-rate bias — §5.6"
+  },
+  {
+    "index": 144,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "• Figure 30. Annotation effort against per-class accuracy — §5.7"
+  },
+  {
+    "index": 145,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "• Figure 31. Occlusion by mark size, and against per-class accuracy — §5.8"
+  },
+  {
+    "index": 146,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "List of Tables"
+  },
+  {
+    "index": 147,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "• Table 1. Specified activities and outputs, and where each is addressed — §1.4"
+  },
+  {
+    "index": 148,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "• Table 2. Detection accuracy under three splitting protocols — §5.3"
+  },
+  {
+    "index": 149,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "• Table 3. RF-DETR validation metrics at the best checkpoint — §5.3.1"
+  },
+  {
+    "index": 150,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "• Table 4. Data efficiency across the seventeen sponsor classes — §5.7"
+  },
+  {
+    "index": 151,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "• Table 5. Occlusion audit summary — §5.8"
+  },
+  {
+    "index": 152,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "• Table A.1. Key system configuration — Appendix A"
+  },
+  {
+    "index": 153,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "• Table B.1. Summary of experimental results — Appendix B"
+  },
+  {
+    "index": 154,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "• Table C.1. Class distribution and per-class accuracy — Appendix C"
+  },
+  {
+    "index": 157,
+    "kind": "paragraph",
+    "style": "Heading 1",
+    "text": "Chapter 1. Introduction"
+  },
+  {
+    "index": 158,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "1.1 Background and motivation"
+  },
+  {
+    "index": 159,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Commercial sponsorship is one of the principal ways professional sport is financed. Brands pay for their logos to appear on players' kit, on perimeter boards and on other surfaces visible during a televised match. Unlike a conventional advertisement, which has a fixed duration and a published rate, the value a sponsorship delivers is implicit: it is distributed across thousands of fleeting appearances that vary in size, position, sharpness and duration with the camera work and the run of play. The question a sponsor wants answered is therefore deceptively simple: how much was my logo seen, how clearly, and what is that worth?"
+  },
+  {
+    "index": 160,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "The industry answers using Sponsorship Media Value (SMV) and Equivalent Media Value (EMV), which express the visibility a sponsor received as the cost of buying equivalent advertising attention through paid media (Nielsen Sports, 2019). Producing such an estimate at scale means measuring, for every brand, the total quality-weighted time its logo was on screen. Historically analysts timed appearances from recordings; more recently this has been automated and sold as a service. Both routes are costly — manual review is slow and inconsistent, and commercial subscriptions are priced for elite leagues — so mid-tier organisations, the majority of professional clubs, are effectively excluded and cannot demonstrate sponsorship value with objective evidence."
+  },
+  {
+    "index": 161,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "The stakes are not trivial. Kit and perimeter sponsorship is a primary revenue stream for clubs outside the top tier, where broadcast and matchday income are modest, and evidencing delivered value is often the difference between renewing a local sponsor and losing one. Yet it is exactly these clubs that cannot justify commercial analytics, so the organisations with the greatest relative need for measurement have the least access to it. This dissertation is motivated by that mismatch."
+  },
+  {
+    "index": 162,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "The exclusion is not merely budgetary; it reflects a structural property of the underlying vision problem. Sponsor logos are small, deformable marks on moving fabric, frequently occluded during play, and so hard to detect reliably. The same sponsor often appears on both teams' kit, on perimeter boards and in broadcast graphics, so a correctly detected logo may still be attributed to the party who did not pay for it, inflating the estimate. And each competition and season introduces a different sponsor set, so a closed-set detector must be re-annotated whenever the roster changes, with the annotation cost growing at every deployment. Together these make a general, low-cost measurement system genuinely hard to build rather than a routine engineering exercise."
+  },
+  {
+    "index": 163,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "The wider context is the rapid adoption of AI in advertising. Much of that discussion — the recent call for research on AI and the future of advertising creativity (Journal of Advertising Research, 2025), for instance — concentrates on generative systems that produce content. This dissertation addresses the complementary and less examined side of the same trend: using AI not to create advertising but to measure and value it. The framing is motivation, revisited in the discussion; it is not claimed as a contribution to advertising theory."
+  },
+  {
+    "index": 164,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "1.2 Problem statement"
+  },
+  {
+    "index": 165,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "The problem is the design and honest evaluation of an automated system that measures the on-screen exposure of sponsor logos on players and converts it into a defensible monetary estimate, under three constraints that distinguish it from commercial solutions: it must attribute exposure only to the paying party, run on affordable hardware, and be reproducible and transparent enough to be audited. A subsidiary problem is what the recurring cost of manual annotation — the main barrier to scaling across competitions — actually amounts to."
+  },
+  {
+    "index": 166,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "1.3 Aim and objectives"
+  },
+  {
+    "index": 167,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "The aim of the dissertation is to design, implement and critically evaluate a low-cost, reproducible computer-vision system that measures and values sponsor-logo exposure in sports broadcasts, using Bradford Bulls rugby league as a case study."
+  },
+  {
+    "index": 168,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "The aim is pursued through the following objectives:"
+  },
+  {
+    "index": 169,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "1. To review the literature in logo detection, tracking, team attribution, sponsorship-value measurement and weakly-supervised learning, and identify the gap the system addresses."
+  },
+  {
+    "index": 170,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "2. To design a modular pipeline that detects sponsor logos, attributes each to the correct team, assigns it to a sellable kit position and aggregates exposure into a media-value estimate."
+  },
+  {
+    "index": 171,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "3. To implement it as a working system with a processing backend and analytics frontend, on open-source models and consumer hardware."
+  },
+  {
+    "index": 172,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "4. To characterise the exposure signal empirically — logos per frame, share of screen, rendered resolution, frequency of occlusion — and to evaluate the system on real footage under leakage-controlled protocols and human audits, quantifying its sensitivity to key parameters."
+  },
+  {
+    "index": 173,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "5. To quantify how annotated data per sponsor class affects the accuracy achieved on that class, and derive a practical labelling budget for adding a new sponsor."
+  },
+  {
+    "index": 174,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "6. To discuss the results against the wider debate on AI in advertising, and identify limitations and future work."
+  },
+  {
+    "index": 175,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "1.4 Research questions"
+  },
+  {
+    "index": 176,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "The evaluation is organised around five research questions, following the order in which a measurement is built — detect, characterise, convert into a number — then asking what the whole costs to extend and how it sits in its commercial context."
+  },
+  {
+    "index": 177,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "• RQ1. What accuracy can a detector trained on consumer hardware achieve on sponsor logos in real broadcast footage, how far does that figure depend on the evaluation protocol, and how reliably can each detection be attributed to the correct team?"
+  },
+  {
+    "index": 178,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "• RQ2. What are the measurable properties of sponsor-logo exposure in broadcast footage — how many logos appear at once, what share of the screen they occupy, at what resolution they are rendered, and how often they are obscured — and what do those properties imply for the measurement?"
+  },
+  {
+    "index": 179,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "• RQ3. How can a stream of per-frame detections be combined into a logo visibility score and a duration-weighted media-value estimate in a principled way, and how sensitive is that estimate to the model's key parameters?"
+  },
+  {
+    "index": 180,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "• RQ4. How does the quantity of annotated data available for a sponsor class affect the detection accuracy achieved on that class, and what labelling budget does a new sponsor therefore require?"
+  },
+  {
+    "index": 181,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "• RQ5. How does automated exposure measurement relate to the broader use of AI in advertising, and what are the practical implications of making such measurement affordable?"
+  },
+  {
+    "index": 182,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "The questions were framed to cover the project's specified activities and outputs, and Table 1 records where each is addressed, so that the correspondence can be checked directly rather than inferred."
+  },
+  {
+    "index": 183,
+    "kind": "table",
+    "style": "Table",
+    "text": "Specified activity | Research question | Where addressed\nTrain and evaluate logo detection models | RQ1 | §4.3, §5.3, §5.3.1\nDetect multiple logos simultaneously | RQ2 | §4.2, §5.2.1\nAnalyse logo size and screen coverage | RQ2 | §5.2, §5.2.1\nMeasure occlusion levels | RQ2 | §3.4, §5.8\nAssess image quality and readability | RQ2 | §5.2.1\nMeasure visibility duration | RQ3 | §4.6, §5.6\nDevelop a Logo Visibility Score | RQ3 | §4.6, §5.5\nOutput:  logo detection engine | RQ1 | §4.1–§4.3\nOutput:  visibility scoring framework | RQ3 | §4.6\nOutput:  performance evaluation reports | RQ1, RQ3 | Chapter 5, §4.7"
+  },
+  {
+    "index": 185,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Table 1. Specified activities and outputs, and where each is addressed."
+  },
+  {
+    "index": 186,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "1.5 Scope and delimitations"
+  },
+  {
+    "index": 187,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "The dissertation focuses on sponsor logos carried on players' kit (jersey sponsorship) in rugby league, with Bradford Bulls as the primary case. Perimeter advertising boards and broadcast graphics are handled by exclusion rather than being valued in their own right. EMV is treated as an industry-standard proxy for advertising attention, not as an actual transaction price; the dissertation does not attempt to model sponsorship revenue econometrically. No identification of individual players or spectators is performed, for reasons discussed in the methodology. All quantitative results are obtained at the scale of a single-student project — one sport, one primary club, and a modest number of matches — so claims about generality across sports and clubs are treated as design intentions to be tested rather than as demonstrated outcomes."
+  },
+  {
+    "index": 188,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "1.6 Contributions"
+  },
+  {
+    "index": 189,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "The dissertation makes the following contributions:"
+  },
+  {
+    "index": 190,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "1. A reproducible, low-cost sponsorship-measurement system that couples logo detection, reference-based team attribution, pose-based position assignment and a three-tier valuation model, and that runs at approximately real time on consumer hardware."
+  },
+  {
+    "index": 191,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "2. An honest evaluation methodology for a domain that lacks public ground truth, combining leakage-controlled detection protocols, a stratified human audit of attribution, a parameter-sensitivity analysis, and the explicit measurement and disclosure of a sampling-rate bias."
+  },
+  {
+    "index": 192,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "3. An empirical characterisation of the exposure signal itself — how many marks share a frame, how little of the screen each occupies, at what resolution each is rendered and how often each is obscured — measured across the dataset and, for occlusion, by a purpose-built audit. These properties are usually assumed rather than reported, and two of them work against the valuation model in ways it does not absorb."
+  },
+  {
+    "index": 193,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "4. A measured data-efficiency curve for sponsor-logo detection, relating annotation effort per sponsor to the accuracy obtained, which converts an abstract complaint about annotation cost into a stated labelling budget and identifies where that budget stops buying accuracy."
+  },
+  {
+    "index": 195,
+    "kind": "paragraph",
+    "style": "Heading 1",
+    "text": "Chapter 2. Literature Review"
+  },
+  {
+    "index": 196,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "2.1 Object detection and its evaluation"
+  },
+  {
+    "index": 197,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Two detector families are relevant. The single-stage YOLO family, introduced by Redmon et al. (2016) and maintained through the open-source Ultralytics implementations (Jocher et al., 2023), frames detection as a single regression from pixels to boxes and class probabilities, prioritising inference speed while steadily improving accuracy — attractive for video on modest hardware. The transformer-based DETR line removes hand-designed components such as non-maximum suppression at the cost of higher computational demand. For a system processing long broadcasts on a single consumer GPU the trade-off favours YOLO, and a recent YOLO variant is adopted here."
+  },
+  {
+    "index": 198,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Performance is conventionally reported as Average Precision at a given IoU threshold and its mean over classes, mAP (Everingham et al., 2010; Lin et al., 2014). A recurring pitfall, acute for video, is data leakage: because consecutive frames are highly correlated, a random frame-level split puts near-duplicates on both sides and produces optimistic scores that do not reflect performance on unseen footage. The importance of clip-disjoint splitting is well established in sports video (Deliège et al., 2021) and is treated as a first-class concern in Chapter 3."
+  },
+  {
+    "index": 199,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "2.2 Logo detection and recognition"
+  },
+  {
+    "index": 200,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Logos differ from generic objects: they are small relative to the frame, appear against cluttered backgrounds, deform on fabric and belong to a large open-ended class set. Early work relied on curated datasets such as FlickrLogos-32 (Romberg et al., 2011); Su et al. (2018) introduced the OpenLogo benchmark and drew attention to two persistent obstacles, the scarcity of annotated examples for most brands and the open-set nature of the task, in which a deployed system inevitably meets brands it was never trained on."
+  },
+  {
+    "index": 201,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Two design responses appear. The conventional closed-set detector is fine-tuned on a fixed set of brand classes, achieving high accuracy within that set but unable to recognise a new brand without re-annotation and retraining. Open-set logo retrieval instead matches detected regions against a gallery of reference exemplars, so new brands are added by inserting exemplars; retrieval approaches fusing visual features with text read from the logo scale to large brand sets. The present system uses a closed-set detector, justified because a club's roster is small and stable within a season. That makes the cost of admitting a new brand explicit rather than eliminating it, and Section 5.7 measures what that cost actually is; the retrieval alternative, which trades annotation cost for gallery maintenance, is returned to in the future work."
+  },
+  {
+    "index": 202,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Sponsor logos are also, in the technical sense, small objects — a recognised weak point of general detectors, since the features available for a target a few pixels across are limited and easily lost through successive downsampling. The standard mitigations of higher input resolution, multi-scale aggregation and input tiling trade computation for the ability to resolve small marks, and the choices made in Chapter 4 follow directly from this. The prevalence of small logos also affects evaluation: a fixed pixel-area threshold reasonable for everyday objects would discard most genuine sponsor logos, which is why the visibility model uses a deliberately low floor, justified empirically in Chapter 5."
+  },
+  {
+    "index": 203,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "From the standpoint of valuation, a limitation of this literature is that it treats detection and recognition as ends in themselves. It rarely addresses attribution — which party a detected logo belongs to — even though a correctly detected logo on the wrong shirt is a costly error. Attribution is therefore treated as a distinct sub-problem here, and is reviewed next."
+  },
+  {
+    "index": 204,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "2.3 Multi-object tracking and team attribution in sports video"
+  },
+  {
+    "index": 205,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Attributing a logo to the correct team means knowing which player wears it and which team that player belongs to, connecting this work to the literature on player tracking and team identification. Tracking-by-detection is standard: a detector locates people per frame and a tracker associates them into consistent tracks. ByteTrack (Zhang et al., 2022) improved association by retaining low-confidence detections during matching, and BoT-SORT (Aharon et al., 2022) added camera-motion compensation and appearance features — both relevant to fast, camera-panned rugby-league footage."
+  },
+  {
+    "index": 206,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Team identification is complicated because opponents' kits change from match to match, making a per-team trained classifier impractical. Leading SoccerNet Game-State-Reconstruction solutions (Deliège et al., 2021) instead cluster players by colour and appearance and assign labels by majority vote over each track, adapting per match without additional training; colour histograms remain strong when kits differ in luminance, while learned embeddings from CLIP-style encoders (Radford et al., 2021) and the sigmoid-loss variant SigLIP (Zhai et al., 2023) help when colours are similar. That reference-based philosophy is adopted directly in Chapter 4. What this literature does not consider is the financial consequence of an attribution error, which motivates the revenue-safe policy introduced here."
+  },
+  {
+    "index": 207,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "2.4 Measuring sponsorship exposure and media value"
+  },
+  {
+    "index": 208,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "The rationale for measuring exposure quality rather than counting appearances rests on the sponsorship-effectiveness literature, which treats sponsorship as a distinct channel whose effects are indirect and contextual (Cornwell, 2019; Cornwell & Kwon, 2020). Experimental work on how viewers process on-screen sponsorship signals repeatedly finds that recognition and recall depend on the size, duration, centrality, motion and contrast of the stimulus (Breuer & Rumpf, 2012; Rumpf et al., 2020) — the theoretical justification for weighting each detection by a visibility score rather than treating all appearances equally."
+  },
+  {
+    "index": 209,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Translating weighted exposure into money is done through EMV/SMV, which expresses exposure as the equivalent cost of buying comparable paid-media attention, typically parameterised by a cost-per-mille (CPM) rate and an audience size (Nielsen Sports, 2019). The approach is widely used in industry but is legitimately criticised as a proxy for attention rather than for business outcome, and as being prone to inflation if low-quality exposures are counted. Automated implementations have been commercialised by vendors such as GumGum Sports and Relo Metrics, but their methods are proprietary and not reproducible. In the academic literature, the recent ExposureEngine work (2025) proposes a detection-to-valuation pipeline and reports strong detection accuracy using oriented bounding boxes to correct for perspective distortion of logos. The present dissertation adopts the quality-weighting principle from this strand, and provides for the oriented-box correction without implementing it (Section 4.6), but adds an explicit team-attribution stage, a position-based valuation, and, crucially, a commitment to reproducibility and low cost. A structural obstacle common to all this work, discussed further in Chapter 3, is the absence of any public benchmark with sponsorship-ownership labels; there is no dataset that states which sponsor a logo belongs to and which team is wearing it, which forces every valuation system to construct its own evaluation procedure."
+  },
+  {
+    "index": 210,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "The limitations of EMV as a construct should be explicit, since the dissertation adopts it. EMV measures opportunity to see rather than any behavioural or attitudinal outcome: it says nothing about whether a viewer attended to the logo, remembered it or acted on it, and it inflates if technically-visible but psychologically-negligible appearances are counted. Frameworks that bridge this gap weight exposure with attention or recall models derived from eye-tracking (Rumpf et al., 2020), but require data a low-cost system cannot obtain. The pragmatic justification for retaining EMV is that it is the language in which clubs and sponsors actually negotiate, so a transparent estimate is directly useful even as an imperfect proxy. The three-tier quality-weighting is best understood as a cheap partial approximation of the attention weighting the recall literature would recommend — the system automates the industry-standard proxy at low cost, and neither claims nor requires that the proxy be a perfect measure of advertising effect."
+  },
+  {
+    "index": 211,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Sponsorship pricing has passed through four eras, and locating the system among them clarifies what is genuinely new. In the manual era analysts timed appearances with a stopwatch and converted on-screen time into money by analogy with advertising rates — the media-equivalency principle from which EMV descends — which was slow, inconsistent and treated all exposure time uniformly. Rule-based automation reduced some of that burden through logging software and template matching, but recognition stayed brittle and the valuation logic remained hand-coded rules over human-verified detections. The step change came in the computer-vision era, when detectors could localise logos frame by frame and valuation began weighting each appearance by size, position, duration and clarity in line with the recall research above; this is the lineage of the commercial vendors and of the three-tier model used here. The current AI era extends it in two directions: deeper detectors and trackers improving accuracy and granularity, and foundation models beginning to remove the annotation bottleneck. This dissertation sits in the third era and looks towards the fourth, treating that bottleneck as something to be measured rather than assumed away — quantifying in Section 5.7 what supervision actually costs per sponsor before any claim is made about removing it. What it adds is not a valuation theory but a demonstration that the capability can be delivered transparently and cheaply rather than only through proprietary services."
+  },
+  {
+    "index": 212,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "2.5 Reducing annotation cost: weak supervision, foundation models and synthetic data"
+  },
+  {
+    "index": 213,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "The main barrier to scaling a closed-set detector across competitions is the linear growth of annotation cost, and three complementary lines of research offer ways to reduce it. Programmatic weak supervision, exemplified by Snorkel (Ratner et al., 2017), fuses multiple noisy labelling sources through a label model that estimates their reliabilities, replacing manual annotation with the lighter task of writing labelling functions. Foundation models supply general-purpose labelling sources: open-vocabulary detectors such as Grounding DINO (Liu et al., 2023) and promptable segmenters such as the Segment Anything family (Kirillov et al., 2023; Ravi et al., 2024) generate zero-shot pseudo-labels, while self-supervised encoders such as DINOv2 (Oquab et al., 2023) give strong features for clustering similar regions; the ability of recent promptable models to segment and track a concept through video from a single exemplar makes it feasible to label a whole broadcast from one reference image per brand. Synthetic data offers a third source, with 3D Gaussian Splatting (Kerbl et al., 2023) enabling photorealistic reconstruction into which real logo textures can be inserted with pixel-accurate labels."
+  },
+  {
+    "index": 214,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "What this literature does not supply is a figure for what it is worth avoiding. Weak-supervision papers argue from the premise that manual annotation is prohibitive, but the premise is rarely quantified for a specific application, so a practitioner cannot tell whether the machinery is warranted. In the sponsorship setting the question is unusually concrete, since annotation is incurred per sponsor and a roster changes by one or two brands a season rather than wholesale. This work therefore takes the complementary route: rather than adopting these techniques and asserting a saving, it measures the supervised baseline's data efficiency directly (Section 5.7). That figure is what makes it possible to judge whether the extra complexity would pay for itself, and it is the basis on which the annotation-free route is proposed as future work rather than as a result."
+  },
+  {
+    "index": 215,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "2.6 Artificial intelligence in advertising"
+  },
+  {
+    "index": 216,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Forward-looking analyses (Davenport et al., 2020; Huang & Rust, 2021) anticipated that AI would reshape marketing across the value chain, and recent calls for research — the Journal of Advertising Research special issue on AI and the Future of Advertising Creativity (2025) — frame generative AI as transforming how advertising is imagined, produced, evaluated and valued. Most attention falls on the productive side. The measurement-and-valuation side addressed here is comparatively neglected, yet it is where the economic worth of exposure is actually estimated. This is used as motivation and as a lens for discussion (Chapter 6), not as a claimed contribution to advertising theory, which would require a different research design."
+  },
+  {
+    "index": 217,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "2.7 Research gap and positioning"
+  },
+  {
+    "index": 218,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "The gap lies at the intersection of these strands. Logo-detection research provides strong detectors but largely ignores attribution and valuation. Sports-video research solves team attribution without considering its financial consequences. The sponsorship-measurement literature has a sound theory of exposure value but relies on manual methods or proprietary tools and lacks public ground truth. Weak supervision offers cheaper labelling but argues from an annotation cost asserted rather than measured. No existing work combines a reproducible, low-cost, end-to-end pipeline with an evaluation methodology suited to a domain without ground truth, and none states what supervising such a system costs per sponsor. This dissertation targets that gap."
+  },
+  {
+    "index": 220,
+    "kind": "paragraph",
+    "style": "Heading 1",
+    "text": "Chapter 3. Research Methodology"
+  },
+  {
+    "index": 221,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "The design of the artefact itself is deferred to Chapter 4; the concern here is with method."
+  },
+  {
+    "index": 222,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "3.1 Research design and philosophy"
+  },
+  {
+    "index": 223,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "The dissertation adopts a design-science approach (Hevner et al., 2004), in which knowledge is produced by building an artefact that addresses a real problem and then rigorously evaluating it. This is appropriate because the central output is a functioning system and the research questions concern what such a system can achieve, rather than testing a pre-existing theory. It is combined with experimental evaluation for the quantitative components, measured under controlled conditions with defined metrics."
+  },
+  {
+    "index": 224,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Two epistemological commitments follow from the domain. Because there is no public ground truth for sponsorship attribution or value (Section 2.4), the strongest evidence available for some claims is a controlled human audit rather than an automatic benchmark, so the methodology treats such audits as planned instruments rather than afterthoughts. And a clear line is drawn between operational claims (what the system produces, measured by its own output), accuracy claims (whether that output is correct, asserted only against independent human judgement) and value claims (the economic meaning of an EMV figure, always stated with its assumptions). The separation prevents the circular error of validating a system against its own predictions."
+  },
+  {
+    "index": 225,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "3.2 Development approach and tools"
+  },
+  {
+    "index": 226,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "The system was developed iteratively, with each component prototyped, tested on real footage, and revised in light of observed failures. This iterative style is reflected in the evaluation, which reports not only final results but also the intermediate failures that shaped the design, on the grounds that in design-science research the reasoning behind a design is itself a contribution."
+  },
+  {
+    "index": 227,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "The implementation uses the Python scientific and deep-learning ecosystem. Object detection and pose estimation use the Ultralytics framework; tracking uses ByteTrack and BoT-SORT; appearance features use CLIP-family encoders; auto-labelling experiments use promptable segmentation and DINOv2 embeddings. The processing backend is built with FastAPI and the analytics frontend with Next.js. Model training was performed on rented cloud GPUs, while all inference and evaluation were performed on a single consumer workstation (an RTX 5060 Ti 16 GB GPU with an Intel i5-13400F CPU and 16 GB RAM), reflecting the target deployment environment. Software versions were pinned to ensure that trained weights remain loadable, and configuration is controlled through environment variables so that experiments are repeatable."
+  },
+  {
+    "index": 228,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "3.3 Data collection and preparation"
+  },
+  {
+    "index": 229,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "The primary data are full-match Bradford Bulls broadcasts from publicly available streams, spanning daytime and floodlit matches, higher- and lower-quality streams, and fixtures in which both teams wore dark kit. That variety was deliberately retained so the evaluation reflects realistic difficulty rather than a curated best case. Official kit imagery and the club's kit-regulation document supplied the sponsor roster and the physical positions of logos on the kit."
+  },
+  {
+    "index": 230,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Broadcast frames were manually annotated with axis-aligned bounding boxes and brand labels. Axis-aligned boxes were a practical choice rather than a principled one — they are what the annotation platform and detector families support natively, and an oriented-box workflow would have raised the per-instance cost on a budget already identified as the binding constraint. The choice has a known cost, since a rotated mark is enclosed by a box larger than itself, over-stating its area and therefore its visibility; Section 4.6 explains how the visibility model is structured to accept an oriented-box correction, and Section 6.4 treats the resulting bias as a threat to validity. Annotation conventions kept the labels consistent: every visible instance was boxed, including partially occluded ones down to a legibility limit, with the home/away kit variant recorded as part of the class. The effort was deliberately kept modest, because a mid-tier club could not fund large-scale labelling and the system is only useful within that constraint; the resulting variation in how much data each class received is what makes the analysis of Section 5.7 possible."
+  },
+  {
+    "index": 231,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Two properties of the preparation are methodologically important. Kit variants are distinguished, each brand carrying a home/away suffix, because the same sponsor occupies different positions against different backgrounds on the two strips. More importantly, the train/test split is clip-disjoint, so that no passage of play contributes frames to both sides. As Section 2.1 noted and Section 5.3 demonstrates, a random frame-level split leaks correlated frames across the boundary and inflates reported accuracy; the clip-disjoint split is the honest protocol and is used for all headline detection figures."
+  },
+  {
+    "index": 232,
+    "kind": "paragraph",
+    "style": "Heading 3",
+    "text": "3.3.1 High-value frame selection for annotation"
+  },
+  {
+    "index": 233,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "A full match holds on the order of a hundred thousand frames, most unsuitable for annotation: replays, crowd shots, graphics, blurred transitions, or frames with no target-team player prominently visible. Annotating at random would spend most of the budget on low-value images and under-sample exactly the sharp, logo-bearing frames the detector needs. A dedicated frame-selection procedure therefore extracts roughly two hundred high-value frames per video through the eight steps of Figure 1. It is distinct from the sparse frame sampling used at inference time (Section 4.2): this is an offline, one-off selection of training images."
+  },
+  {
+    "index": 234,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Two of those steps carry most of the benefit. The static-overlay mask is estimated from the temporal standard deviation of a few hundred frames, since pixels that barely change correspond to fixed graphics such as the scoreboard and watermark, which are then excluded from scoring. And the sharpness score is a weighted Laplacian computed specifically on target-team torsos — where the logos are — with overlay and opponent regions masked out, so a frame is scored on the sharpness of the parts that matter rather than of the whole image. The remaining steps gate on shot type, player count and kit colour, then de-duplicate; the net effect is to concentrate annotation on sharp, logo-rich, non-redundant frames of the correct team."
+  },
+  {
+    "index": 236,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Figure 1. High-value frame selection for annotation. From each match video, an eight-step procedure — adaptive sampling, static-overlay masking, shot-type gating, person detection, target-colour filtering, weighted sharpness scoring, de-duplication and export — yields roughly two hundred high-value frames for annotation rather than a random sample."
+  },
+  {
+    "index": 237,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Figure 2 shows representative frames chosen by this procedure, illustrating the sharp, logo-bearing, target-team images that the selector favours over the many uninformative frames it rejects."
+  },
+  {
+    "index": 239,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Figure 2. Six frames retained by the selection procedure. Each shows several target-team players in open play, sharp enough for the sponsor marks on their torsos to be annotated, and free of the replays, crowd shots and blurred transitions the shot-type gate removes. The broadcast watermark and the score-and-clock graphic are blurred, following the same figure policy applied to Figure 19."
+  },
+  {
+    "index": 240,
+    "kind": "paragraph",
+    "style": "Heading 3",
+    "text": "3.3.2 Annotation with Roboflow and model-assisted labelling"
+  },
+  {
+    "index": 241,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "The selected frames were annotated on Roboflow, which also handled the split, resizing and augmentation. Annotating thousands of small logos by hand would have been prohibitively slow, so a model-assisted strategy — a form of active learning — was used (Figure 3). A seed set of roughly fifty to eighty clean, close-up frames was annotated entirely by hand, ensuring every class appeared several times; a first detector trained on that seed was connected to Roboflow's Label Assist, which runs the model on each new frame and pre-populates its predicted boxes. The annotator's task reduced from drawing every box to accepting, correcting or adding to suggestions, on the order of five to ten times faster than annotating from scratch, and as more frames were corrected the assisting model improved, making its suggestions progressively more accurate."
+  },
+  {
+    "index": 243,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Figure 3. Model-assisted (label-assist) annotation workflow. A small manually annotated seed set trains an initial model that pre-labels new frames through Roboflow's Label Assist; the annotator corrects the suggestions, and the corrected frames improve the model in an active-learning loop, giving an order-of-magnitude speed-up over manual drawing."
+  },
+  {
+    "index": 244,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Figure 4 shows Label Assist in use, the suggested boxes presented for the annotator to accept, adjust or supplement."
+  },
+  {
+    "index": 246,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Figure 4. The Roboflow annotation interface with Label Assist enabled. The assisting model's predictions appear as cyan boxes on the sponsor marks, which the annotator accepts, adjusts or supplements rather than drawing from scratch; the confidence and overlap thresholds controlling the suggestions are set in the toolbar. The broadcast watermark and the caption naming the match officials are blurred, per the figure policy."
+  },
+  {
+    "index": 247,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Conventions were applied throughout: every legible sponsor instance boxed, including partially occluded and motion-blurred ones; illegible or replay-embedded logos and broadcast overlays excluded; boxes kept tight. The dataset was configured with a 70/20/10 split, letterbox resizing to 1280 pixels to preserve logo aspect ratios, and a moderate augmentation policy (horizontal flip, limited rotation, brightness and blur variation) that avoids transformations distorting a logo's identity, such as vertical flips or strong colour shifts."
+  },
+  {
+    "index": 248,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "3.4 Evaluation methods and metrics"
+  },
+  {
+    "index": 249,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "The evaluation combines four instruments, each aligned to a research question."
+  },
+  {
+    "index": 250,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Detection accuracy (RQ1). Precision, recall and mean Average Precision at IoU 0.5 (Everingham et al., 2010; Lin et al., 2014). Reporting all three matters because they have asymmetric commercial consequences: a false positive credits a sponsor for exposure that did not occur, a false negative merely under-counts. Results are given under three splitting protocols — random-frame, clip-disjoint and extended clip-aware — precisely to expose leakage, and a per-class confusion matrix characterises the type of error, since a missed logo is far less harmful than one attributed to the wrong brand."
+  },
+  {
+    "index": 251,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Attribution accuracy (RQ1). With no ground truth for team attribution, it is evaluated by stratified manual audit: three frames per match, at the 55%, 75% and 95% points of each clip so that team-voting has stabilised, across nine matches, giving 184 attributed detections each checked by eye against shirt colour and categorised."
+  },
+  {
+    "index": 252,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Exposure characterisation (RQ2). Logos per frame, share of screen and rendered resolution are computed exhaustively from the annotation files, since every instance is already boxed. Occlusion is the exception — not annotated, not recoverable from a box — so it is judged by eye through the same instrument: nine instances per class under a fixed seed, 153 in all. Stratifying by class rather than proportionally is deliberate, since the question is whether occlusion differs between sponsors. Each item is shown with its surroundings visible, because the rater must see what covers the mark, in shuffled order so the class is not a cue, and rated unobstructed, partially covered but readable, or heavily covered; size, blur and distance are excluded from the judgement. Ratings are then set against objective per-instance features and against the per-class accuracy residuals of the data-efficiency analysis. As with the attribution audit, the single rater is a limitation recorded in Section 6.4."
+  },
+  {
+    "index": 253,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Value sensitivity (RQ3). Since EMV cannot be validated against a true price, the model is evaluated for structural plausibility and sensitivity: exposure across brands and kit positions is examined for plausibility, and retained quality-exposure measured as the visibility and confidence floors are swept. A controlled experiment compares sparse sampling against the native frame rate on the same segment, to quantify sampling-induced bias."
+  },
+  {
+    "index": 254,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Data efficiency (RQ4). Annotation effort against accuracy is examined per sponsor class, the level at which a club incurs the cost. For each of the 17 classes the training-instance count is paired with the AP achieved on the held-out partition, and two things estimated: the strength of the association, by Pearson and Spearman correlation, and its shape, by least-squares fit of AP against the base-ten logarithm of the count — logarithmic because vision learning curves are conventionally close to linear in log data volume (Sun et al., 2017). Classes are then split at a threshold and group means compared with Welch's t-test, converting the curve into what a practitioner needs: a number of boxes. With only 17 classes, effect sizes carry their uncertainty and the analysis is indicative of magnitude rather than precise."
+  },
+  {
+    "index": 255,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Throughput (video-minutes processed per wall-clock minute) is measured on the target workstation to substantiate the low-cost, real-time claim."
+  },
+  {
+    "index": 256,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Three design goals additionally function as qualitative criteria. Generality requires that another club could use the system by supplying its own logos and footage without code changes, assessed by whether the mechanisms are reference-based rather than hard-coded. Revenue-safety requires that under uncertainty the system errs towards not deducting exposure from a client, assessed by inspecting the attribution policy. Measurement integrity requires every reported figure to be traceable to a transparent procedure and unmeasured quantities to be labelled as such, assessed by the audit records and the explicit disclosure of biases."
+  },
+  {
+    "index": 257,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "3.5 Ethical, legal and professional considerations"
+  },
+  {
+    "index": 258,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Four considerations shaped the work. Privacy: although the footage contains people, the system performs no identification of individuals — it analyses brand exposure, not persons — which is a design constraint rather than an omission. Disclosure in reporting: because the case study is a specific, identifiable club, figures reproduced from broadcast footage have club-identifying overlays and any caption naming an individual blurred, while sponsor logos, the object of study and publicly displayed, are retained. Provenance and licensing: the source footage is publicly available, and some foundation-model components carry research-only licences that a commercial deployment would need to replace. Professional integrity: results are reported conservatively, unmeasured quantities are not presented as measured, and a bias unfavourable to the commercial narrative (Section 5.6) is disclosed rather than concealed. These align with the ethical expectations of the University of Bradford and with professional codes for computing practitioners."
+  },
+  {
+    "index": 259,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "3.6 Reproducibility"
+  },
+  {
+    "index": 260,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Pipeline configuration is externalised, model versions pinned, evaluation splits constructed by explicit rules and audit judgements recorded, so reported accuracies can be reconstructed. The primary limitation is that the source broadcasts are third-party material that cannot be redistributed; the collection and preparation process is described in enough detail for the study to be repeated on comparable footage."
+  },
+  {
+    "index": 262,
+    "kind": "paragraph",
+    "style": "Heading 1",
+    "text": "Chapter 4. System Design and Implementation"
+  },
+  {
+    "index": 263,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "4.1 Architecture overview"
+  },
+  {
+    "index": 264,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "The system is divided into two loosely coupled parts that communicate over an HTTP API (Figure 5). The backend is the processing engine: a FastAPI application that accepts an uploaded video, runs it through the analysis pipeline as a background job, and exposes the results as JSON together with rendered media. The frontend is a Next.js dashboard that submits jobs, polls their progress, and presents the results as interactive analytics across multiple matches."
+  },
+  {
+    "index": 266,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Figure 5. LogoLens overall system architecture. The frontend submits jobs and polls the backend over an HTTP API; the backend runs a pipeline orchestrator and keeps the database, file storage, job queue and model zoo behind interfaces, so each can be replaced by a production equivalent through configuration alone."
+  },
+  {
+    "index": 267,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "All infrastructure lies behind interfaces by design. The database (SQLite in development), file storage (local) and job queue (in-process) are each abstracted so a production equivalent — PostgreSQL, object storage, a distributed queue — replaces them through configuration alone, without altering pipeline logic. This supports the generality criterion at the infrastructure level and keeps development light enough for a single machine."
+  },
+  {
+    "index": 268,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "4.2 The processing pipeline"
+  },
+  {
+    "index": 269,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Where Figure 5 shows static structure, Figure 6 shows what happens when a video is uploaded. One upload is one job, processed through eight stages with a progress field updated after each: (1) frames, reading metadata; (2) team, bootstrapping kit references; (3) detect, the main loop that samples frames, detects logos, scores visibility, applies the team filter and assigns positions; (4) exposure, grouping detections into per-brand segments; (5) pricing; (6) preview, rendering an annotated video with the original audio; (7) bodyseg; and (8) done, persisting the result. Stage three is itself a nested per-frame sub-pipeline, shown in the lower part of the figure. Every optional stage degrades gracefully: a failure is logged and the job returns a partial result rather than aborting."
+  },
+  {
+    "index": 271,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Figure 6. Processing pipeline for a newly uploaded video. The orchestrator runs eight stages with monotonically increasing progress; the central detection stage expands into a per-sampled-frame sub-pipeline of logo detection, visibility scoring, team attribution and pose-based slot assignment."
+  },
+  {
+    "index": 272,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Two separate detection passes serve different purposes. The analytics pass samples sparsely at two frames per second, because estimating exposure duration does not require every frame and sparse sampling is far cheaper; it is the source of all value figures. The preview pass runs at full frame rate, capped, to render a smooth review video in which boxes track each logo closely. Measurement and presentation have different frequency requirements. That the sampling rate affects the measured value is examined experimentally in Section 5.6 and is not treated as neutral."
+  },
+  {
+    "index": 273,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "4.3 Logo detection"
+  },
+  {
+    "index": 274,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Detection uses a fine-tuned YOLO model at 1280-pixel input, chosen because sponsor logos are small (Section 5.2). YOLO was preferred over transformer detectors because single-stage inference runs in real time on one consumer GPU, a hard requirement of the low-cost objective; a heavier detector at marginally higher accuracy and a fraction of real-time speed would defeat the purpose. The high resolution answers the small-object property directly, since a logo a few pixels across after downsampling loses the features needed to classify it. Each detection yields an axis-aligned box, a brand class and a confidence score. The detector is closed-set, appropriate because a club's sponsor set is small and stable within a season; the open-set problem is not solved here but priced, since adding a brand means annotating it and Section 5.7 quantifies what that costs."
+  },
+  {
+    "index": 275,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "4.4 Team attribution"
+  },
+  {
+    "index": 276,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "This component decides, per detected logo, whether it belongs to the target club. It follows the reference-based philosophy of Section 2.3 and trains no dedicated model, because opponents' kits change each match. Per sampled frame a person detector locates players and BoT-SORT maintains a stable identity across frames; a torso band is cropped, excluding grass and skin, and classified by fusing a colour histogram with a learned appearance embedding, weighted towards colour when kits differ strongly in luminance. Votes accumulate per track with hysteresis, so a single blurred frame cannot flip a label. Each logo is assigned to the player whose box most tightly contains it, and kept only if that player is on the target team."
+  },
+  {
+    "index": 277,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Kit references are obtained without a mandatory manual step, at one of three levels of preference: an existing hand-built reference file if present; otherwise an automatic bootstrap that clusters players in the opening frames and selects the cluster most similar to the official kit image; and, failing that, a luminance rule for dark away kits. The official kit images that anchor the second option are shown in Figure 7, which also indicates where each sponsor sits on the strip."
+  },
+  {
+    "index": 279,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Figure 7. The club's official home (left) and away (right) playing-kit renders for the season, which serve as the reference the attribution stage bootstraps from and as a map of where each sponsor sits on the strip. The squad surname printed on the back view is redacted, since the sponsor marks rather than any individual are the object of study."
+  },
+  {
+    "index": 280,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "The keep/drop policy embodies the revenue-safety criterion, and its asymmetry is deliberate:"
+  },
+  {
+    "index": 281,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "`"
+  },
+  {
+    "index": 282,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "for each detected logo L in frame:"
+  },
+  {
+    "index": 283,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "owner = tracked player whose box most tightly contains centre(L),"
+  },
+  {
+    "index": 284,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "else nearest tracked player within a distance threshold, else NONE"
+  },
+  {
+    "index": 285,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "if owner is NONE: drop L # board, crowd, graphic"
+  },
+  {
+    "index": 286,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "elif team_vote[owner] == TARGET: keep L"
+  },
+  {
+    "index": 287,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "elif team_vote[owner] == OTHER"
+  },
+  {
+    "index": 288,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "and votes >= MIN_VOTES: drop L"
+  },
+  {
+    "index": 289,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "else: keep L # revenue-safe default"
+  },
+  {
+    "index": 290,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "`"
+  },
+  {
+    "index": 291,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Exposure is removed only once enough evidence has accumulated that a player belongs to the opposing team; absent that evidence the detection is kept. This encodes the principle that a tool used to bill sponsors should fail towards under-claiming, since an over-claim later discovered damages a club's credibility more than a small conservative under-claim."
+  },
+  {
+    "index": 292,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "4.5 Position assignment"
+  },
+  {
+    "index": 293,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Rather than treating all jersey logos as equivalent, each detection is assigned to one of eighteen sellable kit positions using pose estimation. Keypoints define regions corresponding to commercial slots — chest-centre, back-upper, sleeve, shorts-front, sock — rather than anatomical parts, and skin regions carry no slot so a logo is never assigned to bare skin. The exposure accruing to each slot is the basis for pricing positions differently, turning \"where on the kit\" into a priced variable."
+  },
+  {
+    "index": 294,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "4.6 The three-tier valuation model"
+  },
+  {
+    "index": 295,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "The valuation model converts the detection stream into a monetary estimate in three tiers (Figure 8), each introducing a correction grounded in the sponsorship-effectiveness literature (Section 2.4)."
+  },
+  {
+    "index": 297,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Figure 8. The three-tier valuation model. A per-frame detection stream is refined into a monetary estimate, each tier adding a correction: spatial visibility quality, then temporal and recall structure, then broadcast and competitive context."
+  },
+  {
+    "index": 298,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Tier 1 — visibility, per detection, is the product of a size term (the square root of the box-to-frame area ratio, so one close-up does not dominate), a position term (a Gaussian centred on the screen, since central logos attract more attention) and a clarity term (detector confidence). The implementation carries a fourth factor, an oriented-box penalty that would discount a logo skewed by camera angle, but because the deployed detector emits axis-aligned boxes (Section 4.3) it is fixed at 1.0 and inert — retained as a declared extension point so that training an oriented-box model later changes one constant rather than the model's structure. Every visibility figure in Chapter 5 therefore comes from three active terms, and the over-statement for rotated logos is assessed in Section 6.4. A low visibility floor of 0.02 keeps negligible detections from forming a segment; that value, far below the 0.1 sometimes used, is justified empirically in Section 5.6."
+  },
+  {
+    "index": 299,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Tier 2 — exposure, computed per brand, links the surviving detections into continuous segments using track identity and sums, over segments, the product of duration, mean visibility and a duration weight. Segments shorter than half a second are discarded as flicker, and the duration weight encodes the recall finding that very short appearances are less memorable and sustained ones more so."
+  },
+  {
+    "index": 300,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Tier 3 — EMV multiplies quality-weighted exposure by a CPM rate, audience size and a placement multiplier for broadcast type, with optional category and prime-time multipliers where the context is known. Against a naive product of appearance count and CPM, the value of this staged construction is that each tier adds a defensible correction: spatial quality, then temporal and recall structure, then broadcast context."
+  },
+  {
+    "index": 301,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "An example makes the difference concrete. A chest logo accumulating 120 seconds of quality-weighted exposure, at a CPM of US$22 and an audience of 40,000 on a live feed, gives US$105,600. The same appearances counted as 200 seconds of raw on-screen time would give US$176,000 — an over-statement of two-thirds. Quality-weighting is therefore a material determinant of the reported value, not a cosmetic refinement. The example also shows the leverage of the inputs: audience size enters linearly, so an error in the declared audience propagates straight into the EMV, which is why CPM and audience are user-supplied figures to be justified rather than quantities the system infers."
+  },
+  {
+    "index": 302,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "4.7 The analytics dashboard"
+  },
+  {
+    "index": 303,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "The frontend turns the JSON result into a decision-support tool through five views: an Overview of the multi-match portfolio; a Match view with the preview video, a per-brand timeline and a team-filter statistics badge; a Brand view profiling a single sponsor across matches; an Analytics Report with filterable charts and export to PDF and CSV; and a Body Segmentation view with a rotatable three-dimensional model that colours the eighteen kit slots and ranks them by exposure, supporting the position-based pricing discussion. Figures 9 to 11 show the portfolio view, the match view and the three-dimensional kit-slot model, captured from the running system over the twenty-three matches analysed during the project."
+  },
+  {
+    "index": 305,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Figure 9. The Overview portfolio view, aggregating twenty-three analysed matches: headline totals across the portfolio, and the per-match EMV trend with the three largest sponsors tracked separately. The figures shown are the system's own output, not illustrative values."
+  },
+  {
+    "index": 307,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Figure 10. The per-match view for one analysed fixture, the preview player paused on a passage of close play. The attribution statistics sit directly above the value figures — here 1,412 detections credited to the target club and 943 dropped, a 40.0% drop rate — so a user can judge whether attribution behaved sensibly before reading the money. The annotated preview shows the per-frame output as the operator sees it, with a dozen marks from ten brands boxed and labelled by confidence; every box on this frame belongs to a target-team player, the opposition in white carrying none that survived the filter. Beneath it the per-brand timeline shows when each of the thirteen detected sponsors was on screen, making the difference between sustained exposure (KLG, Paints & Lacquers) and intermittent appearances (Romantica, MNA Support Services) visible at a glance."
+  },
+  {
+    "index": 309,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Figure 11. The Body Segmentation view: a rotatable three-dimensional kit model colouring the eighteen sellable sponsor slots by their share of exposure, with the ranked breakdown alongside. For this match the two shoulder positions and the chest centre lead, while the sock and back-centre positions contribute under two per cent each — a twenty-five-fold spread across the inventory, which is the empirical basis for pricing positions differently."
+  },
+  {
+    "index": 310,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "All charts are implemented directly in SVG rather than through a charting library, which trades development effort for full control of the visualisations and a smaller dependency surface; when no backend is present, the dashboard displays clearly labelled demonstration data."
+  },
+  {
+    "index": 311,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "The dashboard is the point at which the measurement becomes commercially usable, and several design choices reflect that. Brand colours are held stable across every view, so a sponsor is recognisable at a glance through a multi-match analysis. The match view places the team-filter statistics directly alongside the value figures, so a user can see at once whether attribution behaved sensibly; an unusually low or high drop rate signals that the kit-reference bootstrap may have misfired, and surfacing it supports the measurement-integrity criterion. The report view plots each brand's exposure duration against its mean visibility, separating \"premium\" inventory — long, prominent exposure — from frequent but low-quality appearances, which gives a club a defensible basis for differential pricing. Export to PDF and CSV lets the figures go into a sponsor report or spreadsheet, which is how a club would actually use them."
+  },
+  {
+    "index": 312,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "4.8 Output data model and interface"
+  },
+  {
+    "index": 313,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Analysing one video persists a single structured record, read by both the dashboard and any external consumer through the API. It captures, per brand, the segments with their start and end times, mean visibility and duration weight, plus aggregate quality-exposure, average visibility, segment count, longest segment and EMV; it also stores per-slot exposure percentages, the team-filter statistics and a per-brand timeline driving the interactive player, alongside the rendered preview and body-part overlay. Exposing all of this through a small API — create a job, poll it, retrieve the analysis and media — keeps the frontend a thin presentation layer and lets a different client or an automated reporting process consume the same outputs unmodified. Separating the record from its presentation is deliberate: the numbers a club relies on are computed once, stored, and never recomputed differently for display, which makes any figure in a sponsor report reproducible and auditable."
+  },
+  {
+    "index": 314,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "4.9 Implementation constraints"
+  },
+  {
+    "index": 315,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Implementation surfaced constraints that illustrate the gap between an algorithm and a running system. Training required specific settings to avoid platform-specific memory failures, and text output required explicit UTF-8 handling. Rendering the preview video and the body-part overlay proved more expensive than the detection pass itself on long inputs, which is why both are optional stages that a failure can skip without losing the analysis. Two failure modes had to be handled explicitly rather than by tuning: a tracker identity switch during a tackle can carry a brand across to an opposing player, and a player's surname printed above the sponsor mark can be picked up as a similar-looking brand. Each was addressed by a control gate rather than by a threshold, because the failure is categorical rather than a matter of degree. The need for these gates is itself evidence, discussed in Chapter 6, that automating measurement redistributes rather than removes the human role."
+  },
+  {
+    "index": 317,
+    "kind": "paragraph",
+    "style": "Heading 1",
+    "text": "Chapter 5. Experiments and Results"
+  },
+  {
+    "index": 318,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Results are organised by research question. Following the methodology, operational and accuracy claims are kept distinct and unvalidated quantities identified as such."
+  },
+  {
+    "index": 319,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "5.1 Experimental setup"
+  },
+  {
+    "index": 320,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "All inference and evaluation ran on the target workstation (RTX 5060 Ti 16 GB, i5-13400F, 16 GB RAM); training used rented cloud GPUs. Detection metrics are reported under three splitting protocols to expose leakage, attribution by the stratified audit of Section 3.4, and value-model experiments over the analytics pass across nine matches. Unless stated otherwise, figures are drawn from the project's experimental records and reconstructable from them."
+  },
+  {
+    "index": 321,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "5.2 Dataset characterisation"
+  },
+  {
+    "index": 322,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "The extended clip-aware training set contains 10,654 annotated logo instances across 17 sponsor classes, and three of its properties shape everything that follows. The class distribution is strongly imbalanced (Figure 12): the most frequent class holds 1,667 instances and the rarest 182, a ratio of 9.2 to 1. This is not an artefact but a faithful reflection of reality, since a main chest or shorts sponsor is on screen far more often than a sleeve patch, and it predicts the per-class gap observed later."
+  },
+  {
+    "index": 324,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Figure 12. Per-class instance distribution of the extended clip-aware training set (17 classes, 10,654 boxes). The distribution is heavily skewed, with an imbalance ratio of roughly 9.2 to 1 between the most and least frequent classes, reflecting how often each sponsor position appears in broadcast. Counted directly from the dataset's annotation files."
+  },
+  {
+    "index": 325,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "The logos are small (Figure 13, lower right), the great majority of boxes occupying 3–5% of the frame dimension, which justifies both the high detection resolution and the low visibility floor. And the box centres concentrate near the middle of the frame (Figure 13, lower left), consistent with broadcast framing that keeps the ball-carrier central — the empirical prior that the Gaussian position term encodes, giving that choice a data-grounded rather than arbitrary basis."
+  },
+  {
+    "index": 327,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Figure 13. Bounding-box geometry and label analysis of the training set. Upper-left: instances per class. Lower-left: the box-centre heat map, showing that logos cluster near the frame centre. Lower-right: the box width–height density, showing that logos are small and roughly square. Authentic output of the training framework's label analysis."
+  },
+  {
+    "index": 328,
+    "kind": "paragraph",
+    "style": "Heading 3",
+    "text": "5.2.1 Multi-logo frames, screen coverage and rendered resolution (RQ2)"
+  },
+  {
+    "index": 329,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Three further properties of the material shape the measurement task, each quantified from the annotation files across all 4,113 frames and 12,960 instances (Figure 14)."
+  },
+  {
+    "index": 330,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Sponsor logos appear in groups, not singly. 63.1% of annotated frames contain two or more logos and 25.9% five or more; the mean is 3.15 per frame, rising to 3.82 among frames where any sponsor is visible, with a maximum of 27. These are usually different brands rather than repeats: 61.6% of frames carry two or more distinct sponsors, a mean of 2.54. Simultaneous multi-brand detection is therefore the ordinary case, which is why the pipeline treats each frame as a set of independent detections — each separately scored, attributed and assigned to a slot — rather than resolving it to one dominant logo. It also has the valuation consequence Section 6.1 returns to: sponsors sharing a frame share the viewer's attention, which the per-detection model does not discount for. A further 17.5% of frames show no sponsor at all, a reminder that on-screen time and sponsor-visible time are different quantities."
+  },
+  {
+    "index": 331,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Individual logos occupy a very small share of the screen. The median covers 0.145% of the frame area, 87.3% cover under 0.5% and 95.7% under 1%; the largest single instance reaches only 12.1%. Summed across a frame, sponsor marks still occupy a mean of 0.84% and 3.3% at the ninety-fifth percentile. This is a demanding small-object problem, and the empirical justification for two Chapter 4 decisions: the 1280-pixel detector input, without which these marks reduce to a handful of pixels, and the low 0.02 visibility floor, since a floor set for large objects would discard essentially the whole inventory."
+  },
+  {
+    "index": 332,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Rendered resolution sets the ceiling on readability. In these 1080-pixel-high frames the median mark is 46 pixels tall and 68 wide; 18.7% are under 32 tall and 2.6% under 20, while only 26.3% reach 64 or more. Thirty pixels carries enough shape for a trained detector to classify but not enough for reliable text reading, which is why the pipeline identifies brands by learned appearance rather than by reading the wordmark, and why the clarity term (Section 4.6) uses detector confidence as its proxy for legibility. Image sharpness was also examined via the Laplacian variance of each crop but proved unusable: it is confounded by crop size, falling fivefold from the smallest marks to the largest (r = −0.45 against log pixel height) because a large crop contains proportionally more smooth fabric between the strokes, and contrast normalisation did not remove the dependence. Rendered resolution is reported instead, being exact and scale-free; no sharpness statistic is claimed."
+  },
+  {
+    "index": 334,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Figure 14. What a broadcast frame contains. Left: the number of sponsor logos per frame — most frames carry several, and 63% carry two or more; the grey bar is frames with no visible sponsor. Centre: the share of frame area occupied by each logo, on a logarithmic scale; 96% fall below one per cent of the frame. Right: the height at which each mark is rendered in the 1080-pixel frame, which sets the ceiling on readability. Computed from the annotation files."
+  },
+  {
+    "index": 335,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "5.3 Detection accuracy and the effect of leakage (RQ1)"
+  },
+  {
+    "index": 336,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Detection accuracy depends strongly on the splitting protocol (Table 2, Figure 15). A random-frame split reports 0.862 mAP@0.5, inflated because correlated adjacent frames fall on both sides. The clip-disjoint split gives a more honest 0.702, and the extended clip-aware set 0.745 with precision 0.65 and recall 0.74; the latter is the headline result. The methodological point — that the impressive 0.862 must not be cited as true performance while the less flattering 0.745 is more trustworthy — is treated as a contribution to evaluation integrity."
+  },
+  {
+    "index": 337,
+    "kind": "table",
+    "style": "Table",
+    "text": "Split protocol | mAP@0.5 | Note\nRandom-frame | 0.862 | Inflated by adjacent-frame leakage\nClip-disjoint | 0.702 | Honest\nExtended clip-aware | 0.745 (P 0.65, R 0.74) | Headline result"
+  },
+  {
+    "index": 339,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Table 2. Detection accuracy under three splitting protocols."
+  },
+  {
+    "index": 341,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Figure 15. Detection accuracy under the three splitting protocols. Random-frame splitting inflates mAP@0.5 to 0.862 through leakage; the honest clip-disjoint and extended clip-aware protocols give 0.702 and 0.745. The headline figure is the honest 0.745."
+  },
+  {
+    "index": 342,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "The training dynamics of the clip-disjoint run (Figure 16) show validation precision, recall and mAP converging early and then holding flat. The two box-loss curves separate as training proceeds — training loss continues to fall while validation loss plateaus around 1.24 — the signature of mild overfitting. It is not runaway, since validation loss flattens rather than rising and the metrics do not decay, but the gap is real and is one reason the headline accuracy should be read as a ceiling for this quantity of data rather than a figure more epochs would improve. The normalised confusion matrix (Figure 17) is almost purely diagonal apart from the background row: the detector rarely confuses one brand with another, and its errors are predominantly misses concentrated on the least-represented classes. The per-class precision–recall curves (Figure 18) confirm that well-represented sponsors sustain high precision across a broad recall range while rare classes pull down the mean."
+  },
+  {
+    "index": 344,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Figure 16. Training dynamics of the clip-disjoint run over 148 epochs. Left: validation mAP@0.5, precision and recall rise quickly and then hold flat. Right: the training box-loss continues to fall while the validation box-loss plateaus, a widening gap that indicates mild but not runaway overfitting. Raw per-epoch values are shown faintly behind a nine-epoch moving average. Plotted from the run's logged metrics."
+  },
+  {
+    "index": 346,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Figure 17. Normalised confusion matrix for the clip-disjoint split. The matrix is almost purely diagonal apart from the bottom background row, indicating that the detector rarely confuses brands and that its errors are misses into the background, concentrated on rare classes. Authentic framework output."
+  },
+  {
+    "index": 348,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Figure 18. Per-class precision–recall curves for the clip-disjoint split. Well-represented sponsors sustain high precision across a broad recall range, while rare, data-starved classes lower the mean, mirroring the class imbalance in Figure 12."
+  },
+  {
+    "index": 349,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "That structure matters because mAP conflates two very different failure modes. A naive reading dismisses 0.745 as leaving a quarter of the target unaccounted for; the confusion matrix separates the causes. The near-absence of off-diagonal mass means that when the detector fires it almost always names the correct sponsor, so the shortfall is almost entirely recall loss on rare classes rather than mislabelling. For valuation the distinction is decisive: a recall shortfall produces a conservative under-estimate aligned with the revenue-safe philosophy, and it is partly absorbed downstream because exposure aggregates over time, a logo missed in one sampled frame often being recovered in an adjacent one within the same track. A brand confusion would misattribute money and could not be recovered by aggregation. The system's operative accuracy for its purpose is therefore better than the raw mAP suggests, and the appropriate headline metric for future work is exposure-level error against manual timing rather than a frame-level score."
+  },
+  {
+    "index": 350,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Figures 19 to 21 show the detector's output on three held-out frames, one frame per figure. The framework's own validation mosaic tiles four frames into a single image, leaving each mark a few dozen pixels across with the text labels overlapping one another; the predictions are the same, but they cannot be read. These figures re-run the same clip-disjoint weights at the 1280-pixel input the system deploys at and present one frame at full width. Frames were selected by detection count and by image sharpness, measured as the Laplacian variance of the frame, so the marks stay legible in print."
+  },
+  {
+    "index": 351,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Each box is coloured by brand and carries its own confidence; the legend beneath decodes the colour. A sponsor typically appears several times in one frame — three instances of the shorts logo in Figure 19, two of the chest logo — and a colour groups those repeats at a glance, where writing the brand on every box would instead produce overlapping chips that cover the very marks they describe. The colour assignment is fixed across all three figures, so a sponsor keeps its colour throughout. Broadcast overlays are blurred per the figure policy; sponsor marks are retained."
+  },
+  {
+    "index": 352,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "The frames show the range rather than the best case. Figure 19 is the dense case: nine marks across six brands and four players, spanning a 0.95-confidence chest logo at mid-distance down to a 0.48-confidence shorts logo on a player at the far touchline. Figure 20 shows the same behaviour in open play. Figure 21 is instructive for a different reason: two of its four marks are the same brand at very different confidence, 0.90 on a clear shorts logo and 0.32 on one turned away from camera, which is the visibility gradient the Tier 1 clarity term is meant to capture."
+  },
+  {
+    "index": 354,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Figure 19. Detection output on a held-out frame during close play: nine sponsor marks across six brands and four players, each box coloured by brand and labelled with its confidence. The three orange boxes are the same sponsor found three times, and the two blue boxes the same sponsor found twice. Rendered at the deployed 1280-pixel input; broadcast overlays blurred per the figure policy."
+  },
+  {
+    "index": 356,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Figure 20. Detection output on a held-out frame in open play: five marks across four brands, at the middle distance typical of broadcast framing."
+  },
+  {
+    "index": 358,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Figure 21. Detection output on a held-out frame with fewer players in shot. The two KLG instances are found at 0.90 and 0.32 confidence, the lower one on a mark turned away from the camera — the visibility gradient the clarity term of Section 4.6 is intended to capture."
+  },
+  {
+    "index": 359,
+    "kind": "paragraph",
+    "style": "Heading 3",
+    "text": "5.3.1 Alternative architecture benchmark: RF-DETR"
+  },
+  {
+    "index": 360,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "An RF-DETR model was trained on the same sponsor dataset to test whether a heavier, transformer-based detector would improve accuracy. Its best checkpoint reached 0.771 mAP@0.5 (Table 3). Per-class AP (Figure 22) shows the same pattern as the YOLO detector, well-represented classes such as klg and mcp achieving the highest AP while sparse ones such as fairway and atm trail, mirroring the imbalance of Figure 12; the training curve (Figure 23) rises quickly and plateaus, the best checkpoint reached early."
+  },
+  {
+    "index": 361,
+    "kind": "table",
+    "style": "Table",
+    "text": "Metric | RF-DETR (best)\nmAP@0.5 | 0.771 (EMA 0.778)\nmAP@0.75 | 0.505\nmAP@[.5:.95] | 0.458 (EMA 0.465)\nPrecision | 0.730\nRecall | 0.711\nF1 | 0.710"
+  },
+  {
+    "index": 363,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Table 3. RF-DETR validation metrics at the best checkpoint."
+  },
+  {
+    "index": 365,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Figure 22. RF-DETR per-class Average Precision at the best checkpoint. Well-represented sponsors achieve the highest AP while sparse classes trail, mirroring the class imbalance of Figure 12. Plotted from the model's logged metrics."
+  },
+  {
+    "index": 367,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Figure 23. RF-DETR validation mAP over training. The mAP@0.5 and mAP@[.5:.95] rise quickly and plateau, with the best checkpoint reached early. Plotted from the model's logged metrics."
+  },
+  {
+    "index": 368,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "The comparison rests on this model having been evaluated under the same discipline as the headline detector, so how its data were partitioned matters. The annotation platform's default export is a random split, which would have leaked correlated frames in precisely the way Section 5.3 warns against; that default was not used. The images were instead pooled across the platform's splits and re-partitioned by source, grouping every frame under its match or clip identifier and holding out whole groups — the 4,113 images fall into 46 such groups, of which 14 (741 images, 18.0%) were held out. No evaluation frame therefore shares a passage of play with any training frame, and because most groups are whole matches, much of the held-out data is unseen fixtures rather than merely unseen clips. The reported 0.771 is leakage-controlled and comparable in kind to 0.745."
+  },
+  {
+    "index": 369,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Two residual optimisms should be declared: the held-out partition serves as both validation and test set, so the best checkpoint is selected on the data that reports the score, and the group assignment was chosen among 300 shuffles to leave fewest classes starved, slightly favouring the rarer ones. The reading is that a heavier transformer reaches accuracy comparable to, and probably a little above, the deployed detector. The latter was retained because the throughput budget of Section 5.9 leaves no headroom for a substantially heavier model and the difference sits within what these protocols can resolve. Inference cost was not measured on the target hardware, so the trade-off is argued rather than demonstrated; quantifying it is noted in the future work."
+  },
+  {
+    "index": 370,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "5.4 Team attribution (RQ1)"
+  },
+  {
+    "index": 371,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Figure 24 shows the stage in operation on one frame, each tracked player carrying its own decision. The stratified audit of 184 detections across nine matches (Figure 25) found attribution correct in 91.8% of cases (169 of 184), balanced between the target-team subset (90.7%) and the other (92.9%), above the 90% threshold set for the audit. The errors were systematic rather than random: half of the target-team errors were officials or stewards in bright clothing, suggesting the value of a dedicated officials class, and the rest clustered in the first seconds after kickoff before team-voting had stabilised, and in a fixture where both teams wore dark kit. Being structured and explicable, they are in principle addressable."
+  },
+  {
+    "index": 373,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Figure 24. The attribution stage on one frame, as rendered by the pipeline's own overlay. Every tracked player carries a track identity and a decision: gold for the target club, grey for opponents and match officials, with a third state held for tracks that have not yet accumulated enough votes. The lower panel magnifies the defensive line, where target and opponent players stand adjacent. Because the decision is made per track rather than per frame, a single blurred frame cannot flip a label."
+  },
+  {
+    "index": 375,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Figure 25. Team-attribution accuracy from the stratified manual audit (three frames across nine matches, 184 observations). Overall accuracy is 91.8%, above the 90% audit threshold, with balanced performance on the target and other subsets."
+  },
+  {
+    "index": 376,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "The filter's practical importance shows in the detection count (Figure 26): across nine matches it removed 44% of detections (11,161 of 25,153, ranging from 21% to 78% per match) as belonging to opponents, officials or unattributable surfaces. Without it the value estimate would be almost doubled in many matches — which is why attribution is essential to valuation and not merely to detection."
+  },
+  {
+    "index": 378,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Figure 26. Effect of the team-attribution filter across nine matches. Of 25,153 raw detections, 44% are removed as not belonging to the target team, over a per-match range of 21–78%. Without this filter the value estimate would be roughly doubled in many matches."
+  },
+  {
+    "index": 379,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "5.5 Valuation plausibility and quality-weighting (RQ3)"
+  },
+  {
+    "index": 380,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Since EMV cannot be validated against a true price, the model is assessed for structural plausibility and for how its quality-weighting behaves. Exposure across brands is strongly skewed, the leading sponsor carrying about 41% of total weighted exposure across eight matches, as expected when a main chest or shorts logo dominates. Across kit positions the ratio between the highest- and lowest-exposure slots is on the order of 27 to 1 in duration, enough to justify pricing positions differently rather than at a flat rate — the practical output of the position-assignment component."
+  },
+  {
+    "index": 381,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "The quality-weighting behaves as intended (Figure 27). Detections below 0.4 confidence are 29% of the raw count but contribute only 9.5% of quality-weighted exposure, while those at or above 0.8 contribute 64%. The model therefore discounts uncertain, fleeting appearances rather than counting them equally, which is the desired behaviour for an estimate meant to reflect attention."
+  },
+  {
+    "index": 383,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Figure 27. Effect of quality-weighting by confidence. Low-confidence detections (below 0.4) are 29% of the raw count but contribute only 9.5% of quality-weighted exposure, while high-confidence detections (0.8 and above) carry 64% of exposure. The valuation model discounts uncertain appearances rather than counting them equally."
+  },
+  {
+    "index": 384,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "5.6 Parameter sensitivity and sampling bias (RQ3)"
+  },
+  {
+    "index": 385,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "An estimate is only trustworthy if its sensitivity to parameters is understood. Sweeping the visibility floor over 13,439 detections shows that raising it from 0.02 to 0.05 removes 71% of quality exposure and raising it to 0.1 removes 98%, whereas raising the confidence floor from 0.25 to 0.6 loses under 5% (Figure 28). Two conclusions follow: the low 0.02 floor is strongly justified, since the 0.1 value proposed elsewhere would destroy almost all genuine signal given how small and off-centre sponsor logos are; and the estimate is far more sensitive to the visibility floor than to the confidence floor, which matters to anyone tuning the system."
+  },
+  {
+    "index": 387,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Figure 28. Parameter sensitivity over 13,439 detections. Raising the visibility floor from 0.02 to 0.1 removes up to 98% of quality exposure, whereas raising the confidence floor from 0.25 to 0.6 loses under 5%. The estimate is dominated by the visibility floor, justifying the low 0.02 setting."
+  },
+  {
+    "index": 388,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "A controlled experiment on a three-minute segment compared exposure at the deployed two frames per second against the native fifty (Figure 29). The sparse rate over-measured by 63%, because each isolated sample is effectively quantised to a half-second block and short gaps are bridged. The bias favours the sponsor and is disclosed rather than concealed; a production report should either correct for it or state it. Reporting a bias that works against the commercial narrative is a matter of measurement integrity."
+  },
+  {
+    "index": 390,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Figure 29. Sampling-rate bias on a three-minute segment. Sparse two-frames-per-second analytics sampling over-measures total exposure by 63% relative to native fifty-frames-per-second processing, because isolated samples are quantised to half-second blocks and gaps are bridged."
+  },
+  {
+    "index": 391,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "5.7 Annotation effort and per-class accuracy (RQ4)"
+  },
+  {
+    "index": 392,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Annotation is the dominant recurring cost of operating the system, and it is incurred per sponsor: a club signing a new shirt partner must have that partner's mark annotated whatever has already been done for the others. The question is therefore not \"how much data does a detector need?\" but \"how many boxes must I pay for before this sponsor is measured reliably?\" Sections 5.3 and 5.3.1 observed in passing that sparser classes underperform; this section treats that as the object of study, pairing each class's training-instance count with the Average Precision achieved on it (Figure 30). The seventeen pairs are given in full in Appendix C."
+  },
+  {
+    "index": 393,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "The association is clear and in the expected direction (Table 4): accuracy rises by 0.169 AP per tenfold increase in annotated instances (95% CI [0.064, 0.275], R² = 0.44), about 0.05 AP per doubling. The logarithmic form matters commercially as much as statistically: the first few hundred boxes for a new sponsor buy far more accuracy than the next few hundred, and beyond a point further annotation is a poor use of a limited budget."
+  },
+  {
+    "index": 395,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Figure 30. Annotation effort against per-class accuracy across the seventeen sponsor classes. Left: Average Precision rises with the number of annotated training instances, close to linearly in the logarithm of the count; each tenfold increase in data is worth about 0.17 AP. Right: the nine classes with at least 500 annotated instances average 0.498 AP against 0.414 for the eight below that level, a difference of 0.084 (Welch t-test, p = 0.009). Each dot is one sponsor class."
+  },
+  {
+    "index": 396,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Converting the curve into a budget gives a usable planning figure. Reaching the dataset's own mean of 0.458 AP requires on the order of 500 annotated instances, and splitting the classes there separates them cleanly: the nine at or above 500 average 0.498 AP against 0.414 for the eight below, a difference of 0.084 surviving a Welch t-test (p = 0.009). The working recommendation for a new sponsor is therefore approximately 500 annotated instances. At this dataset's density of about 1.2 instances per frame in which a class appears at all, that is roughly 400 annotated frames — within reach of the model-assisted labelling of Section 3.3.2, and a far smaller commitment than the whole-dataset re-annotation the framing of the annotation-cost problem tends to imply."
+  },
+  {
+    "index": 397,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Two qualifications bound how far the number should be carried. First, data quantity explains slightly under half the variance, so it is necessary but not sufficient: fairway sits 0.10 AP below the line despite a middling 313 instances, while cch sits 0.07 above it on the smallest count in the set. Some notion of class difficulty competes with sheer volume, so a club with an awkward mark should expect to annotate above the budget rather than at it; Section 5.8 tests the most obvious candidate for that difficulty and rules it out. Second, a confound cannot be removed from this design: because the split is proportional, a class with few training instances also has few validation instances, so its AP is measured less precisely as well as learned less well. Part of the spread at the low-count end is evaluation noise, and the honest reading of the slope is as an indication of magnitude — hundreds, not thousands, of boxes per sponsor — rather than a precise coefficient. Separating the two would require holding the validation set fixed while varying only the training count, a cleaner experiment noted in the future work."
+  },
+  {
+    "index": 398,
+    "kind": "table",
+    "style": "Table",
+    "text": "Statistic | Value\nClasses analysed | 17\nPearson  r  (AP vs instances) | +0.73 ( p  = 0.001)\nPearson  r  (AP vs log₁₀ instances) | +0.66 ( p  = 0.004)\nSpearman  ρ | +0.60 ( p  = 0.012)\nFitted slope | +0.169 AP per 10× data (95% CI [0.064, 0.275])\nVariance explained ( R ²) | 0.44\nMean AP, ≥ 500 instances (9 classes) | 0.498\nMean AP, < 500 instances (8 classes) | 0.414\nDifference | +0.084 (Welch  t -test,  p  = 0.009)"
+  },
+  {
+    "index": 400,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Table 4. Data efficiency across the seventeen sponsor classes."
+  },
+  {
+    "index": 401,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "5.8 Occlusion (RQ2)"
+  },
+  {
+    "index": 402,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Sponsor logos on a moving player are routinely covered by an opposing player, the wearer's own arm, the ball or the frame edge. Occlusion is not annotated and cannot be derived from box geometry, so it was measured as team attribution was, by stratified manual audit under a fixed rule (Section 3.4): nine instances per class, 153 in all, each shown with its surroundings and rated unobstructed, partially covered but readable, or heavily covered."
+  },
+  {
+    "index": 403,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Occlusion is common but rarely severe. 30.7% of the 153 audited logos are covered to some degree (Wilson 95% CI 24.0–38.4%), but only 3.9% heavily (Table 5): one appearance in three is compromised, one in twenty-five badly. This matters in a specific way. A partially covered logo is still detected and scored as an ordinary appearance whose box happens to be smaller, and the model cannot distinguish a mark that was small because the player was distant from one that was large but half-hidden. The two are worth different amounts to a sponsor; the system charges the same for both."
+  },
+  {
+    "index": 404,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Larger, closer logos are covered more often, not less (Figure 31, left; Table 5). The explanation is situational rather than optical: a logo is rendered large when the camera is close, and the camera is close during rucks, tackles and tries — exactly the passages in which bodies overlap. The consequence is uncomfortable for the valuation model, because the Tier 1 size term rewards precisely the appearances most likely to be partly hidden. Size and occlusion work against each other, and the model sees only the first."
+  },
+  {
+    "index": 406,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Figure 31. Occlusion measured by stratified manual audit of 153 logos, nine from each sponsor class. Left: the share of logos partly or heavily covered, by the pixel height at which the mark is rendered; large, close-up marks are covered more than twice as often as small ones, because the camera is close during contact. Right: each class's occlusion rate against how far its accuracy sits above or below the data-efficiency fit of Figure 30; the relationship is flat, so occlusion does not account for the accuracy differences between sponsors."
+  },
+  {
+    "index": 407,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Occlusion does not explain why some sponsors are harder than others. It was the leading candidate for the variance Section 5.7 leaves unexplained — a sleeve or shorts mark is covered more often in contact than a chest one, so the classes below the fitted line ought to be the ones most obscured. The audit does not support this (Figure 31, right). Per-class rates vary from 0% to 77.8% but show no association with the residual (r = +0.20, p = 0.45; Spearman ρ = +0.11), and adding occlusion as a second predictor raises raw R² only from 0.441 to 0.463 while the adjusted R² falls from 0.404 to 0.386 — the term does not earn the degree of freedom it costs. The cases make the point plainly: fairway sits furthest below the line at −0.102 AP yet not one of its nine audited instances was occluded, while floor_tonic was covered in 77.8% of cases and sits above it."
+  },
+  {
+    "index": 408,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "The negative result is reported because it is informative: it rules out the most plausible single explanation for the unexplained half of the per-class variance. Two limits qualify it — nine instances per class gives a standard error near 15 percentage points, so a moderate association could hide in that noise, and one rater carries the judgement-bias caveat of Section 6.4. What the audit establishes firmly is the aggregate rate, where 153 observations give a usefully tight interval, and the size relationship, which is significant and has a clear mechanism."
+  },
+  {
+    "index": 409,
+    "kind": "table",
+    "style": "Table",
+    "text": "Measure | Value\nLogos audited | 153 (9 per class × 17 classes)\nUnobstructed | 106 (69.3%)\nPartially covered | 41 (26.8%)\nHeavily covered | 6 (3.9%)\nCovered to any degree | 47 (30.7%), Wilson 95% CI 24.0–38.4%\nCovered, marks under 32 px tall | 21.9%\nCovered, marks 72 px tall and over | 54.8%\nMedian height, covered vs unobstructed | 52 px vs 44 px (Mann–Whitney  p  = 0.009)\nPer-class rate, range | 0% – 77.8% (SE ≈ 15 pp per class)\nCorrelation with data-efficiency residual | r  = +0.20 ( p  = 0.45); adjusted  R ² falls when added"
+  },
+  {
+    "index": 411,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Table 5. Occlusion audit summary."
+  },
+  {
+    "index": 412,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "5.9 Throughput"
+  },
+  {
+    "index": 413,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "On the target workstation the system processed footage at approximately real time (87.7 video-minutes in 88.4 wall-clock minutes, a range of 0.81–1.12 times real time across jobs). This substantiates the claim that the system is feasible on consumer-grade hardware, which is a necessary condition for making the capability affordable to smaller clubs."
+  },
+  {
+    "index": 414,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "5.10 Summary of results"
+  },
+  {
+    "index": 415,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "The evidence supports three claims at differing levels of confidence. With high confidence, the production system measures exposure and value at approximately real time on affordable hardware, attributes exposure to the correct team in about 92% of audited cases, and its attribution filter makes a large quantitative difference. With medium confidence, the valuation model produces plausible distributions and responds to its parameters in a controlled and now-quantified way, although it lacks a ground-truth price against which absolute error could be measured. With lower confidence, accuracy on a sponsor rises with the annotation spent on it at a rate of roughly 0.17 AP per tenfold increase, giving a working budget of about 500 instances per sponsor; the direction and rough magnitude are firm, but seventeen classes and a confounded validation size make the coefficient itself provisional."
+  },
+  {
+    "index": 417,
+    "kind": "paragraph",
+    "style": "Heading 1",
+    "text": "Chapter 6. Discussion"
+  },
+  {
+    "index": 418,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "6.1 Interpretation of the principal findings"
+  },
+  {
+    "index": 419,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "The results answer the five research questions with differing degrees of certainty, and in each case the interpretation matters more than the headline number."
+  },
+  {
+    "index": 420,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "For RQ1, what is informative is not the 0.745 mAP@0.5 but the shape of the error and the effect of attribution. The near-diagonal confusion matrix shows the detector's mistakes are overwhelmingly misses rather than brand confusions — the benign mode for valuation, since a miss under-counts slightly whereas a confusion would misdirect money. And removing 44% of raw detections shows attribution is not a refinement but a first-order determinant of the estimate: a logo-detection system without it would systematically over-value sponsorship. This supports the argument of Section 2.2, that the sponsorship problem is mis-framed if treated as detection alone."
+  },
+  {
+    "index": 421,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "For RQ2, three findings have consequences the valuation model does not absorb. Occlusion rises with the rendered size of the mark rather than its smallness, because large means close and close means contact, so the visibility model rewards through its size term precisely the appearances most likely to be obscured. Occlusion does not explain why some sponsors are detected more accurately than others — a negative result worth as much as a positive one, since it removes the most convenient explanation for the variance left unexplained under RQ4. And because the model scores each detection independently, a sponsor appearing alone and one appearing alongside six others receive the same per-detection visibility; attention is finite and shared, and with 63.1% of frames carrying two or more logos, crowded frames are over-valued relative to isolated ones. That bias occupies the same position as the sampling bias — direction knowable, size not — so it is disclosed here and a competition-for-attention term proposed in the future work."
+  },
+  {
+    "index": 422,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "For RQ3, the sensitivity analysis matters more than the value distributions, because it converts an opaque number into one whose behaviour is understood: the estimate is dominated by the visibility floor, comparatively robust to the confidence floor, and biased upward by the deployed sampling rate. None of this validates the absolute estimate, which without a ground-truth price cannot be validated, but it makes the estimate interpretable and its assumptions explicit — the appropriate standard in a domain without ground truth."
+  },
+  {
+    "index": 423,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "For RQ4, a club can now be told what onboarding a new sponsor costs — on the order of 500 instances, some 400 frames — instead of being told that annotation is expensive. The more interesting implication is what remains unexplained: data quantity accounts for slightly under half the variance in per-class accuracy, and the obvious candidate for the rest has been tested and rejected. The surviving candidates are properties of the mark itself, its contrast against the kit, the fineness of its lettering, its consistency across strips, none of which this dissertation measures. Sponsorship inventory is therefore not uniformly measurable, the differences between sponsors are real and substantial, and their cause is not established. That is a finding about the commercial object rather than only the model, and it argues for setting measurement expectations per sponsor — while stopping short of saying which property to price on."
+  },
+  {
+    "index": 424,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "6.2 Relation to prior work"
+  },
+  {
+    "index": 425,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "The dependence of reported accuracy on the splitting protocol reproduces, in the logo-detection setting, leakage concerns long recognised in sports video (Deliège et al., 2021). The reference-based approach to attribution follows leading SoccerNet solutions but adds a consideration absent there — the financial asymmetry of attribution errors — operationalised as a revenue-safe keep/drop policy. Against the sponsorship-measurement literature, the system reproduces quality-weighting, though not the oriented-box correction, while adding attribution, position-based valuation and, most importantly, reproducibility and low cost, answering the criticism that existing tools are proprietary and opaque."
+  },
+  {
+    "index": 426,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "The data-efficiency result meets the weak-supervision literature of Section 2.5 from an unusual direction. That literature argues from the premise that annotation is prohibitively expensive; the measurement here puts a number on the premise, and the number is modest enough — hundreds of instances per sponsor, not tens of thousands — that the case for elaborate label-free machinery rests on scale rather than on the single-club setting. The log-linear shape itself reproduces, on a small domain-specific dataset, the relationship Sun et al. (2017) reported at web scale, which is mild evidence that it is a property of the learning problem rather than of this dataset."
+  },
+  {
+    "index": 427,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "6.3 Automated valuation in the context of AI in advertising"
+  },
+  {
+    "index": 428,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "The debate of Section 2.6 concerns mostly AI that produces advertising content; this system sits on the complementary side, AI that measures and values it. The two are connected: as generative tools lower the cost of producing creative variants, measuring which of them earns attention becomes more important, not less, because measurement turns an abundance of options into a set of priced, comparable choices. Position-based valuation is a small concrete instance, turning \"where on the kit a logo sits\" into a measured variable that could inform a placement decision."
+  },
+  {
+    "index": 429,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Two observations emerge from building it. The first concerns the human role: automation relocated the contribution rather than removing it, from timing appearances by hand to auditing samples and designing the control gates that catch structured errors — officials mistaken for players, a surname mistaken for a sponsor. Those errors need human contextual understanding to anticipate, which suggests the human is not a step awaiting automation but the source of the semantic constraints the system needs. The second concerns access: running at approximately real time on a consumer GPU lowers the barrier for a mid-tier club to measure sponsorship value itself rather than buying an expensive service, mirroring on the measurement side what generative AI does on the production side."
+  },
+  {
+    "index": 430,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "6.4 Threats to validity"
+  },
+  {
+    "index": 431,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "The principal construct-validity threat is that EMV proxies advertising attention, not business outcome, and is not validated against any true price; the results measure exposure quality, not commercial return. The main external-validity threat is scale — one sport, one primary club, a modest number of matches — so the sport-agnostic claim is a design intention rather than a demonstrated outcome."
+  },
+  {
+    "index": 432,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Four measurement threats affect the visibility score, the first three sharing a direction. The axis-aligned box encloses a rotated mark in more area than it occupies, over-stating visibility exactly where exposure is most valuable, and the correction that would remove this is provided for but inert (Section 4.6). Competition for attention within a frame is not modelled, over-valuing the 63% of frames carrying more than one logo. And the sampling rate over-measures by 63% (Section 5.6). All three inflate and none is corrected, so every EMV figure here should be read as an upper bound. That they point the same way is worth naming: each simplification was adopted because it was cheaper, and the cheaper choice happens each time to flatter the sponsor — a pattern a measurement system built for a commercially interested party should expect and disclose rather than net off."
+  },
+  {
+    "index": 433,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "The fourth threat is occlusion, measured but not corrected for. A covered logo is either detected with a smaller box and scored as less valuable, or missed; neither outcome distinguishes a mark that was small and distant from one large but half-hidden, and Section 5.8 shows the latter is not rare. Its direction is ambiguous — under-valued for lost area, or over-valued because the appearance is a prominent close-up — so it is not folded into the upper-bound argument. Resolving it needs occlusion labels on a held-out set large enough to compare detection outcomes across levels, which the present audit, at 26 held-out items, cannot support; that experiment is identified in Section 7.2."
+  },
+  {
+    "index": 434,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Both audits rest on a single rater, so systematic misjudgement cannot be excluded; sampling rules and ratings are retained for replication, but no inter-rater agreement is reported. The occlusion audit is further limited by size, supporting the aggregate rate well but per-class rates only indicatively, so its null result on class difficulty is an absence of a large effect rather than evidence of no effect."
+  },
+  {
+    "index": 435,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "The components differ in how exposed they are to the generalisation threat, which is worth separating out. Reference-based attribution is sport- and club-agnostic by construction, since it learns kit references per match rather than from a fixed training set; the valuation model is likewise domain-general, its inputs being geometric and temporal. The exposed component is the closed-set detector, which would need retraining for a new roster — and Section 5.7 puts a price on clearing that bottleneck, at roughly 500 annotated instances per sponsor. A second-club deployment would therefore be limited by detector training data rather than by the attribution or valuation logic, though only the second-club experiment identified in the future work would test that properly."
+  },
+  {
+    "index": 436,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "6.5 Practical and ethical implications"
+  },
+  {
+    "index": 437,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "For a club, the practical implication is that a credible sponsorship report can be produced in-house at low cost, provided its assumptions and biases are disclosed. For practitioners, four lessons transfer: evaluate detection under clip-disjoint splits; treat attribution as a first-order component with a revenue-safe policy; characterise the data before trusting the model; and disclose sensitivities rather than reporting a single headline value."
+  },
+  {
+    "index": 438,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Three implications deserve brief reflection beyond the privacy measures of the methodology. A measurement instrument is not neutral: the visibility floor, the duration weights and the placement multipliers encode a particular theory of what counts as valuable attention, and different choices would produce different valuations. Making them explicit and their sensitivities measurable is therefore an ethical requirement as much as good science, because a black-box valuation used to set prices between parties concentrates unaccountable power in whoever controls the parameters. The sampling bias of Section 5.6 shows how easily such a valuation could be tuned, deliberately or otherwise, to favour the party commissioning it; measuring and disclosing biases is what separates a legitimate analytics tool from a persuasive one. And democratising the capability cuts both ways, since the affordability that empowers a small club also lowers the barrier to producing inflated or selectively reported valuations — which is precisely why the transparent, auditable methodology advocated here matters."
+  },
+  {
+    "index": 440,
+    "kind": "paragraph",
+    "style": "Heading 1",
+    "text": "Chapter 7. Conclusion and Future Work"
+  },
+  {
+    "index": 441,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "7.1 Conclusion"
+  },
+  {
+    "index": 442,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "This dissertation set out to design, implement and critically evaluate a low-cost, reproducible computer-vision system for measuring and valuing sponsor-logo exposure in sports broadcasts, with Bradford Bulls as the case study. The resulting system, LogoLens, couples a fine-tuned detector with reference-based team attribution, pose-based assignment to sellable kit positions and a three-tier visibility-to-value model behind a web dashboard, running at approximately real time on consumer hardware."
+  },
+  {
+    "index": 443,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Evaluated under leakage-controlled protocols, it achieves 0.745 mAP@0.5 detection, 91.8% team-attribution accuracy by stratified audit, and an attribution filter removing 44% of otherwise mis-credited detections. Characterising the exposure signal showed that most frames carry several marks from more than one brand, each occupying a median 0.145% of the screen at 46 pixels of height, and that roughly one in three is partly covered — more often when the mark is large. The value estimate is interpretable and its sensitivities quantified, the deployed sampling rate carries a disclosed positive bias, and per-class accuracy rises with per-class annotation at roughly 0.169 AP per tenfold increase, giving a budget of about 500 instances for a new sponsor. Against the research questions, the work demonstrates a working, affordable pipeline (RQ1, RQ3), establishes the measurable properties of the exposure it rests on (RQ2), quantifies the cost of extending it to a new sponsor (RQ4), and situates automated valuation within, though not as a contribution to, the debate on AI in advertising (RQ5). Each of the six objectives set out in Chapter 1 has accordingly been addressed."
+  },
+  {
+    "index": 444,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "The overall conclusion is that measuring and valuing sponsorship exposure to a useful standard is achievable at low cost and with transparent methods, and that doing so honestly — reporting conservative figures, disclosing biases, and distinguishing what has been measured from what has not — is both possible and necessary in a domain lacking public ground truth. The contribution is therefore as much methodological as technical: alongside a working system, the dissertation offers a template for evaluating one credibly when no ground truth exists. The main limitation is the absence of an absolute value validation; the main opportunity is to prove generality across clubs and sports and to reduce the annotation cost now measured."
+  },
+  {
+    "index": 445,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "7.2 Future work"
+  },
+  {
+    "index": 446,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "The directions that follow divide into work that would firm up what has been claimed and work that would extend it."
+  },
+  {
+    "index": 447,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Firming up. Most important is to measure the absolute error of the value estimate against careful manual timing on a stratified sample, converting the current plausibility argument into a validated accuracy claim. Next is to turn the data-efficiency finding into a controlled one, by holding a fixed validation set and training on deliberately subsampled fractions of each class, which would separate training volume from the evaluation-noise confound and establish whether the fitted slope flattens beyond the range observed. Third, the occlusion audit should be extended until enough rated items fall in the held-out partition to compare recall and mean confidence across occlusion levels; the instrument now exists, so this is a matter of rating more items rather than designing anything new, and the answer would determine whether occlusion belongs in the visibility score at all, and with what sign. Fourth is to establish what does drive the per-class accuracy differences that Section 5.8 shows are not occlusion, by measuring candidate properties of each mark — contrast against the kit, stroke width of its lettering, consistency across strips — against the same residuals. Fifth is to measure the inference cost of the transformer architecture on the target hardware, so the trade-off argued in Section 5.3.1 rests on measurement."
+  },
+  {
+    "index": 448,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Extending. Applying the system to a second club and a second sport with no code changes would test the generality claim directly. Training an oriented-box detector would activate the correction term Section 4.6 provides for and remove the area over-statement on rotated logos. Adding a dedicated officials class would remove the largest identified source of attribution error. And modelling competition for attention when several logos share a frame would allocate value more fairly among sponsors appearing together, removing the second of the three inflationary biases."
+  },
+  {
+    "index": 449,
+    "kind": "paragraph",
+    "style": "Heading 3",
+    "text": "Reducing the annotation requirement"
+  },
+  {
+    "index": 450,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "The most substantial extension follows from what Section 5.7 measured: if each new sponsor costs on the order of 500 annotated instances, can that cost be met without manual boxes? The techniques of Section 2.5 suggest a design, set out here as a proposal rather than a result."
+  },
+  {
+    "index": 451,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "It would exploit three signals a supervised pipeline leaves unused: sponsor artwork exists and can serve as a visual exemplar; the per-event roster is known in advance, reducing open-world recognition to a small closed set per match; and video is temporally redundant, so one confident decision can label a whole track. A teacher–student arrangement follows — a heavy teacher auto-labels a broadcast by prompting a segmenter with an exemplar per brand, reading brand text with OCR and clustering crops with self-supervised embeddings, a label model fusing these noisy sources in the manner of Ratner et al. (2017), with a lighter student distilled for real-time use. A variant particular to kit sponsorship exploits kit regulation: a squad wears one identical strip all season, so a logo position need be identified only once at its sharpest moment, after which blurred crops inherit the label by geometry, turning a hard recognition problem into an easier inventory-and-assignment one. Rare conditions could be supplied synthetically, including from a venue digital twin reconstructed by 3D Gaussian Splatting (Kerbl et al., 2023)."
+  },
+  {
+    "index": 452,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Preliminary work along these lines was carried out but is not reported as a result, not having been evaluated to the standard applied elsewhere. Two obstacles should shape any continuation. Automatic labels are useful only above a purity threshold, and the failure modes that degrade purity — a tracker identity switch carrying a brand to an opposing player, a segmenter firing on a fabric fold — are categorical rather than gradual, so they need explicit control gates rather than tuned thresholds. And any evaluation must be track-disjoint, since validation frames sharing a track with training frames leak almost completely. The measured budget gives this work the success criterion it would otherwise lack: an automatic route is worth its complexity only if it yields, for a new sponsor, something approaching the 500 usable instances manual annotation is now known to require."
+  },
+  {
+    "index": 453,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "The most ambitious direction of all is to close the loop between measurement and creative decision-making, using position-level valuation to inform kit-design and placement choices — connecting this work directly to the creative side of the advertising debate that motivated it."
+  },
+  {
+    "index": 455,
+    "kind": "paragraph",
+    "style": "Heading 1",
+    "text": "References"
+  },
+  {
+    "index": 456,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "A small number of industry and very recent sources are marked [to be verified]; their exact publication details should be confirmed against the original before final submission. All other entries are established works and should be checked only for APA 7th formatting."
+  },
+  {
+    "index": 457,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Aharon, N., Orfaig, R., & Bobrovsky, B.-Z. (2022). BoT-SORT: Robust associations multi-pedestrian tracking. arXiv. https://arxiv.org/abs/2206.14651"
+  },
+  {
+    "index": 458,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Breuer, C., & Rumpf, C. (2012). The viewer's reception and processing of sponsorship information in sport telecasts. Journal of Sport Management, 26(6), 521–531. https://doi.org/10.1123/jsm.26.6.521"
+  },
+  {
+    "index": 459,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Cornwell, T. B. (2019). Less \"sponsorship as advertising\" and more sponsorship-linked marketing as authentic engagement. Journal of Advertising, 48(1), 49–60. https://doi.org/10.1080/00913367.2019.1588809"
+  },
+  {
+    "index": 460,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Cornwell, T. B., & Kwon, Y. (2020). Sponsorship-linked marketing: Research surpluses and shortages. Journal of the Academy of Marketing Science, 48(4), 607–629. https://doi.org/10.1007/s11747-019-00654-w"
+  },
+  {
+    "index": 461,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Davenport, T., Guha, A., Grewal, D., & Bressgott, T. (2020). How artificial intelligence will change the future of marketing. Journal of the Academy of Marketing Science, 48(1), 24–42. https://doi.org/10.1007/s11747-019-00696-0"
+  },
+  {
+    "index": 462,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Deliège, A., Cioppa, A., Giancola, S., Seikavandi, M. J., Dueholm, J. V., Nasrollahi, K., Ghanem, B., Moeslund, T. B., & Van Droogenbroeck, M. (2021). SoccerNet-v2: A dataset and benchmarks for holistic understanding of broadcast soccer videos. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition Workshops (CVPRW) (pp. 4508–4519). https://arxiv.org/abs/2011.13367"
+  },
+  {
+    "index": 463,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Everingham, M., Van Gool, L., Williams, C. K. I., Winn, J., & Zisserman, A. (2010). The PASCAL Visual Object Classes (VOC) challenge. International Journal of Computer Vision, 88(2), 303–338. https://doi.org/10.1007/s11263-009-0275-4"
+  },
+  {
+    "index": 464,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Hevner, A. R., March, S. T., Park, J., & Ram, S. (2004). Design science in information systems research. MIS Quarterly, 28(1), 75–105. https://doi.org/10.2307/25148625"
+  },
+  {
+    "index": 465,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Huang, M.-H., & Rust, R. T. (2021). A strategic framework for artificial intelligence in marketing. Journal of the Academy of Marketing Science, 49(1), 30–50. https://doi.org/10.1007/s11747-020-00749-9"
+  },
+  {
+    "index": 466,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Jocher, G., Chaurasia, A., & Qiu, J. (2023). Ultralytics YOLO [Computer software]. https://github.com/ultralytics/ultralytics"
+  },
+  {
+    "index": 467,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Journal of Advertising Research. (2025). AI and the future of advertising creativity [Call for papers, special issue]. Taylor & Francis. https://think.taylorandfrancis.com/special_issues/ai-and-the-future-of-advertising-creativity/ [to be verified]"
+  },
+  {
+    "index": 468,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Kerbl, B., Kopanas, G., Leimkühler, T., & Drettakis, G. (2023). 3D Gaussian splatting for real-time radiance field rendering. ACM Transactions on Graphics, 42(4), 1–14. https://doi.org/10.1145/3592433"
+  },
+  {
+    "index": 469,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Kirillov, A., Mintun, E., Ravi, N., Mao, H., Rolland, C., Gustafson, L., Xiao, T., Whitehead, S., Berg, A. C., Lo, W.-Y., Dollár, P., & Girshick, R. (2023). Segment anything. In Proceedings of the IEEE/CVF International Conference on Computer Vision (ICCV) (pp. 4015–4026). https://arxiv.org/abs/2304.02643"
+  },
+  {
+    "index": 470,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Lin, T.-Y., Maire, M., Belongie, S., Hays, J., Perona, P., Ramanan, D., Dollár, P., & Zitnick, C. L. (2014). Microsoft COCO: Common objects in context. In Proceedings of the European Conference on Computer Vision (ECCV) (pp. 740–755). https://arxiv.org/abs/1405.0312"
+  },
+  {
+    "index": 471,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Liu, S., Zeng, Z., Ren, T., Li, F., Zhang, H., Yang, J., Li, C., Yang, J., Su, H., Zhu, J., & Zhang, L. (2023). Grounding DINO: Marrying DINO with grounded pre-training for open-set object detection. arXiv. https://arxiv.org/abs/2303.05499"
+  },
+  {
+    "index": 472,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Nielsen Sports. (2019). Measuring the value of sponsorship [Industry report]. Nielsen. [to be verified]"
+  },
+  {
+    "index": 473,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Oquab, M., Darcet, T., Moutakanni, T., Vo, H., Szafraniec, M., Khalidov, V., Fernandez, P., Haziza, D., Massa, F., El-Nouby, A., Assran, M., Ballas, N., Galuba, W., Howes, R., Huang, P.-Y., Li, S.-W., Misra, I., Rabbat, M., Sharma, V., … Bojanowski, P. (2023). DINOv2: Learning robust visual features without supervision. arXiv. https://arxiv.org/abs/2304.07193"
+  },
+  {
+    "index": 474,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Radford, A., Kim, J. W., Hallacy, C., Ramesh, A., Goh, G., Agarwal, S., Sastry, G., Askell, A., Mishkin, P., Clark, J., Krueger, G., & Sutskever, I. (2021). Learning transferable visual models from natural language supervision. In Proceedings of the 38th International Conference on Machine Learning (ICML) (pp. 8748–8763). https://arxiv.org/abs/2103.00020"
+  },
+  {
+    "index": 475,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Ratner, A., Bach, S. H., Ehrenberg, H., Fries, J., Wu, S., & Ré, C. (2017). Snorkel: Rapid training data creation with weak supervision. Proceedings of the VLDB Endowment, 11(3), 269–282. https://doi.org/10.14778/3157794.3157797"
+  },
+  {
+    "index": 476,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Ravi, N., Gabeur, V., Hu, Y.-T., Hu, R., Ryali, C., Ma, T., Khedr, H., Rädle, R., Rolland, C., Gustafson, L., Mintun, E., Pan, J., Alwala, K. V., Carion, N., Wu, C.-Y., Girshick, R., Dollár, P., & Feichtenhofer, C. (2024). SAM 2: Segment anything in images and videos. arXiv. https://arxiv.org/abs/2408.00714"
+  },
+  {
+    "index": 477,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Redmon, J., Divvala, S., Girshick, R., & Farhadi, A. (2016). You only look once: Unified, real-time object detection. In Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition (CVPR) (pp. 779–788). https://arxiv.org/abs/1506.02640"
+  },
+  {
+    "index": 478,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Romberg, S., Pueyo, L. G., Lienhart, R., & van Zwol, R. (2011). Scalable logo recognition in real-world images. In Proceedings of the 1st ACM International Conference on Multimedia Retrieval (ICMR) (pp. 1–8). https://doi.org/10.1145/1991996.1992021"
+  },
+  {
+    "index": 479,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Rumpf, C., Boronczyk, F., & Breuer, C. (2020). Predicting consumer gaze behavior toward sponsorship stimuli in sport broadcasts. European Sport Management Quarterly, 20(4), 461–479. https://doi.org/10.1080/16184742.2019.1620838"
+  },
+  {
+    "index": 480,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Su, H., Zhu, X., & Gong, S. (2018). Open logo detection challenge. In Proceedings of the British Machine Vision Conference (BMVC). https://arxiv.org/abs/1807.01964"
+  },
+  {
+    "index": 481,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Sun, C., Shrivastava, A., Singh, S., & Gupta, A. (2017). Revisiting unreasonable effectiveness of data in deep learning era. In Proceedings of the IEEE International Conference on Computer Vision (ICCV) (pp. 843–852). https://arxiv.org/abs/1707.02968"
+  },
+  {
+    "index": 482,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Zhai, X., Mustafa, B., Kolesnikov, A., & Beyer, L. (2023). Sigmoid loss for language image pre-training. In Proceedings of the IEEE/CVF International Conference on Computer Vision (ICCV). https://arxiv.org/abs/2303.15343"
+  },
+  {
+    "index": 483,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Zhang, Y., Sun, P., Jiang, Y., Yu, D., Weng, F., Yuan, Z., Luo, P., Liu, W., & Wang, X. (2022). ByteTrack: Multi-object tracking by associating every detection box. In Proceedings of the European Conference on Computer Vision (ECCV) (pp. 1–21). https://arxiv.org/abs/2110.06864"
+  },
+  {
+    "index": 484,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "ExposureEngine (2025). A detection-to-valuation pipeline for sponsor exposure in sports broadcasts. arXiv:2510.04739. [to be verified: authors, exact title]"
+  },
+  {
+    "index": 486,
+    "kind": "paragraph",
+    "style": "Heading 1",
+    "text": "Appendices"
+  },
+  {
+    "index": 487,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "Appendix A — Key system configuration"
+  },
+  {
+    "index": 488,
+    "kind": "table",
+    "style": "Table",
+    "text": "Parameter | Default | Meaning\nAnalytics sampling rate | 2 fps | Frame sampling for the analytics pass\nDetection input size | 1280 px | Detector input resolution\nVisibility floor | 0.02 | Minimum visibility to form a segment\nMinimum segment length | 0.5 s | Shorter segments discarded as flicker\nDuration weight | 0.5 / 1.0 / 1.2 | For segments <1 s / 1–5 s / >5 s\nDefault CPM | US$22.0 | Value-model input\nPlacement multiplier | 1.0 / 1.4 / 0.85 / 0.7 | Live TV / highlight / stream / social\nKeep-unknown policy | enabled | Revenue-safety: keep when evidence is insufficient\nMinimum votes (attribution) | 2.0 | Vote mass before trusting an \"other-team\" label\nVote hysteresis | 1.25 | Stickiness of the voted team label\nBootstrap frames | 32 | Frames sampled when bootstrapping kit references"
+  },
+  {
+    "index": 490,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "Appendix B — Summary of experimental results"
+  },
+  {
+    "index": 491,
+    "kind": "table",
+    "style": "Table",
+    "text": "Metric | Value | Source / condition\nmAP@0.5 (random-frame) | 0.862 | Inflated by leakage; not cited as true performance\nmAP@0.5 (clip-disjoint) | 0.702 | Honest protocol\nmAP@0.5 (extended clip-aware) | 0.745 (P 0.65, R 0.74) | Headline result\nRF-DETR mAP@0.5 (clip/match-disjoint) | 0.771 (EMA 0.778) | 18% group holdout; checkpoint selected on same partition\nRF-DETR mAP@[.5:.95] / P / R | 0.458 / 0.730 / 0.711 | Best checkpoint\nTeam-attribution accuracy | 91.8% (169/184) | Stratified human audit, 3 frames × 9 matches\nAttribution filter removal rate | 44% (11,161/25,153) | 9 matches, per-match range 21–78%\nLow-confidence detections (conf < 0.4) | 29% of count / 9.5% of weighted exposure | 8 matches\nHigh-confidence detections (conf ≥ 0.8) | 64% of weighted exposure | 8 matches\nVisibility-floor sensitivity (0.02→0.1) | up to 98% of exposure removed | 13,439 detections\nConfidence-floor sensitivity (0.25→0.6) | under 5% lost | 13,439 detections\nSampling bias (2 fps vs 50 fps) | +63% over-measurement | 3-minute segment\nThroughput | ~1.0× real time (0.81–1.12×) | RTX 5060 Ti 16 GB workstation\nLogos per frame | 63.1% of frames carry ≥2; mean 3.15 | 4,113 annotated frames\nScreen coverage per logo | median 0.145% of frame area; 95.7% under 1% | 12,960 instances\nRendered resolution | median 46 px tall; 18.7% under 32 px | 12,960 instances; 1080p source\nOcclusion, any degree | 30.7% (Wilson 95% CI 24.0–38.4%) | Stratified audit, 153 logos, 9 per class\nOcclusion, heavy | 3.9% | Same audit\nOcclusion vs mark size | 54.8% covered at ≥72 px vs 21.9% under 32 px | Mann–Whitney  p  = 0.009\nOcclusion vs per-class accuracy | r  = +0.20 ( p  = 0.45) — no association | Adjusted  R ² falls when added\nData efficiency, AP vs instances | Pearson  r  = +0.73 ( p  = 0.001) | 17 sponsor classes\nData efficiency, fitted slope | +0.169 AP per 10× data (95% CI [0.064, 0.275]) | R ² = 0.44\nMean AP, ≥ 500 vs < 500 instances | 0.498 vs 0.414 (+0.084) | Welch  t -test,  p  = 0.009"
+  },
+  {
+    "index": 493,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "Appendix C — Class distribution and per-class accuracy"
+  },
+  {
+    "index": 494,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "Per-class annotated instance counts for the extended clip-aware set (17 classes; 10,654 training and 2,306 held-out instances), with the Average Precision achieved on each class at the best checkpoint. These are the seventeen pairs analysed in Section 5.7. Brand names are the model's internal class labels; the held-out column is reported because it is the confound discussed there — a class with few training instances also has few instances on which its accuracy is measured."
+  },
+  {
+    "index": 495,
+    "kind": "table",
+    "style": "Table",
+    "text": "Class | Training instances | Held-out instances | AP@[.5:.95]\nklg | 1,667 | 341 | 0.606\npaints_lacquers | 1,170 | 218 | 0.474\nmcp | 1,106 | 318 | 0.576\nromantica | 886 | 226 | 0.498\naon | 749 | 102 | 0.452\nellgren | 718 | 161 | 0.394\nacs_group | 700 | 154 | 0.474\nbartercard | 612 | 159 | 0.479\ntop_notch | 582 | 138 | 0.529\nfloor_tonic | 446 | 71 | 0.490\natm | 431 | 108 | 0.382\nem_workwear | 385 | 64 | 0.422\nfairway | 313 | 86 | 0.319\nmna_support_service | 249 | 50 | 0.408\nmna_cladding | 240 | 44 | 0.401\nchadlaw | 218 | 25 | 0.432\ncch | 182 | 41 | 0.454\nTotal / mean | 10,654 | 2,306 | 0.458"
+  },
+  {
+    "index": 497,
+    "kind": "paragraph",
+    "style": "Heading 2",
+    "text": "Appendix D — Note on assumptions and transparency"
+  },
+  {
+    "index": 498,
+    "kind": "paragraph",
+    "style": "Normal",
+    "text": "The following assumptions are stated for the reader: the institution and programme details on the title page are filled in by the author; a small number of very recent or industry sources are flagged for verification in the reference list; EMV is treated as an industry-standard proxy for advertising attention rather than an actual price; and a small number of derived figures (for example the per-match filter range and the slot-exposure ratio) are indicative and should be read alongside the underlying experimental records. Quantitative figures are drawn from the project's records and may change as the dataset is scaled."
+  }
+]

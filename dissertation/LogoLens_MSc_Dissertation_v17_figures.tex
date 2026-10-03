@@ -1,0 +1,195 @@
+\documentclass[11pt,a4paper]{article}
+
+% Paper-style figure catalogue for LogoLens MSc Dissertation v17.
+% The figure blocks can also be copied individually into the main manuscript.
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage[a4paper,margin=25mm]{geometry}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{float}
+\usepackage{placeins}
+\usepackage[hidelinks]{hyperref}
+
+\graphicspath{{LogoLens_MSc_Dissertation_v17_media/}}
+
+\captionsetup{
+  font=small,
+  labelfont=bf,
+  labelsep=period,
+  justification=justified,
+  singlelinecheck=false
+}
+
+\setlength{\textfloatsep}{12pt plus 2pt minus 2pt}
+\setlength{\floatsep}{12pt plus 2pt minus 2pt}
+\setlength{\intextsep}{12pt plus 2pt minus 2pt}
+
+\title{LogoLens: Paper-Style Figure Catalogue}
+\author{MSc Dissertation, Version 17}
+\date{}
+
+\begin{document}
+\maketitle
+\listoffigures
+\clearpage
+
+% Figure 1
+\begin{figure}[!htbp]
+  \centering
+  \includegraphics[width=0.98\linewidth]{figure_01_yolo26_rfdetr_architecture.png}
+  \caption[YOLO26 and RF-DETR conceptual architecture comparison]{%
+    Conceptual comparison of the evaluated YOLO26 and RF-DETR detection
+    routes. The diagram shows the task-relevant prediction pathways and their
+    common output schema. It is not a layer-complete network specification and
+    does not imply equivalent accuracy or computational efficiency.}
+  \label{fig:yolo-rfdetr-architecture}
+\end{figure}
+\FloatBarrier
+
+% Figure 2
+\begin{figure}[!htbp]
+  \centering
+  \includegraphics[width=0.96\linewidth]{figure_02_research_framework.png}
+  \caption[Research framework]{%
+    Research framework linking sponsorship accountability to observable
+    exposure, leakage-aware computer vision and auditable visibility evidence.
+    The diagram is conceptual and contains no measured experimental results.}
+  \label{fig:research-framework}
+\end{figure}
+\FloatBarrier
+
+% Figure 3
+\begin{figure}[!htbp]
+  \centering
+  \includegraphics[width=0.98\linewidth]{figure_03_research_design_case_boundary.png}
+  \caption[Research design and case boundary]{%
+    Leakage-aware research design and case boundary. Training, validation and
+    held-out matches have non-overlapping roles. The evaluated detection study
+    is bounded to one club, the white home kit, broadcast and highlight footage,
+    and three unseen test matches. Visibility aggregation consumes evaluated
+    detections but remains beyond the validated detection boundary.}
+  \label{fig:research-design-boundary}
+\end{figure}
+\FloatBarrier
+
+% Figure 4
+\begin{figure}[!htbp]
+  \centering
+  \includegraphics[width=0.94\linewidth]{figure_04_split_and_leakage.png}
+  \caption[Match-disjoint split and temporal leakage]{%
+    Match-disjoint dataset design and measured inflation on familiar match
+    material. Complete matches, rather than neighbouring video frames, define
+    the data partitions. The familiar-material score is a temporal-leakage
+    diagnostic and is not treated as a second held-out test result.}
+  \label{fig:split-and-leakage}
+\end{figure}
+\FloatBarrier
+
+% Figure 5
+\begin{figure}[!htbp]
+  \centering
+  \includegraphics[width=0.98\linewidth]{figure_05_system_architecture.png}
+  \caption[LogoLens system architecture]{%
+    LogoLens processing pipeline. The detector inset presents RF-DETR Small and
+    YOLO26 as alternative backends behind a common adapter. Both return class,
+    confidence, bounding-box, frame-index and timestamp records, allowing final
+    reports to remain traceable to the source footage.}
+  \label{fig:system-architecture}
+\end{figure}
+\FloatBarrier
+
+% Figure 6
+\begin{figure}[!htbp]
+  \centering
+  \includegraphics[width=0.96\linewidth]{figure_06_visibility_aggregation.png}
+  \caption[Visibility-quality and duration aggregation]{%
+    Transformation from detection records to prototype visibility evidence.
+    The inset distinguishes measured geometry, model-derived confidence and
+    researcher-defined transformations. Temporal segments, raw visible seconds
+    and quality-weighted exposure remain subject to manual timing and human
+    readability validation.}
+  \label{fig:visibility-aggregation}
+\end{figure}
+\FloatBarrier
+
+% Figure 7
+\begin{figure}[!htbp]
+  \centering
+  \includegraphics[width=\linewidth]{figure_07_training_and_heldout_evidence.png}
+  \caption[RF-DETR training trajectory and held-out evidence]{%
+    RF-DETR Small training and held-out evidence. (a) Composite training and
+    validation loss across the two retained runs joined at the resume boundary.
+    (b) Regular and exponential-moving-average validation
+    mAP@[0.50:0.95], with epoch 36 selected by the maximum EMA value.
+    (c) Operating-point confusion matrix at confidence 0.35 and IoU 0.50;
+    colour is normalised by ground-truth row and labels report raw counts.
+    ``No object'' denotes misses and unmatched predictions.
+    (d) Per-brand AP@0.50 with held-out support in parentheses; orange denotes
+    classes with fewer than five boxes. CCH is omitted from panels (c) and (d)
+    because the held-out set contains no CCH ground truth and its AP is not
+    estimable.}
+  \label{fig:training-heldout-evidence}
+\end{figure}
+\FloatBarrier
+
+% Figure 8
+\begin{figure}[!htbp]
+  \centering
+  \includegraphics[
+    width=\linewidth,
+    height=0.78\textheight,
+    keepaspectratio
+  ]{figure_08_occlusion_examples_v2.png}
+  \caption[Qualitative held-out occlusion examples]{%
+    Qualitative held-out examples using a three-level occlusion scale.
+    Solid boxes denote matched ground truth, the dashed box denotes a missed
+    ground-truth instance, and box colour identifies the sponsor class.
+    The cases illustrate appearance conditions and detector outcomes; they are
+    not an aggregate clear-versus-occluded performance benchmark.}
+  \label{fig:occlusion-examples}
+\end{figure}
+\FloatBarrier
+
+% Figure 9
+\begin{figure}[!htbp]
+  \centering
+  \includegraphics[
+    width=\linewidth,
+    height=0.78\textheight,
+    keepaspectratio
+  ]{figure_09_detection_evidence.png}
+  \caption[Representative held-out successes and failure modes]{%
+    Representative held-out outcomes from the selected RF-DETR Small EMA
+    checkpoint at epoch 36, regenerated at confidence 0.35 and IoU 0.50.
+    Box colour identifies the sponsor class; solid boxes are correct
+    predictions, short-dashed boxes labelled FP are false positives, and
+    long-dashed boxes labelled Missed are missed ground truth. Source frames
+    retain their natural colour, and the cases follow the predefined selection
+    and annotation-audit rules.}
+  \label{fig:detection-evidence}
+\end{figure}
+\FloatBarrier
+
+% Figure 10
+\begin{figure}[!htbp]
+  \centering
+  \includegraphics[width=\linewidth]{figure_10_visibility_timeline.png}
+  \caption[Prototype brand-level visibility timeline]{%
+    Prototype brand-level visibility timeline in the LogoLens reporting
+    interface. Colour distinguishes sponsor classes, horizontal position
+    encodes elapsed video time, and each bar represents a continuous detected
+    segment. The interface demonstrates temporal reporting and traceability;
+    the displayed intervals are not treated as manually validated duration
+    ground truth.}
+  \label{fig:visibility-timeline}
+\end{figure}
+\FloatBarrier
+
+% Cross-reference examples for the main manuscript:
+% Figure~\ref{fig:yolo-rfdetr-architecture}
+% Figures~\ref{fig:training-heldout-evidence} and~\ref{fig:detection-evidence}
+
+\end{document}

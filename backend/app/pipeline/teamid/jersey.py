@@ -36,7 +36,10 @@ def _skin_mask(region_bgr: np.ndarray) -> np.ndarray:
     """Skin pixels via YCrCb thresholds (face / arms)."""
     ycrcb = cv2.cvtColor(region_bgr, cv2.COLOR_BGR2YCrCb)
     cr, cb = ycrcb[:, :, 1], ycrcb[:, :, 2]
-    return (cr >= 133) & (cr <= 173) & (cb >= 77) & (cb <= 127)
+    # Bradford's saturated red/yellow chevrons also fall in the broad YCrCb
+    # skin box. Preserve those kit colours instead of erasing the identity cue.
+    sat = cv2.cvtColor(region_bgr, cv2.COLOR_BGR2HSV)[:, :, 1]
+    return (cr >= 133) & (cr <= 173) & (cb >= 77) & (cb <= 127) & (sat < 140)
 
 
 def box_iou(b1, b2) -> float:
@@ -127,3 +130,31 @@ def jersey_quality(region_bgr: np.ndarray | None, pixel_mask: np.ndarray | None)
     q_cov = min(coverage / 0.25, 1.0)
     q_sharp = min(sharp / 150.0, 1.0)
     return 0.2 + 0.8 * q_cov * q_sharp
+
+
+def bradford_home_evidence(region_bgr: np.ndarray | None) -> str | None:
+    """Conservative colour evidence for the configured white/red/yellow kit.
+
+    Use central shirt pixels to reduce exposed arms. Saturation distinguishes
+    shaded white fabric from Hull's cyan/purple and green officials; brightness
+    alone cannot. None means abstain, not opponent. Not used for away kits.
+    """
+    if region_bgr is None or region_bgr.shape[1] < 8:
+        return None
+    w = region_bgr.shape[1]
+    hsv = cv2.cvtColor(region_bgr[:, int(.2*w):max(int(.8*w), int(.2*w)+1)], cv2.COLOR_BGR2HSV)
+    h, s, v = cv2.split(hsv)
+    warm = float((((h < 30) | (h > 170)) & (s > 140)).mean())
+    cool = float(((h >= 90) & (h <= 160) & (s > 90)).mean())
+    green = float(((h > 30) & (h < 90) & (s > 80)).mean())
+    neutral = float((s < 90).mean())
+    # Mixed warm/cool patches can be two overlapping players. Do not let a
+    # neighbour's purple shirt cast an opponent vote for a Bradford player.
+    if (green > .55 and warm < .02 and neutral < .30) or (cool > .25 and warm < .025):
+        return "other"
+    if cool < .12 and green < .20 and (
+        (warm > .035 and neutral > .30)
+        or (neutral > .75 and float(v.mean()) > 115)
+    ):
+        return "target"
+    return None
